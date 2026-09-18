@@ -1,4 +1,4 @@
-# FlyWire FAFB v783 — Proofread Connectome Workspace
+# Maxwell's Demon: Inside the Fly Brain
 
 ![Maxwell's Demon Inside the Fly Brain](research_figures/icon_image_project.png)
 
