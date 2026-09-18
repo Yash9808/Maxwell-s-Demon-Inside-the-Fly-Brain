@@ -1,0 +1,3728 @@
+{
+  "dataset": "FAFB v783 compact browser circuit",
+  "frames": 9000,
+  "parameters": {
+    "learningRate": "0.008",
+    "dopamineScale": "2",
+    "particles": "420",
+    "jetPower": "0.55",
+    "noise": "0.12"
+  },
+  "layerNames": [
+    "antennal lobe (AL)",
+    "lateral horn + mushroom body",
+    "central (SMP/SIP/SLP)",
+    "motor (GNG/SAD)"
+  ],
+  "layerSizes": [
+    2875,
+    6758,
+    8300,
+    7002
+  ],
+  "history": [
+    {
+      "frame": 1000,
+      "da": 0.018181162887519187,
+      "door": 1.6168499026920707e-12,
+      "ex": 0.4501233014498899,
+      "good": 18,
+      "bad": 15,
+      "ratio": 1.2,
+      "openRate": 0.8,
+      "doorFast": 0.20238782091637902
+    },
+    {
+      "frame": 2000,
+      "da": 0.017671800107355518,
+      "door": 0.02235479652211795,
+      "ex": 0.4250899800083061,
+      "good": 3,
+      "bad": 5,
+      "ratio": 0.6,
+      "openRate": 0.22,
+      "doorFast": 0.22487116126078435
+    },
+    {
+      "frame": 3000,
+      "da": -0.000001127475108806458,
+      "door": 3.636963910599999e-31,
+      "ex": 0.32797919218285815,
+      "good": 0,
+      "bad": 1,
+      "ratio": 0,
+      "openRate": 0.1,
+      "doorFast": 0.2558062232336692
+    },
+    {
+      "frame": 4000,
+      "da": -0.10062769388823178,
+      "door": 0.018326495368694545,
+      "ex": 0.3934673268716913,
+      "good": 8,
+      "bad": 11,
+      "ratio": 0.7272727272727273,
+      "openRate": 0.54,
+      "doorFast": 0.13629516222436777
+    },
+    {
+      "frame": 5000,
+      "da": -0.08994244514339762,
+      "door": 0.02028978575820943,
+      "ex": 0.5334063824940275,
+      "good": 2,
+      "bad": 10,
+      "ratio": 0.2,
+      "openRate": 0.34,
+      "doorFast": 0.21824614447907575
+    },
+    {
+      "frame": 6000,
+      "da": -0.003382497252716615,
+      "door": 1.2298746245996725e-23,
+      "ex": 0.4518261354387624,
+      "good": 20,
+      "bad": 7,
+      "ratio": 2.857142857142857,
+      "openRate": 0.62,
+      "doorFast": 0.24815193848732653
+    },
+    {
+      "frame": 7000,
+      "da": 0.0023033134549823326,
+      "door": 2.3679377767579913e-25,
+      "ex": 0.3192752782322041,
+      "good": 3,
+      "bad": 2,
+      "ratio": 1.5,
+      "openRate": 0.14,
+      "doorFast": 0.12004418258483145
+    },
+    {
+      "frame": 8000,
+      "da": -0.12408204317983546,
+      "door": 2.16214044565884e-10,
+      "ex": 0.3521797917849341,
+      "good": 12,
+      "bad": 9,
+      "ratio": 1.3333333333333333,
+      "openRate": 0.4,
+      "doorFast": 0.20115878040993287
+    },
+    {
+      "frame": 9000,
+      "da": -3.3879690456727904e-8,
+      "door": 4.721589868076209e-14,
+      "ex": 0.2979992844044219,
+      "good": 0,
+      "bad": 0,
+      "ratio": null,
+      "openRate": 0.04,
+      "doorFast": 0.16197815437866625
+    }
+  ],
+  "policySamples": [
+    {
+      "doorFast": 0.07744830997664355,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.12800499053983497,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.08878969864740659,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.0764509181710037,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.06754168741685965,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.05611532145589114,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.10317182053651754,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.0999889131576576,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.14060508761599605,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.15505264536397406,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.12465272180169254,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.09378229760397505,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.14177016509460133,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.1879204752626387,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.18959105627602182,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.17330099745001012,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.1446446155335935,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.13818472634917353,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.06713977474788568,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.06902859561626061,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.049352055056682984,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.05773842677510126,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.04986017615350783,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.07693625701180981,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.10500957644586152,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.1212923032279141,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.12401948913917889,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.13292220675873587,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.16053038204953107,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.15749291645128574,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.19325054108780657,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.19472988485261555,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.17766534829706934,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.13461717480382734,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.14848954391614863,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.16427077284994748,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.18138502232337178,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.20735592188586874,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.1731774301398613,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.16802709756562836,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.21874037014096856,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2203516742964296,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.18063466951202645,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.19395989503489952,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1772207073768436,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.16937494123743888,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.23023275569750565,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.16082250008544763,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.22904165970187587,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.20238782091637902,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.23293870946978595,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.17807710443659402,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2151687400048501,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.19262146821224435,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.16441571019894854,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.22689660062195896,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.23091530219259732,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.22159127896852088,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2213486452643913,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2347153546295231,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.24367177471615195,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.19492753508864713,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.16585998368250518,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.18487370354761654,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2821549864266198,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.24636472283223376,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2604954310056067,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.22415252950339198,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.15581361288322926,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.20445138694825993,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.21178380368323657,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.24983419825357867,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2223511926406231,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.12405920742727312,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.15781086244698816,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.23705279348083816,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.21821597644231372,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2207614600076925,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.19691781125807012,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.18553934683522222,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.1934254338730381,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.1712200479539059,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.2012513952989958,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.16835321648780924,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.23507634328283358,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.23264629669084128,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.2078778103654229,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.2125401515538631,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.2469388270593537,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.2614952062103345,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.22110715176034748,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.18303887880182224,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.18641540983992885,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.18467347499122308,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.15224163713127065,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.19612710375353734,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.12372981958101603,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.15191166825007205,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.21793539188094896,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.22487116126078435,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2729625365078492,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.28269831384038097,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.276866626234262,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2653118941968499,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.18521722801062726,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.22545834800366674,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.23551641151592975,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.19533664538119697,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.2356600603907278,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.2241631977974422,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.11333273413651833,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.15009706153841232,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.22575069882208995,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.20120942851443763,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.24811841419476657,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.24293223883050505,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2209127318133598,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.211179076193682,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1832798818001718,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.17057480695964575,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.19702280606967257,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.16243914541286317,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1310281055346968,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.12981856987486967,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.14133686438729676,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.19598787208835067,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.16062962032331257,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.21700320702675172,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.20409661301838838,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1864140154154281,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.16213281794475268,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.19705014680972122,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1777006539758338,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.13926231342240392,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.16942616951755712,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.18442102367316057,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.19999868994813078,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.22609132722153136,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.20314466899655145,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1458514728347715,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1965434244355157,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.18763422175068678,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1729350638762122,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.24267330413632365,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.22682778904203788,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2423012040185511,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2644234734311695,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.16233779859402778,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2315285026768034,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2558062232336692,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.3188064811532574,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.349507447926228,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.27419442348314005,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2762244825928707,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.30227873159392527,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.25722731877044935,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.28673835580038276,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.20802306973745752,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.35993631327292663,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.32882978577321836,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2882156268234028,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2710492138359519,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.24323129149064004,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.21511152052020685,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1526412589182356,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.18286377700551892,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.1774501868391897,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.23595782900645576,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.24026751172748162,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.22394462620061467,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.14607484060588824,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.28980995080194893,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.2695222023449706,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.17451545059979934,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.23161422300136686,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.23502259019777424,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.3211328973279332,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.27724165436312026,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.23120380796952103,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.19833280613179016,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.1416518161655937,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.20113846549806177,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.24401712882129414,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.2304605847747329,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.1881563219358447,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.21875733543226225,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.11964173618966253,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.10970646694510641,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.22333472165880272,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.20182001924285634,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.24677000596763052,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.17422736995546464,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.15621700028170635,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.11150751125071391,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.12271522378458756,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.15920233346045665,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1568515971383904,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2089546113060173,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.14499058023001882,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.13629516222436777,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.09887516298554438,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.11335892596758497,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.12243258934068647,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.11938839858251696,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1216602150597742,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.09359962936176282,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.09121943499954628,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.12754305024853604,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.21002409005438316,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.22697038787555585,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1462990050180959,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1423590457648977,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.10701097720751455,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.11621315796342921,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.0860457850349669,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.12438056589624197,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1560136383374359,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.13276576763874254,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.19593855592450402,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.23164434284702107,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.21455673265863634,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.262761383583259,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.16539527002644994,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1545222126763274,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.15614713254506482,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.15046727716153185,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.22812892439322363,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.17855632481457823,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.15917229141309963,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.1428016492551481,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.16674983090129972,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.1489737079591346,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.09911353512048432,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.12331967841921272,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.13973879495422026,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.12115979078395855,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.14004986545180692,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.18092425742810597,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.151829702492322,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.22084937590507356,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.24587607361615574,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.29851394076954024,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2430125215079609,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.20995847421492841,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.20844523043641558,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.15047499788235927,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.20106131121031343,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2350639707627507,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.26071025626525984,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.21824614447907575,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2348813128641314,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2884130590152617,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.28568803157223965,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.27891426924053325,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.2396598134080168,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.22447693101242178,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.2410129531706051,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.22207355059923475,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.1720596856799999,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.17902605322984527,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.179115056702403,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.1506033348741662,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.1746350428000434,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.14530062105348324,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.14537138547251505,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.07115253686967889,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.10429472255488241,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.13751962283561253,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.13478606146769895,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.14749675049660926,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.14795708425073606,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.1933339386218087,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.11953197499974068,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.11591338914938226,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.1603027318347186,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.1610187256791618,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.14965750270706948,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.15246823110456814,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.12775633331161823,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.1223144273494268,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.16044107245133823,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.20062530922764413,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.23207196341469857,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1973999069845312,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.17890327795896135,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.21079716849086513,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1580112071448626,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.15444662665717995,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.11806592261093418,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1895470916791468,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.3136022312058572,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.33582924844752726,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.25158194895210484,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2633075615853372,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.48289078936695556,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.5826518729055364,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.3200552770866397,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.3194777465356988,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.32536527004722043,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.24815193848732653,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.23352254810012146,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.23692253012698444,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.21338523675085683,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1879403048661444,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.12002567454474362,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1071208230131005,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.11056948776741791,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1286743499897043,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.18067661037795477,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.15250678412671906,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.23718112265891228,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2281144073231686,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.18530846245453997,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1751388071869801,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.17658377736495143,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.16722435775213657,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2594384571240654,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.28178821822659844,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.24776663060890897,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.17994015773305105,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.10122874759492709,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.10772846130206422,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.08587912099263816,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.09482411411373275,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.09304189942625633,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.13717979440140335,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.24300828584983164,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.24426323365384434,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.21395366192551005,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.13030199465583228,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1290881116210869,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.12086361510495978,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.17886815479910628,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1740639417434044,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.10081659982883792,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.12312838521225641,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.10397917052291043,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1858807813142276,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.18636900918149252,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2688626579701222,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.29508972557510654,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.24969817294102853,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2089696060278396,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.18810761353984146,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1850448061764608,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2087465205484062,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2496303513142801,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1944682073959519,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.17339084370357327,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.12004418258483145,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.09013332904920246,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1595728717464723,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.16225181961863278,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2310378627932267,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.25550062288874903,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2820564634553202,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.19089292184556825,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.15992916461781634,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.14890481778120812,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.15180192085537736,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.16716610869747014,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1879987114801438,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1955202845412964,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.18766781854508868,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2464226727012224,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.22099932356185928,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.20119273477589747,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.22104886960667053,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2003746084818836,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2097901558435257,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.1625328320121446,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.15085711222063347,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.18736338062182153,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.20559123535417143,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.24997357599783734,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.2576669289064459,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.2368396449493999,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.1894156736360786,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.12210773436221814,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.15817372764099413,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.17735367516923609,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.13891406302463086,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.16334458098347857,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.16470989788096352,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.19433810287835832,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.1585758847680949,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.15555086085830563,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.12646140928732988,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2126694044497273,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.20134076150109234,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.22467583557252885,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.2349945379835576,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.16941372566338905,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1972474697301639,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.20987915643995012,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.15215513717695808,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.14137537800310784,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.14483079576852706,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.21369053794678525,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.20115878040993287,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.15903275106992149,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.11224694121524748,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.09716581515756566,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.13793970396506564,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.15503978802764987,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.16785163502410505,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.11814212915766388,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.11742490702873955,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.04984365277808007,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.11407692844646217,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1471372365471382,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.19146761816698993,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.17546758506785187,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.12825161470736385,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.15327002252950636,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1600839304110201,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.13782667433841955,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.11076277657162525,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.13842011904674267,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.11717007900427522,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.11835887303246205,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.08090569705548513,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.15937256491175283,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.17288160614127013,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1365636612356527,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.17280677658386015,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.20534228028513257,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1398259226577423,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.14343996305048815,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.16895252545642647,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.20538770353548166,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1929465226651346,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.16999290763581776,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.17994306846870117,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.15183495569805838,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.12159571960447069,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.037309461689725786,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.15813374077085768,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1844375653903582,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.18481943971411602,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.16922840200174474,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.16772768823249176,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.10226065640233782,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.08827201965533714,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1748141308312408,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1752477346694486,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.26237365039468175,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2629645711865647,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.2130860856253654,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.16197815437866625,
+      "openNow": false
+    }
+  ],
+  "plasticity": [
+    {
+      "edge": 66259,
+      "source": 35,
+      "target": 22516,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.5755171954631806,
+      "score": 1.9183906515439353,
+      "direction": "weakened"
+    },
+    {
+      "edge": 119469,
+      "source": 19804,
+      "target": 2249,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": -0.6087086868286133,
+      "score": 1.9022146463394167,
+      "direction": "weakened"
+    },
+    {
+      "edge": 12123,
+      "source": 334,
+      "target": 22085,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.6435854697227479,
+      "score": 1.892898440361023,
+      "direction": "weakened"
+    },
+    {
+      "edge": 143104,
+      "source": 1095,
+      "target": 470,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.7515881299972534,
+      "score": 1.8789703249931335,
+      "direction": "weakened"
+    },
+    {
+      "edge": 7516,
+      "source": 1160,
+      "target": 19804,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -4.462001423835755,
+      "score": 1.7991941225144172,
+      "direction": "weakened"
+    },
+    {
+      "edge": 46766,
+      "source": 24499,
+      "target": 2458,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": -0.42891558051109313,
+      "score": 1.7871482521295547,
+      "direction": "weakened"
+    },
+    {
+      "edge": 122586,
+      "source": 44,
+      "target": 1197,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.37229338407516477,
+      "score": 1.6922426548871126,
+      "direction": "weakened"
+    },
+    {
+      "edge": 71860,
+      "source": 1346,
+      "target": 21078,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.5007204443216324,
+      "score": 1.6690681477387748,
+      "direction": "weakened"
+    },
+    {
+      "edge": 2655,
+      "source": 2835,
+      "target": 18875,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.8313246667385101,
+      "score": 1.6626493334770203,
+      "direction": "weakened"
+    },
+    {
+      "edge": 66336,
+      "source": 632,
+      "target": 19792,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.3589006823301315,
+      "score": 1.631366737864234,
+      "direction": "weakened"
+    },
+    {
+      "edge": 131038,
+      "source": 1251,
+      "target": 22085,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.780426572561264,
+      "score": 1.6258886928359668,
+      "direction": "weakened"
+    },
+    {
+      "edge": 47878,
+      "source": 2425,
+      "target": 20983,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.3223391890525818,
+      "score": 1.611695945262909,
+      "direction": "weakened"
+    },
+    {
+      "edge": 65360,
+      "source": 22591,
+      "target": 20690,
+      "sourceLayer": 3,
+      "targetLayer": 3,
+      "delta": -0.38217713475227355,
+      "score": 1.592404728134473,
+      "direction": "weakened"
+    },
+    {
+      "edge": 114918,
+      "source": 20589,
+      "target": 19890,
+      "sourceLayer": 3,
+      "targetLayer": 3,
+      "delta": -0.34721666693687436,
+      "score": 1.5782575769857925,
+      "direction": "weakened"
+    },
+    {
+      "edge": 104998,
+      "source": 2608,
+      "target": 20690,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.7175424015522003,
+      "score": 1.559874785983044,
+      "direction": "weakened"
+    },
+    {
+      "edge": 110201,
+      "source": 1036,
+      "target": 20983,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.5275776201486588,
+      "score": 1.551698882790173,
+      "direction": "weakened"
+    },
+    {
+      "edge": 29769,
+      "source": 779,
+      "target": 20983,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.4022962695360184,
+      "score": 1.5472933443693013,
+      "direction": "weakened"
+    },
+    {
+      "edge": 24193,
+      "source": 790,
+      "target": 23348,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -1.515827338695526,
+      "score": 1.5467625905056388,
+      "direction": "weakened"
+    },
+    {
+      "edge": 45089,
+      "source": 19686,
+      "target": 2437,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": -1.36018342256546,
+      "score": 1.5456629801880228,
+      "direction": "weakened"
+    },
+    {
+      "edge": 59325,
+      "source": 19686,
+      "target": 20564,
+      "sourceLayer": 3,
+      "targetLayer": 3,
+      "delta": -0.340045855641365,
+      "score": 1.5456629801880228,
+      "direction": "weakened"
+    },
+    {
+      "edge": 88112,
+      "source": 243,
+      "target": 2489,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.9490311396121979,
+      "score": 1.530695386471287,
+      "direction": "weakened"
+    },
+    {
+      "edge": 14946,
+      "source": 2435,
+      "target": 2489,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -2.2654259610176086,
+      "score": 1.5306932169037897,
+      "direction": "weakened"
+    },
+    {
+      "edge": 124028,
+      "source": 2575,
+      "target": 2489,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.7959600877761841,
+      "score": 1.5306924764926617,
+      "direction": "weakened"
+    },
+    {
+      "edge": 150677,
+      "source": 218,
+      "target": 22516,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.5717326897382736,
+      "score": 1.504559709837562,
+      "direction": "weakened"
+    },
+    {
+      "edge": 1623,
+      "source": 360,
+      "target": 13639,
+      "sourceLayer": 0,
+      "targetLayer": 2,
+      "delta": -0.8059195363521576,
+      "score": 1.4924435858373288,
+      "direction": "weakened"
+    },
+    {
+      "edge": 151574,
+      "source": 1207,
+      "target": 875,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.3259377864003181,
+      "score": 1.4815353927287187,
+      "direction": "weakened"
+    },
+    {
+      "edge": 58966,
+      "source": 165,
+      "target": 2655,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.35167699098587035,
+      "score": 1.4653207957744598,
+      "direction": "weakened"
+    },
+    {
+      "edge": 72593,
+      "source": 506,
+      "target": 22516,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.3804758733510971,
+      "score": 1.4633687436580658,
+      "direction": "weakened"
+    },
+    {
+      "edge": 74946,
+      "source": 58,
+      "target": 912,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.34984038561582564,
+      "score": 1.4576682733992736,
+      "direction": "weakened"
+    },
+    {
+      "edge": 18503,
+      "source": 2562,
+      "target": 19207,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -5.30247832775116,
+      "score": 1.4567248153162529,
+      "direction": "weakened"
+    },
+    {
+      "edge": 134384,
+      "source": 2519,
+      "target": 24182,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.639129968881607,
+      "score": 1.4525681110945614,
+      "direction": "weakened"
+    },
+    {
+      "edge": 49900,
+      "source": 1096,
+      "target": 22299,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.31779215604066846,
+      "score": 1.4445098001848566,
+      "direction": "weakened"
+    },
+    {
+      "edge": 27109,
+      "source": 22239,
+      "target": 2268,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": -1.0105384409427645,
+      "score": 1.4436263442039492,
+      "direction": "weakened"
+    },
+    {
+      "edge": 115659,
+      "source": 2176,
+      "target": 22516,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.5166763371229172,
+      "score": 1.435212047563659,
+      "direction": "weakened"
+    },
+    {
+      "edge": 98912,
+      "source": 772,
+      "target": 22516,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.2870422199368477,
+      "score": 1.4352110996842384,
+      "direction": "weakened"
+    },
+    {
+      "edge": 21011,
+      "source": 183,
+      "target": 22516,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.6027886253595351,
+      "score": 1.435211012760798,
+      "direction": "weakened"
+    },
+    {
+      "edge": 28656,
+      "source": 764,
+      "target": 22516,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.3444504642486572,
+      "score": 1.4352102677027385,
+      "direction": "weakened"
+    },
+    {
+      "edge": 124333,
+      "source": 2765,
+      "target": 22516,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.31574584662914273,
+      "score": 1.4352083937688307,
+      "direction": "weakened"
+    },
+    {
+      "edge": 72547,
+      "source": 19890,
+      "target": 20554,
+      "sourceLayer": 3,
+      "targetLayer": 3,
+      "delta": -2.2031270051002503,
+      "score": 1.4306019513637989,
+      "direction": "weakened"
+    },
+    {
+      "edge": 38751,
+      "source": 20554,
+      "target": 19890,
+      "sourceLayer": 3,
+      "targetLayer": 3,
+      "delta": -1.6594980990886687,
+      "score": 1.4306018095591972,
+      "direction": "weakened"
+    },
+    {
+      "edge": 131233,
+      "source": 24930,
+      "target": 2250,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": -1.5159738039970398,
+      "score": 1.4301639660349432,
+      "direction": "weakened"
+    },
+    {
+      "edge": 148037,
+      "source": 2250,
+      "target": 24930,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -2.7173055052757267,
+      "score": 1.4301607922503823,
+      "direction": "weakened"
+    },
+    {
+      "edge": 76775,
+      "source": 476,
+      "target": 22085,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.5705323457717896,
+      "score": 1.4263308644294739,
+      "direction": "weakened"
+    },
+    {
+      "edge": 1901,
+      "source": 22954,
+      "target": 20477,
+      "sourceLayer": 3,
+      "targetLayer": 3,
+      "delta": -1.2441433417797088,
+      "score": 1.4137992520223963,
+      "direction": "weakened"
+    },
+    {
+      "edge": 93779,
+      "source": 397,
+      "target": 22098,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.33907758980989455,
+      "score": 1.4128232908745606,
+      "direction": "weakened"
+    },
+    {
+      "edge": 106148,
+      "source": 18240,
+      "target": 1290,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": -0.5915221405029296,
+      "score": 1.4083860488164992,
+      "direction": "weakened"
+    },
+    {
+      "edge": 13340,
+      "source": 21411,
+      "target": 22771,
+      "sourceLayer": 3,
+      "targetLayer": 3,
+      "delta": -0.36480476170778275,
+      "score": 1.403095237337626,
+      "direction": "weakened"
+    },
+    {
+      "edge": 45307,
+      "source": 377,
+      "target": 22516,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.41803412437438964,
+      "score": 1.3934470812479656,
+      "direction": "weakened"
+    },
+    {
+      "edge": 28496,
+      "source": 1198,
+      "target": 22085,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.4435223710536957,
+      "score": 1.386007409542799,
+      "direction": "weakened"
+    },
+    {
+      "edge": 142397,
+      "source": 1306,
+      "target": 22781,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.30354074507951734,
+      "score": 1.3797306594523515,
+      "direction": "weakened"
+    },
+    {
+      "edge": 54138,
+      "source": 23204,
+      "target": 2807,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": -0.3794575619697571,
+      "score": 1.355205578463418,
+      "direction": "weakened"
+    },
+    {
+      "edge": 62830,
+      "source": 28,
+      "target": 13639,
+      "sourceLayer": 0,
+      "targetLayer": 2,
+      "delta": -0.8644698703289032,
+      "score": 1.3507341723889112,
+      "direction": "weakened"
+    },
+    {
+      "edge": 76189,
+      "source": 1180,
+      "target": 2489,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.6745970845222473,
+      "score": 1.3491941690444946,
+      "direction": "weakened"
+    },
+    {
+      "edge": 75044,
+      "source": 182,
+      "target": 493,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.26957365572452546,
+      "score": 1.3478682786226273,
+      "direction": "weakened"
+    },
+    {
+      "edge": 24791,
+      "source": 499,
+      "target": 18240,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -1.5295547389984132,
+      "score": 1.3417146833319413,
+      "direction": "weakened"
+    },
+    {
+      "edge": 111621,
+      "source": 1129,
+      "target": 753,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.26732024252414704,
+      "score": 1.3366012126207352,
+      "direction": "weakened"
+    },
+    {
+      "edge": 46216,
+      "source": 1129,
+      "target": 919,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.3742479968070984,
+      "score": 1.3365999885967799,
+      "direction": "weakened"
+    },
+    {
+      "edge": 74066,
+      "source": 836,
+      "target": 19792,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.29375766336917875,
+      "score": 1.3352621062235397,
+      "direction": "weakened"
+    },
+    {
+      "edge": 97800,
+      "source": 780,
+      "target": 19792,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.2670522898435593,
+      "score": 1.3352614492177963,
+      "direction": "weakened"
+    },
+    {
+      "edge": 89767,
+      "source": 2830,
+      "target": 20039,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.373235656619072,
+      "score": 1.332984487925257,
+      "direction": "weakened"
+    },
+    {
+      "edge": 131870,
+      "source": 20039,
+      "target": 32,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": -0.3465759626030922,
+      "score": 1.3329844715503545,
+      "direction": "weakened"
+    },
+    {
+      "edge": 143879,
+      "source": 2623,
+      "target": 20039,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.29325651496648786,
+      "score": 1.3329841589385811,
+      "direction": "weakened"
+    },
+    {
+      "edge": 59,
+      "source": 22954,
+      "target": 20039,
+      "sourceLayer": 3,
+      "targetLayer": 3,
+      "delta": -1.7595388960838318,
+      "score": 1.332984012184721,
+      "direction": "weakened"
+    },
+    {
+      "edge": 94803,
+      "source": 634,
+      "target": 18856,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.2663747563958168,
+      "score": 1.331873781979084,
+      "direction": "weakened"
+    },
+    {
+      "edge": 83606,
+      "source": 58,
+      "target": 24798,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -1.8894068729877471,
+      "score": 1.3305682204139064,
+      "direction": "weakened"
+    },
+    {
+      "edge": 54847,
+      "source": 22954,
+      "target": 19804,
+      "sourceLayer": 3,
+      "targetLayer": 3,
+      "delta": -0.7979989260435104,
+      "score": 1.3299982100725174,
+      "direction": "weakened"
+    },
+    {
+      "edge": 50225,
+      "source": 9305,
+      "target": 18856,
+      "sourceLayer": 1,
+      "targetLayer": 3,
+      "delta": -1.168523256778717,
+      "score": 1.327867337248542,
+      "direction": "weakened"
+    },
+    {
+      "edge": 31692,
+      "source": 2850,
+      "target": 18856,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.37180282801389697,
+      "score": 1.3278672429067748,
+      "direction": "weakened"
+    },
+    {
+      "edge": 79960,
+      "source": 165,
+      "target": 1193,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.3151395598053932,
+      "score": 1.3130814991891384,
+      "direction": "weakened"
+    },
+    {
+      "edge": 27167,
+      "source": 24930,
+      "target": 1274,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": -0.2613069906830788,
+      "score": 1.3065349534153938,
+      "direction": "weakened"
+    },
+    {
+      "edge": 103119,
+      "source": 413,
+      "target": 21859,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.36309056609869006,
+      "score": 1.2967520217810358,
+      "direction": "weakened"
+    },
+    {
+      "edge": 70830,
+      "source": 18240,
+      "target": 2775,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": -0.8023574602603912,
+      "score": 1.294124935903857,
+      "direction": "weakened"
+    },
+    {
+      "edge": 142502,
+      "source": 18240,
+      "target": 900,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": -0.4400023111701012,
+      "score": 1.2941244446179445,
+      "direction": "weakened"
+    },
+    {
+      "edge": 45099,
+      "source": 18240,
+      "target": 507,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": -0.5377703142166137,
+      "score": 1.2804055100395564,
+      "direction": "weakened"
+    },
+    {
+      "edge": 131727,
+      "source": 24167,
+      "target": 24798,
+      "sourceLayer": 3,
+      "targetLayer": 3,
+      "delta": -0.6637601894140244,
+      "score": 1.2764619027192776,
+      "direction": "weakened"
+    },
+    {
+      "edge": 108217,
+      "source": 398,
+      "target": 20983,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.27962489917874334,
+      "score": 1.2710222689942878,
+      "direction": "weakened"
+    },
+    {
+      "edge": 122003,
+      "source": 1156,
+      "target": 20589,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.3295647895336151,
+      "score": 1.2675568828215966,
+      "direction": "weakened"
+    },
+    {
+      "edge": 132401,
+      "source": 372,
+      "target": 24499,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.6012710738182068,
+      "score": 1.2526480704545975,
+      "direction": "weakened"
+    },
+    {
+      "edge": 107366,
+      "source": 1410,
+      "target": 22516,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.27466692522168157,
+      "score": 1.2484860237349162,
+      "direction": "weakened"
+    },
+    {
+      "edge": 152460,
+      "source": 1107,
+      "target": 737,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.24808502271771432,
+      "score": 1.2404251135885715,
+      "direction": "weakened"
+    },
+    {
+      "edge": 143207,
+      "source": 2768,
+      "target": 22098,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.61660036444664,
+      "score": 1.23320072889328,
+      "direction": "weakened"
+    },
+    {
+      "edge": 73066,
+      "source": 2420,
+      "target": 22098,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.32063153967261315,
+      "score": 1.2331982295100505,
+      "direction": "weakened"
+    },
+    {
+      "edge": 140289,
+      "source": 875,
+      "target": 24797,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -3.2526169562339784,
+      "score": 1.2320518773613554,
+      "direction": "weakened"
+    },
+    {
+      "edge": 64017,
+      "source": 20393,
+      "target": 20551,
+      "sourceLayer": 3,
+      "targetLayer": 3,
+      "delta": -0.2461477153003216,
+      "score": 1.230738576501608,
+      "direction": "weakened"
+    },
+    {
+      "edge": 14735,
+      "source": 1239,
+      "target": 2304,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.7132590728998184,
+      "score": 1.2297570222410663,
+      "direction": "weakened"
+    },
+    {
+      "edge": 31847,
+      "source": 678,
+      "target": 19792,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.5643392196297645,
+      "score": 1.226824390499488,
+      "direction": "weakened"
+    },
+    {
+      "edge": 148125,
+      "source": 372,
+      "target": 18942,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.2694587048888206,
+      "score": 1.2248122949491846,
+      "direction": "weakened"
+    },
+    {
+      "edge": 42475,
+      "source": 1172,
+      "target": 939,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.24412683472037316,
+      "score": 1.2206341736018658,
+      "direction": "weakened"
+    },
+    {
+      "edge": 4835,
+      "source": 2730,
+      "target": 1698,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.3136540672183037,
+      "score": 1.2063617969934757,
+      "direction": "weakened"
+    },
+    {
+      "edge": 21416,
+      "source": 2575,
+      "target": 18724,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.4253303936123848,
+      "score": 1.1814733155899577,
+      "direction": "weakened"
+    },
+    {
+      "edge": 23847,
+      "source": 2519,
+      "target": 23634,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.8388441663980484,
+      "score": 1.1650613422195117,
+      "direction": "weakened"
+    },
+    {
+      "edge": 75976,
+      "source": 561,
+      "target": 22516,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.365411366969347,
+      "score": 1.1419105217792094,
+      "direction": "weakened"
+    },
+    {
+      "edge": 108900,
+      "source": 20535,
+      "target": 24930,
+      "sourceLayer": 3,
+      "targetLayer": 3,
+      "delta": -0.22790810354053975,
+      "score": 1.1395405177026987,
+      "direction": "weakened"
+    },
+    {
+      "edge": 34176,
+      "source": 2506,
+      "target": 21797,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.4765013699233532,
+      "score": 1.134527071246079,
+      "direction": "weakened"
+    },
+    {
+      "edge": 99984,
+      "source": 18724,
+      "target": 22095,
+      "sourceLayer": 3,
+      "targetLayer": 3,
+      "delta": -0.45092793703079226,
+      "score": 1.1273198425769806,
+      "direction": "weakened"
+    },
+    {
+      "edge": 43441,
+      "source": 644,
+      "target": 24167,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.5598587952554226,
+      "score": 1.1197175905108452,
+      "direction": "weakened"
+    },
+    {
+      "edge": 97112,
+      "source": 22299,
+      "target": 2652,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": -0.2456957970559597,
+      "score": 1.1167990775270895,
+      "direction": "weakened"
+    },
+    {
+      "edge": 15640,
+      "source": 22299,
+      "target": 2554,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": -1.8315498673915864,
+      "score": 1.116798699629016,
+      "direction": "weakened"
+    },
+    {
+      "edge": 55074,
+      "source": 345,
+      "target": 22771,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.3571876023709774,
+      "score": 1.1162112574093044,
+      "direction": "weakened"
+    },
+    {
+      "edge": 42645,
+      "source": 605,
+      "target": 215,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.2453022015094757,
+      "score": 1.1150100068612532,
+      "direction": "weakened"
+    },
+    {
+      "edge": 83279,
+      "source": 21797,
+      "target": 21859,
+      "sourceLayer": 3,
+      "targetLayer": 3,
+      "delta": -0.24505588717758656,
+      "score": 1.113890396261757,
+      "direction": "weakened"
+    },
+    {
+      "edge": 130542,
+      "source": 2279,
+      "target": 875,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.9795201095938683,
+      "score": 1.1130910336293958,
+      "direction": "weakened"
+    },
+    {
+      "edge": 70019,
+      "source": 2422,
+      "target": 875,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.22261815778911115,
+      "score": 1.1130907889455557,
+      "direction": "weakened"
+    },
+    {
+      "edge": 145685,
+      "source": 1006,
+      "target": 23348,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.4220048497617245,
+      "score": 1.1105390783203275,
+      "direction": "weakened"
+    },
+    {
+      "edge": 59830,
+      "source": 2654,
+      "target": 23348,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.3109499651193619,
+      "score": 1.1105355897120066,
+      "direction": "weakened"
+    },
+    {
+      "edge": 138176,
+      "source": 2851,
+      "target": 23084,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.28646393328905106,
+      "score": 1.1017843588040426,
+      "direction": "weakened"
+    },
+    {
+      "edge": 111419,
+      "source": 22095,
+      "target": 2575,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": -0.7458814236521721,
+      "score": 1.096884446547312,
+      "direction": "weakened"
+    },
+    {
+      "edge": 131694,
+      "source": 18234,
+      "target": 18986,
+      "sourceLayer": 3,
+      "targetLayer": 3,
+      "delta": -0.3064671128243208,
+      "score": 1.0945254029440028,
+      "direction": "weakened"
+    },
+    {
+      "edge": 134516,
+      "source": 1238,
+      "target": 22865,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.24035490982234478,
+      "score": 1.0925223173742944,
+      "direction": "weakened"
+    },
+    {
+      "edge": 29193,
+      "source": 119,
+      "target": 24692,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -1.8549503207206726,
+      "score": 1.0911472474827486,
+      "direction": "weakened"
+    },
+    {
+      "edge": 144331,
+      "source": 18875,
+      "target": 22591,
+      "sourceLayer": 3,
+      "targetLayer": 3,
+      "delta": -0.5648761060833931,
+      "score": 1.0863002040065253,
+      "direction": "weakened"
+    },
+    {
+      "edge": 124027,
+      "source": 22591,
+      "target": 18875,
+      "sourceLayer": 3,
+      "targetLayer": 3,
+      "delta": -0.3258895978331566,
+      "score": 1.0862986594438553,
+      "direction": "weakened"
+    },
+    {
+      "edge": 29858,
+      "source": 1160,
+      "target": 20039,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -1.9939737582206727,
+      "score": 1.0836813903373221,
+      "direction": "weakened"
+    },
+    {
+      "edge": 101589,
+      "source": 22299,
+      "target": 162,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": -0.2813816650211811,
+      "score": 1.0822371731583889,
+      "direction": "weakened"
+    },
+    {
+      "edge": 108205,
+      "source": 22299,
+      "target": 1039,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": -0.43289475291967394,
+      "score": 1.0822368822991848,
+      "direction": "weakened"
+    },
+    {
+      "edge": 90915,
+      "source": 22299,
+      "target": 228,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": -0.9956578445434571,
+      "score": 1.0822367875472358,
+      "direction": "weakened"
+    },
+    {
+      "edge": 122355,
+      "source": 22299,
+      "target": 1254,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": -0.2139266373589635,
+      "score": 1.0696331867948174,
+      "direction": "weakened"
+    },
+    {
+      "edge": 41852,
+      "source": 2769,
+      "target": 22225,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.25578148640692233,
+      "score": 1.0657561933621764,
+      "direction": "weakened"
+    },
+    {
+      "edge": 34485,
+      "source": 875,
+      "target": 20322,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.2972102376818657,
+      "score": 1.0614651345780917,
+      "direction": "weakened"
+    },
+    {
+      "edge": 27825,
+      "source": 44,
+      "target": 19173,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.5494500552117825,
+      "score": 1.05663472156112,
+      "direction": "weakened"
+    },
+    {
+      "edge": 114156,
+      "source": 504,
+      "target": 20535,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.358324863165617,
+      "score": 1.0538966563694618,
+      "direction": "weakened"
+    },
+    {
+      "edge": 53011,
+      "source": 1339,
+      "target": 22964,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.5254030097275972,
+      "score": 1.0508060194551945,
+      "direction": "weakened"
+    },
+    {
+      "edge": 102618,
+      "source": 2869,
+      "target": 22964,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.3152415670454502,
+      "score": 1.050805223484834,
+      "direction": "weakened"
+    },
+    {
+      "edge": 120842,
+      "source": 2730,
+      "target": 22964,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.3572737240791321,
+      "score": 1.0508050708209766,
+      "direction": "weakened"
+    },
+    {
+      "edge": 86971,
+      "source": 2231,
+      "target": 22964,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.3777157036960125,
+      "score": 1.0492102880444791,
+      "direction": "weakened"
+    },
+    {
+      "edge": 104753,
+      "source": 779,
+      "target": 23305,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.5012254095822573,
+      "score": 1.0442196032963693,
+      "direction": "weakened"
+    },
+    {
+      "edge": 23875,
+      "source": 912,
+      "target": 606,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.43696491241455077,
+      "score": 1.0403926486060733,
+      "direction": "weakened"
+    },
+    {
+      "edge": 123578,
+      "source": 1450,
+      "target": 23634,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.20754356663674117,
+      "score": 1.0377178331837058,
+      "direction": "weakened"
+    },
+    {
+      "edge": 99528,
+      "source": 32,
+      "target": 23297,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.3525983972102404,
+      "score": 1.0370541094418835,
+      "direction": "weakened"
+    },
+    {
+      "edge": 14160,
+      "source": 2730,
+      "target": 24214,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.26940311048179866,
+      "score": 1.0361658095453794,
+      "direction": "weakened"
+    },
+    {
+      "edge": 22945,
+      "source": 22299,
+      "target": 1429,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": -0.3705415191501379,
+      "score": 1.029281997639272,
+      "direction": "weakened"
+    },
+    {
+      "edge": 94526,
+      "source": 18240,
+      "target": 23106,
+      "sourceLayer": 3,
+      "targetLayer": 3,
+      "delta": -0.2667926663905382,
+      "score": 1.0261256399636085,
+      "direction": "weakened"
+    },
+    {
+      "edge": 107296,
+      "source": 22095,
+      "target": 2489,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": -0.20411133468151094,
+      "score": 1.0205566734075546,
+      "direction": "weakened"
+    },
+    {
+      "edge": 87719,
+      "source": 2525,
+      "target": 19270,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.5088890008628368,
+      "score": 1.0177780017256737,
+      "direction": "weakened"
+    },
+    {
+      "edge": 23934,
+      "source": 1023,
+      "target": 19270,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -1.4045326682925225,
+      "score": 1.0177772958641467,
+      "direction": "weakened"
+    },
+    {
+      "edge": 23752,
+      "source": 18234,
+      "target": 23084,
+      "sourceLayer": 3,
+      "targetLayer": 3,
+      "delta": -2.6849167899787427,
+      "score": 1.0170139355980086,
+      "direction": "weakened"
+    },
+    {
+      "edge": 23262,
+      "source": 23272,
+      "target": 23675,
+      "sourceLayer": 3,
+      "targetLayer": 3,
+      "delta": -0.40432359660044315,
+      "score": 1.0108089915011078,
+      "direction": "weakened"
+    },
+    {
+      "edge": 136350,
+      "source": 353,
+      "target": 22591,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.46303669855929913,
+      "score": 1.006601518607172,
+      "direction": "weakened"
+    },
+    {
+      "edge": 18844,
+      "source": 441,
+      "target": 22516,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.26118542020209135,
+      "score": 1.004559308469582,
+      "direction": "weakened"
+    },
+    {
+      "edge": 90369,
+      "source": 24118,
+      "target": 9305,
+      "sourceLayer": 3,
+      "targetLayer": 1,
+      "delta": -0.5014385377289727,
+      "score": 1.0028770754579455,
+      "direction": "weakened"
+    },
+    {
+      "edge": 8859,
+      "source": 190,
+      "target": 24917,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": 0.3600000286102295,
+      "score": 1.0000000794728598,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 31267,
+      "source": 861,
+      "target": 18389,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": 0.3000000238418579,
+      "score": 1.0000000794728598,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 36014,
+      "source": 20858,
+      "target": 292,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": 0.3600000286102295,
+      "score": 1.0000000794728598,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 69074,
+      "source": 397,
+      "target": 22487,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": 0.3600000286102295,
+      "score": 1.0000000794728598,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 75031,
+      "source": 22866,
+      "target": 2674,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": 0.3000000238418579,
+      "score": 1.0000000794728598,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 97206,
+      "source": 44,
+      "target": 826,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": 0.6000000476837158,
+      "score": 1.0000000794728598,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 114217,
+      "source": 18389,
+      "target": 2476,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": 0.3000000238418579,
+      "score": 1.0000000794728598,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 127064,
+      "source": 20308,
+      "target": 348,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": 0.3000000238418579,
+      "score": 1.0000000794728598,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 136343,
+      "source": 1939,
+      "target": 2734,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": 0.3000000238418579,
+      "score": 1.0000000794728598,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 140927,
+      "source": 2173,
+      "target": 19049,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": 0.3000000238418579,
+      "score": 1.0000000794728598,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 150144,
+      "source": 182,
+      "target": 21651,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": 0.6000000476837158,
+      "score": 1.0000000794728598,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 52561,
+      "source": 24914,
+      "target": 1646,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": 1.8200001049041747,
+      "score": 1.0000000576396564,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 144158,
+      "source": 21090,
+      "target": 19837,
+      "sourceLayer": 3,
+      "targetLayer": 3,
+      "delta": 1.8200001049041747,
+      "score": 1.0000000576396564,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 110232,
+      "source": 2842,
+      "target": 18492,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": 0.9800000381469727,
+      "score": 1.0000000389254824,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 135883,
+      "source": 632,
+      "target": 44,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": 0.920000033378601,
+      "score": 1.0000000362810881,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 137946,
+      "source": 2730,
+      "target": 1340,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": 0.4600000166893005,
+      "score": 1.0000000362810881,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 67932,
+      "source": 22832,
+      "target": 20393,
+      "sourceLayer": 3,
+      "targetLayer": 3,
+      "delta": 0.8600000286102295,
+      "score": 1.0000000332677088,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 679,
+      "source": 1308,
+      "target": 19378,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": 0.20000000596046447,
+      "score": 1.0000000298023222,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 15452,
+      "source": 1443,
+      "target": 8800,
+      "sourceLayer": 0,
+      "targetLayer": 1,
+      "delta": 0.20000000596046447,
+      "score": 1.0000000298023222,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 31359,
+      "source": 21199,
+      "target": 20477,
+      "sourceLayer": 3,
+      "targetLayer": 3,
+      "delta": 0.20000000596046447,
+      "score": 1.0000000298023222,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 50665,
+      "source": 182,
+      "target": 20060,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": 0.40000001192092893,
+      "score": 1.0000000298023222,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 55962,
+      "source": 965,
+      "target": 190,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": 0.40000001192092893,
+      "score": 1.0000000298023222,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 57583,
+      "source": 1646,
+      "target": 23084,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": 0.20000000596046447,
+      "score": 1.0000000298023222,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 60818,
+      "source": 243,
+      "target": 24499,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": 0.8000000238418579,
+      "score": 1.0000000298023222,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 105053,
+      "source": 2241,
+      "target": 537,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": 0.20000000596046447,
+      "score": 1.0000000298023222,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 105997,
+      "source": 21199,
+      "target": 2249,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": 0.20000000596046447,
+      "score": 1.0000000298023222,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 110429,
+      "source": 182,
+      "target": 2303,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": 0.40000001192092893,
+      "score": 1.0000000298023222,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 115662,
+      "source": 2450,
+      "target": 18081,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": 0.20000000596046447,
+      "score": 1.0000000298023222,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 116692,
+      "source": 288,
+      "target": 22579,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": 0.20000000596046447,
+      "score": 1.0000000298023222,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 128516,
+      "source": 1285,
+      "target": 2237,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": 0.20000000596046447,
+      "score": 1.0000000298023222,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 151947,
+      "source": 832,
+      "target": 44,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": 0.20000000596046447,
+      "score": 1.0000000298023222,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 154566,
+      "source": 23516,
+      "target": 1153,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": 0.20000000596046447,
+      "score": 1.0000000298023222,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 7511,
+      "source": 24872,
+      "target": 13639,
+      "sourceLayer": 3,
+      "targetLayer": 2,
+      "delta": 0.7400000190734863,
+      "score": 1.0000000257749815,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 88007,
+      "source": 2510,
+      "target": 23719,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": 0.7400000190734863,
+      "score": 1.0000000257749815,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 31149,
+      "source": 21199,
+      "target": 765,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": 0.34000000715255735,
+      "score": 1.0000000210369333,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 37284,
+      "source": 901,
+      "target": 24917,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": 0.6800000143051147,
+      "score": 1.0000000210369333,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 53923,
+      "source": 2425,
+      "target": 18081,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": 0.34000000715255735,
+      "score": 1.0000000210369333,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 61874,
+      "source": 2766,
+      "target": 23015,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": 0.34000000715255735,
+      "score": 1.0000000210369333,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 67925,
+      "source": 182,
+      "target": 1162,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": 0.34000000715255735,
+      "score": 1.0000000210369333,
+      "direction": "strengthened"
+    },
+    {
+      "edge": 75309,
+      "source": 44,
+      "target": 1218,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": 0.34000000715255735,
+      "score": 1.0000000210369333,
+      "direction": "strengthened"
+    }
+  ]
+}

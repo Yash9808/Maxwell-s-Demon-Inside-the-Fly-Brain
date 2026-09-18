@@ -1,0 +1,32 @@
+# Local working folders and generated runtime output
+.freebuff/
+freebuf/
+__pycache__/
+*.log
+*.tmp
+
+# Scratch probes, patch scripts, and extracted module checks
+/_check_*
+/_extract_*
+/_fix_*
+/_inspect_*
+/_patch_*
+/_probe_*
+/_rebuild_anatomy.log
+/_time_*
+/_audit_*
+/_smoke_*
+
+# Large source exports and derived tables; keep the loaders and compact fixtures
+*.feather
+synapses_connections_783.feather
+proofread_connections_783.feather
+per_neuron_neuropil_count_post_783.feather
+per_neuron_neuropil_count_pre_783.feather
+malecns_circuit.json
+
+# Browser/build artifacts and local archives
+isolate-*.log
+*.zip
+*.tar
+s41586-024-07939-3.pdf

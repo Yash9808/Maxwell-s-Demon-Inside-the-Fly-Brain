@@ -1,0 +1,12 @@
+Condition               	   work_in(J)	 extractable(J)	 efficiency	  landauer(J)	  ext/cost	  bits_need	 bits_used
+--------------------------------------------------------------------------------------------------------------
+classical_demon         	     9.84e-12	       1.50e-16	    1.5e-05	     1.88e-19	   8.0e+02	      52165	        65
+random                  	     9.91e-12	       1.43e-16	    1.4e-05	     2.74e-20	   5.2e+03	      49793	        10
+ann                     	     1.00e-11	       1.35e-16	    1.3e-05	     4.23e-20	   3.2e+03	      47070	        15
+drosophila              	     1.00e-11	       1.55e-16	    1.5e-05	     7.59e-20	   2.0e+03	      53923	        26
+connectome              	     1.00e-11	       1.64e-16	    1.6e-05	     2.11e-19	   7.8e+02	      57085	        74
+shuffled_connectome     	     1.03e-11	       1.48e-16	    1.4e-05	     2.16e-19	   6.9e+02	      51608	        75
+
+efficiency = extractable/work_in (the jet pays the entropy bill; second law holds if << 1)
+bits_need = extractable work priced in Landauer bits @300K; bits_used = metered memory traffic
+bits_used << bits_need -> the demon's sorting is jet-subsidized, its erasure bill negligible
