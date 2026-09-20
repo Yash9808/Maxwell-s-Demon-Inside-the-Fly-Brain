@@ -430,6 +430,36 @@ landed. Failed experiments render as red ✕ panels. When the session ends the
 animation stops and **"⬇ download session figure (PNG)"** saves the whole
 six-panel figure as `six_fly_brains_session_figure.png`.
 
+**Per-lab play buttons**: every lab header (🧪 DEMON LAB, 🧠 INFORMATION LAB,
+🪰 FLY BRAIN) has its own green **▶** button that queues *all* of that
+department's experiments in run order and animates the same live session
+figure, scoped to the lab (e.g. DEMON LAB runs E1→E6→E7→E9→E10→E11). A lab
+session never mixes with "run all six": while one animates, further clicks
+queue silently behind it. Apparatus experiments without a fly brain (E10/E11)
+fall back to a compact agreement + ΔT block-curve panel so every slot of the
+figure fills. The ⚛ QUANTUM LAB / 🔬 REAL DEMONS headers also carry the button
+and answer with a "coming soon" toast until experiments land there.
+
+**No-hang guarantee while experiments run** (patches 16–18): the 3D fly used
+to stutter badly (8–12 fps, 100–650 ms hitches) whenever a lab session ran.
+Fixes, all measured on the live page:
+
+- apparatus `app_state` replay streams are time-gated in the worker (~30 Hz
+  instead of ~460 structured clones/sec);
+- experiment progress DOM/canvas work and the plots broadcast are paced on a
+  300 ms timer and skip redraws when the curve did not change;
+- the 2 s e9 training-sweep poll only rebroadcasts when the sweep file
+  actually changed, and its HUD SVG is cached per payload;
+- the apparatus replay pump runs on a timer instead of rAF, its HUD writes
+  only on change (e9 HUD at ~5 Hz);
+- the 106k-neuron brain tick runs at 30 Hz (indistinguishable: spike heat
+  decays over ~1 s), and the default world's simulation pauses while an
+  apparatus stage owns the screen.
+
+Result during a full DEMON LAB session: mean frame ~11–15 ms (~60 fps badge),
+hitches >40 ms down from ~10/s to <0.3/s, worst hitch 652 ms → 87 ms, plots
+broadcast volume down ~8x, and every session still completes with all panels.
+
 A second card, **"Brain outcome — learning deltas (late − early)"**, shows what
 learning *changed*: per region (and per condition for multi-arm experiments),
 the difference between the second and first half of training trials, drawn

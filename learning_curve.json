@@ -23,2185 +23,2395 @@
   "history": [
     {
       "frame": 1000,
-      "da": 0.018181162887519187,
-      "door": 1.6168499026920707e-12,
-      "ex": 0.4501233014498899,
-      "good": 18,
-      "bad": 15,
-      "ratio": 1.2,
-      "openRate": 0.8,
-      "doorFast": 0.20238782091637902
+      "da": -0.3577823767452194,
+      "door": 0.9999999999999997,
+      "ex": 0.4869192497276534,
+      "good": 16,
+      "bad": 26,
+      "ratio": 0.6153846153846154,
+      "openRate": 1,
+      "doorFast": 0.0992029154337567
     },
     {
       "frame": 2000,
-      "da": 0.017671800107355518,
-      "door": 0.02235479652211795,
-      "ex": 0.4250899800083061,
-      "good": 3,
-      "bad": 5,
-      "ratio": 0.6,
-      "openRate": 0.22,
-      "doorFast": 0.22487116126078435
+      "da": 0.002344751177131845,
+      "door": 0.00023992275478720333,
+      "ex": 0.4431339807082388,
+      "good": 4,
+      "bad": 2,
+      "ratio": 2,
+      "openRate": 0.26,
+      "doorFast": 0.11663070885519021
     },
     {
       "frame": 3000,
-      "da": -0.000001127475108806458,
-      "door": 3.636963910599999e-31,
-      "ex": 0.32797919218285815,
-      "good": 0,
-      "bad": 1,
-      "ratio": 0,
-      "openRate": 0.1,
-      "doorFast": 0.2558062232336692
+      "da": 0.19961880124945391,
+      "door": 0.000053362560943331195,
+      "ex": 0.3900953029175613,
+      "good": 6,
+      "bad": 11,
+      "ratio": 0.5454545454545454,
+      "openRate": 0.44,
+      "doorFast": 0.1831164726894819
     },
     {
       "frame": 4000,
-      "da": -0.10062769388823178,
-      "door": 0.018326495368694545,
-      "ex": 0.3934673268716913,
-      "good": 8,
-      "bad": 11,
-      "ratio": 0.7272727272727273,
-      "openRate": 0.54,
-      "doorFast": 0.13629516222436777
-    },
-    {
-      "frame": 5000,
-      "da": -0.08994244514339762,
-      "door": 0.02028978575820943,
-      "ex": 0.5334063824940275,
-      "good": 2,
-      "bad": 10,
-      "ratio": 0.2,
-      "openRate": 0.34,
-      "doorFast": 0.21824614447907575
-    },
-    {
-      "frame": 6000,
-      "da": -0.003382497252716615,
-      "door": 1.2298746245996725e-23,
-      "ex": 0.4518261354387624,
-      "good": 20,
-      "bad": 7,
-      "ratio": 2.857142857142857,
-      "openRate": 0.62,
-      "doorFast": 0.24815193848732653
-    },
-    {
-      "frame": 7000,
-      "da": 0.0023033134549823326,
-      "door": 2.3679377767579913e-25,
-      "ex": 0.3192752782322041,
-      "good": 3,
-      "bad": 2,
-      "ratio": 1.5,
-      "openRate": 0.14,
-      "doorFast": 0.12004418258483145
-    },
-    {
-      "frame": 8000,
-      "da": -0.12408204317983546,
-      "door": 2.16214044565884e-10,
-      "ex": 0.3521797917849341,
-      "good": 12,
-      "bad": 9,
-      "ratio": 1.3333333333333333,
-      "openRate": 0.4,
-      "doorFast": 0.20115878040993287
-    },
-    {
-      "frame": 9000,
-      "da": -3.3879690456727904e-8,
-      "door": 4.721589868076209e-14,
-      "ex": 0.2979992844044219,
-      "good": 0,
+      "da": 1.4884439195184853e-7,
+      "door": 4.008489856877678e-34,
+      "ex": 0.33864741469235465,
+      "good": 1,
       "bad": 0,
       "ratio": null,
       "openRate": 0.04,
-      "doorFast": 0.16197815437866625
+      "doorFast": 0.13609072528347907
+    },
+    {
+      "frame": 5000,
+      "da": -0.052076453812936234,
+      "door": 0.07588071354801254,
+      "ex": 0.4717551975985443,
+      "good": 5,
+      "bad": 6,
+      "ratio": 0.8333333333333334,
+      "openRate": 0.32,
+      "doorFast": 0.23967797700641
+    },
+    {
+      "frame": 6000,
+      "da": -0.35688899502954846,
+      "door": 0.003263556965646749,
+      "ex": 0.4967669786309194,
+      "good": 11,
+      "bad": 14,
+      "ratio": 0.7857142857142857,
+      "openRate": 0.74,
+      "doorFast": 0.16355766877872271
+    },
+    {
+      "frame": 7000,
+      "da": -9.744591859669512e-8,
+      "door": 1.7066120777752573e-65,
+      "ex": 0.38184603250656746,
+      "good": 0,
+      "bad": 0,
+      "ratio": null,
+      "openRate": 0,
+      "doorFast": 0.14994230789872406
+    },
+    {
+      "frame": 8000,
+      "da": -0.005096209085478276,
+      "door": 3.4976664191015873e-9,
+      "ex": 0.37196272958877147,
+      "good": 5,
+      "bad": 4,
+      "ratio": 1.25,
+      "openRate": 0.34,
+      "doorFast": 0.22620304922982157
+    },
+    {
+      "frame": 9000,
+      "da": 0.3048673117419008,
+      "door": 3.127586917556245e-7,
+      "ex": 0.42777530683943116,
+      "good": 8,
+      "bad": 11,
+      "ratio": 0.7272727272727273,
+      "openRate": 0.58,
+      "doorFast": 0.22698210125033205
     }
   ],
   "policySamples": [
     {
-      "doorFast": 0.07744830997664355,
+      "doorFast": 0.021248910983632997,
       "openNow": true
     },
     {
-      "doorFast": 0.12800499053983497,
+      "doorFast": 0.03562476550304111,
       "openNow": true
     },
     {
-      "doorFast": 0.08878969864740659,
+      "doorFast": 0.0436755699623201,
       "openNow": true
     },
     {
-      "doorFast": 0.0764509181710037,
+      "doorFast": 0.07824569209616779,
       "openNow": true
     },
     {
-      "doorFast": 0.06754168741685965,
+      "doorFast": 0.08304585331728459,
       "openNow": true
     },
     {
-      "doorFast": 0.05611532145589114,
+      "doorFast": 0.11777917968449397,
       "openNow": true
     },
     {
-      "doorFast": 0.10317182053651754,
+      "doorFast": 0.17298223490440773,
       "openNow": true
     },
     {
-      "doorFast": 0.0999889131576576,
+      "doorFast": 0.1440178831311736,
       "openNow": true
     },
     {
-      "doorFast": 0.14060508761599605,
+      "doorFast": 0.11577879573432442,
       "openNow": true
     },
     {
-      "doorFast": 0.15505264536397406,
+      "doorFast": 0.10499035996799123,
       "openNow": true
     },
     {
-      "doorFast": 0.12465272180169254,
+      "doorFast": 0.14387712573740177,
       "openNow": true
     },
     {
-      "doorFast": 0.09378229760397505,
+      "doorFast": 0.0898086993801713,
       "openNow": true
     },
     {
-      "doorFast": 0.14177016509460133,
+      "doorFast": 0.09128004590096062,
       "openNow": true
     },
     {
-      "doorFast": 0.1879204752626387,
+      "doorFast": 0.11282135829860482,
       "openNow": true
     },
     {
-      "doorFast": 0.18959105627602182,
+      "doorFast": 0.16501164034733876,
       "openNow": true
     },
     {
-      "doorFast": 0.17330099745001012,
+      "doorFast": 0.1703888824055774,
       "openNow": true
     },
     {
-      "doorFast": 0.1446446155335935,
+      "doorFast": 0.17915301829205588,
       "openNow": true
     },
     {
-      "doorFast": 0.13818472634917353,
+      "doorFast": 0.2098132697298793,
       "openNow": true
     },
     {
-      "doorFast": 0.06713977474788568,
+      "doorFast": 0.16523785844143665,
       "openNow": true
     },
     {
-      "doorFast": 0.06902859561626061,
+      "doorFast": 0.1773758198458712,
       "openNow": true
     },
     {
-      "doorFast": 0.049352055056682984,
+      "doorFast": 0.16797944580814853,
       "openNow": true
     },
     {
-      "doorFast": 0.05773842677510126,
+      "doorFast": 0.1446411178041766,
       "openNow": true
     },
     {
-      "doorFast": 0.04986017615350783,
+      "doorFast": 0.24009160391421933,
       "openNow": true
     },
     {
-      "doorFast": 0.07693625701180981,
+      "doorFast": 0.22503283485690695,
       "openNow": true
     },
     {
-      "doorFast": 0.10500957644586152,
+      "doorFast": 0.20139082053467083,
       "openNow": true
     },
     {
-      "doorFast": 0.1212923032279141,
+      "doorFast": 0.14934744215128848,
       "openNow": true
     },
     {
-      "doorFast": 0.12401948913917889,
+      "doorFast": 0.10158311770262188,
       "openNow": true
     },
     {
-      "doorFast": 0.13292220675873587,
+      "doorFast": 0.15664446653367053,
       "openNow": true
     },
     {
-      "doorFast": 0.16053038204953107,
+      "doorFast": 0.10602636342521868,
       "openNow": true
     },
     {
-      "doorFast": 0.15749291645128574,
+      "doorFast": 0.1411757379198855,
       "openNow": true
     },
     {
-      "doorFast": 0.19325054108780657,
+      "doorFast": 0.1630807724140912,
       "openNow": true
     },
     {
-      "doorFast": 0.19472988485261555,
+      "doorFast": 0.21972717739034514,
       "openNow": true
     },
     {
-      "doorFast": 0.17766534829706934,
+      "doorFast": 0.19122596181473234,
       "openNow": true
     },
     {
-      "doorFast": 0.13461717480382734,
+      "doorFast": 0.18617533291119104,
       "openNow": true
     },
     {
-      "doorFast": 0.14848954391614863,
+      "doorFast": 0.1518660747706126,
       "openNow": true
     },
     {
-      "doorFast": 0.16427077284994748,
+      "doorFast": 0.16633715458662668,
       "openNow": true
     },
     {
-      "doorFast": 0.18138502232337178,
+      "doorFast": 0.18519512965221527,
       "openNow": true
     },
     {
-      "doorFast": 0.20735592188586874,
+      "doorFast": 0.23319303354554827,
       "openNow": true
     },
     {
-      "doorFast": 0.1731774301398613,
+      "doorFast": 0.220451362471075,
       "openNow": true
     },
     {
-      "doorFast": 0.16802709756562836,
+      "doorFast": 0.22482044106532914,
       "openNow": true
     },
     {
-      "doorFast": 0.21874037014096856,
-      "openNow": false
+      "doorFast": 0.2059808174548544,
+      "openNow": true
     },
     {
-      "doorFast": 0.2203516742964296,
-      "openNow": false
+      "doorFast": 0.17409370756853815,
+      "openNow": true
     },
     {
-      "doorFast": 0.18063466951202645,
-      "openNow": false
+      "doorFast": 0.15992414515326925,
+      "openNow": true
     },
     {
-      "doorFast": 0.19395989503489952,
-      "openNow": false
+      "doorFast": 0.13515236928115515,
+      "openNow": true
     },
     {
-      "doorFast": 0.1772207073768436,
-      "openNow": false
+      "doorFast": 0.16931633106470878,
+      "openNow": true
     },
     {
-      "doorFast": 0.16937494123743888,
-      "openNow": false
+      "doorFast": 0.17896819345009055,
+      "openNow": true
     },
     {
-      "doorFast": 0.23023275569750565,
-      "openNow": false
+      "doorFast": 0.12944459315350623,
+      "openNow": true
     },
     {
-      "doorFast": 0.16082250008544763,
-      "openNow": false
+      "doorFast": 0.07733972235442362,
+      "openNow": true
     },
     {
-      "doorFast": 0.22904165970187587,
-      "openNow": false
+      "doorFast": 0.09992081178884556,
+      "openNow": true
     },
     {
-      "doorFast": 0.20238782091637902,
-      "openNow": false
+      "doorFast": 0.0992029154337567,
+      "openNow": true
     },
     {
-      "doorFast": 0.23293870946978595,
-      "openNow": false
+      "doorFast": 0.0767462704910869,
+      "openNow": true
     },
     {
-      "doorFast": 0.17807710443659402,
-      "openNow": false
+      "doorFast": 0.15780645402890742,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.15107905638035232,
+      "openNow": true
     },
     {
-      "doorFast": 0.2151687400048501,
+      "doorFast": 0.16892609279596613,
       "openNow": false
     },
     {
-      "doorFast": 0.19262146821224435,
+      "doorFast": 0.1778406912641326,
       "openNow": false
     },
     {
-      "doorFast": 0.16441571019894854,
+      "doorFast": 0.183300669338975,
       "openNow": false
     },
     {
-      "doorFast": 0.22689660062195896,
+      "doorFast": 0.178255235606978,
       "openNow": false
     },
     {
-      "doorFast": 0.23091530219259732,
+      "doorFast": 0.20158657702114396,
       "openNow": false
     },
     {
-      "doorFast": 0.22159127896852088,
+      "doorFast": 0.1670085339598416,
       "openNow": false
     },
     {
-      "doorFast": 0.2213486452643913,
+      "doorFast": 0.2087014010912162,
       "openNow": false
     },
     {
-      "doorFast": 0.2347153546295231,
+      "doorFast": 0.1725194445067497,
       "openNow": false
     },
     {
-      "doorFast": 0.24367177471615195,
+      "doorFast": 0.17146567229976273,
       "openNow": false
     },
     {
-      "doorFast": 0.19492753508864713,
+      "doorFast": 0.2885779546950608,
       "openNow": false
     },
     {
-      "doorFast": 0.16585998368250518,
+      "doorFast": 0.30823523502501243,
       "openNow": false
     },
     {
-      "doorFast": 0.18487370354761654,
+      "doorFast": 0.25680862965425977,
       "openNow": false
     },
     {
-      "doorFast": 0.2821549864266198,
+      "doorFast": 0.2278087153136494,
       "openNow": false
     },
     {
-      "doorFast": 0.24636472283223376,
+      "doorFast": 0.18701337603532894,
       "openNow": false
     },
     {
-      "doorFast": 0.2604954310056067,
+      "doorFast": 0.13135361421297623,
       "openNow": false
     },
     {
-      "doorFast": 0.22415252950339198,
+      "doorFast": 0.20734646649392302,
       "openNow": false
     },
     {
-      "doorFast": 0.15581361288322926,
+      "doorFast": 0.29015651771267004,
       "openNow": false
     },
     {
-      "doorFast": 0.20445138694825993,
+      "doorFast": 0.3064739637091107,
       "openNow": false
     },
     {
-      "doorFast": 0.21178380368323657,
+      "doorFast": 0.32659521423351795,
       "openNow": false
     },
     {
-      "doorFast": 0.24983419825357867,
+      "doorFast": 0.2818850032512364,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.286765155068356,
       "openNow": false
     },
     {
-      "doorFast": 0.2223511926406231,
+      "doorFast": 0.32853548966772117,
       "openNow": false
     },
     {
-      "doorFast": 0.12405920742727312,
+      "doorFast": 0.2961798081415991,
       "openNow": false
     },
     {
-      "doorFast": 0.15781086244698816,
+      "doorFast": 0.2181569236316714,
       "openNow": false
     },
     {
-      "doorFast": 0.23705279348083816,
+      "doorFast": 0.22154350852909505,
       "openNow": false
     },
     {
-      "doorFast": 0.21821597644231372,
+      "doorFast": 0.18337304542633615,
       "openNow": false
     },
     {
-      "doorFast": 0.2207614600076925,
+      "doorFast": 0.20705293282063053,
       "openNow": false
     },
     {
-      "doorFast": 0.19691781125807012,
+      "doorFast": 0.15816086218347816,
       "openNow": false
     },
     {
-      "doorFast": 0.18553934683522222,
-      "openNow": true
+      "doorFast": 0.24391586051399278,
+      "openNow": false
     },
     {
-      "doorFast": 0.1934254338730381,
+      "doorFast": 0.2380371741724358,
       "openNow": true
     },
     {
-      "doorFast": 0.1712200479539059,
+      "doorFast": 0.20051102621606554,
       "openNow": true
     },
     {
-      "doorFast": 0.2012513952989958,
+      "doorFast": 0.2206229196922343,
       "openNow": true
     },
     {
-      "doorFast": 0.16835321648780924,
+      "doorFast": 0.18226845673523415,
       "openNow": true
     },
     {
-      "doorFast": 0.23507634328283358,
+      "doorFast": 0.17032209315995656,
       "openNow": true
     },
     {
-      "doorFast": 0.23264629669084128,
+      "doorFast": 0.1670966031246424,
       "openNow": true
     },
     {
-      "doorFast": 0.2078778103654229,
-      "openNow": true
+      "doorFast": 0.16967004553301826,
+      "openNow": false
     },
     {
-      "doorFast": 0.2125401515538631,
-      "openNow": true
+      "doorFast": 0.2048028972688934,
+      "openNow": false
     },
     {
-      "doorFast": 0.2469388270593537,
-      "openNow": true
+      "doorFast": 0.24945553571441817,
+      "openNow": false
     },
     {
-      "doorFast": 0.2614952062103345,
+      "doorFast": 0.21102125242015804,
       "openNow": false
     },
     {
-      "doorFast": 0.22110715176034748,
+      "doorFast": 0.14403554275903277,
       "openNow": false
     },
     {
-      "doorFast": 0.18303887880182224,
+      "doorFast": 0.08778550460921827,
       "openNow": false
+    },
+    {
+      "doorFast": 0.10031052990084528,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.060977868242959116,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.10079803608630927,
+      "openNow": true
     },
     {
-      "doorFast": 0.18641540983992885,
+      "doorFast": 0.17321962636667756,
       "openNow": false
     },
     {
-      "doorFast": 0.18467347499122308,
+      "doorFast": 0.18833511838228018,
       "openNow": false
     },
     {
-      "doorFast": 0.15224163713127065,
+      "doorFast": 0.11663070885519021,
       "openNow": false
     },
     {
-      "doorFast": 0.19612710375353734,
+      "doorFast": 0.10765844550027563,
       "openNow": false
     },
     {
-      "doorFast": 0.12372981958101603,
+      "doorFast": 0.1430005507007812,
       "openNow": false
     },
     {
-      "doorFast": 0.15191166825007205,
+      "doorFast": 0.1685546238175363,
       "openNow": false
     },
     {
-      "doorFast": 0.21793539188094896,
-      "openNow": true
+      "doorFast": 0.14610781829216507,
+      "openNow": false
     },
     {
-      "doorFast": 0.22487116126078435,
+      "doorFast": 0.11283207356500324,
       "openNow": false
     },
     {
-      "doorFast": 0.2729625365078492,
+      "doorFast": 0.14336853354658344,
       "openNow": false
     },
     {
-      "doorFast": 0.28269831384038097,
+      "doorFast": 0.18975655043375686,
       "openNow": false
     },
     {
-      "doorFast": 0.276866626234262,
+      "doorFast": 0.19564590778368565,
       "openNow": false
     },
     {
-      "doorFast": 0.2653118941968499,
+      "doorFast": 0.2101597814595509,
       "openNow": false
     },
     {
-      "doorFast": 0.18521722801062726,
+      "doorFast": 0.2045514652273566,
       "openNow": false
     },
     {
-      "doorFast": 0.22545834800366674,
+      "doorFast": 0.1577019425666146,
       "openNow": false
     },
     {
-      "doorFast": 0.23551641151592975,
+      "doorFast": 0.17151496228035004,
       "openNow": false
     },
     {
-      "doorFast": 0.19533664538119697,
+      "doorFast": 0.22468108610093707,
       "openNow": true
     },
     {
-      "doorFast": 0.2356600603907278,
+      "doorFast": 0.20581804359577904,
       "openNow": true
     },
     {
-      "doorFast": 0.2241631977974422,
+      "doorFast": 0.22255876755844717,
       "openNow": true
     },
     {
-      "doorFast": 0.11333273413651833,
+      "doorFast": 0.18422289453938825,
       "openNow": true
     },
     {
-      "doorFast": 0.15009706153841232,
+      "doorFast": 0.161911693700481,
       "openNow": true
     },
     {
-      "doorFast": 0.22575069882208995,
-      "openNow": false
+      "doorFast": 0.116631163444513,
+      "openNow": true
     },
     {
-      "doorFast": 0.20120942851443763,
-      "openNow": false
+      "doorFast": 0.13118230383688337,
+      "openNow": true
     },
     {
-      "doorFast": 0.24811841419476657,
-      "openNow": false
+      "doorFast": 0.19816286110753376,
+      "openNow": true
     },
     {
-      "doorFast": 0.24293223883050505,
-      "openNow": false
+      "doorFast": 0.19764969336238336,
+      "openNow": true
     },
     {
-      "doorFast": 0.2209127318133598,
-      "openNow": false
+      "doorFast": 0.11121381421559151,
+      "openNow": true
     },
     {
-      "doorFast": 0.211179076193682,
+      "doorFast": 0.11176739665726051,
       "openNow": false
     },
     {
-      "doorFast": 0.1832798818001718,
+      "doorFast": 0.1233759872270003,
       "openNow": false
     },
     {
-      "doorFast": 0.17057480695964575,
+      "doorFast": 0.16550217818202898,
       "openNow": false
     },
     {
-      "doorFast": 0.19702280606967257,
+      "doorFast": 0.12724090621978373,
       "openNow": false
     },
     {
-      "doorFast": 0.16243914541286317,
+      "doorFast": 0.08347472875194772,
       "openNow": false
     },
     {
-      "doorFast": 0.1310281055346968,
+      "doorFast": 0.1094523099870714,
       "openNow": false
     },
     {
-      "doorFast": 0.12981856987486967,
+      "doorFast": 0.10632848199794304,
       "openNow": false
     },
     {
-      "doorFast": 0.14133686438729676,
+      "doorFast": 0.08898755214959467,
       "openNow": false
     },
     {
-      "doorFast": 0.19598787208835067,
+      "doorFast": 0.1288487443749214,
       "openNow": false
     },
     {
-      "doorFast": 0.16062962032331257,
-      "openNow": false
+      "doorFast": 0.15669354651538553,
+      "openNow": true
     },
     {
-      "doorFast": 0.21700320702675172,
-      "openNow": false
+      "doorFast": 0.1881949244286456,
+      "openNow": true
     },
     {
-      "doorFast": 0.20409661301838838,
-      "openNow": false
+      "doorFast": 0.14148685302787384,
+      "openNow": true
     },
     {
-      "doorFast": 0.1864140154154281,
-      "openNow": false
+      "doorFast": 0.21163886376841184,
+      "openNow": true
     },
     {
-      "doorFast": 0.16213281794475268,
-      "openNow": false
+      "doorFast": 0.18391374752598952,
+      "openNow": true
     },
     {
-      "doorFast": 0.19705014680972122,
-      "openNow": false
+      "doorFast": 0.18520646699375082,
+      "openNow": true
     },
     {
-      "doorFast": 0.1777006539758338,
-      "openNow": false
+      "doorFast": 0.19800686519874786,
+      "openNow": true
     },
     {
-      "doorFast": 0.13926231342240392,
-      "openNow": false
+      "doorFast": 0.16650178489317394,
+      "openNow": true
     },
     {
-      "doorFast": 0.16942616951755712,
-      "openNow": false
+      "doorFast": 0.14539375332373436,
+      "openNow": true
     },
     {
-      "doorFast": 0.18442102367316057,
-      "openNow": false
+      "doorFast": 0.127035141111829,
+      "openNow": true
     },
     {
-      "doorFast": 0.19999868994813078,
-      "openNow": false
+      "doorFast": 0.11966018338640147,
+      "openNow": true
     },
     {
-      "doorFast": 0.22609132722153136,
+      "doorFast": 0.14316986852407823,
       "openNow": false
     },
     {
-      "doorFast": 0.20314466899655145,
-      "openNow": false
+      "doorFast": 0.16492213890858845,
+      "openNow": true
     },
     {
-      "doorFast": 0.1458514728347715,
+      "doorFast": 0.09096647307538469,
       "openNow": false
     },
     {
-      "doorFast": 0.1965434244355157,
+      "doorFast": 0.08278637443176184,
       "openNow": false
     },
     {
-      "doorFast": 0.18763422175068678,
+      "doorFast": 0.10677448578810361,
       "openNow": false
     },
     {
-      "doorFast": 0.1729350638762122,
+      "doorFast": 0.2159496556377898,
       "openNow": false
     },
     {
-      "doorFast": 0.24267330413632365,
+      "doorFast": 0.20633880612924999,
       "openNow": false
     },
     {
-      "doorFast": 0.22682778904203788,
+      "doorFast": 0.1831164726894819,
       "openNow": false
     },
     {
-      "doorFast": 0.2423012040185511,
+      "doorFast": 0.1425038475619518,
       "openNow": false
     },
     {
-      "doorFast": 0.2644234734311695,
+      "doorFast": 0.1546467521337327,
       "openNow": false
     },
     {
-      "doorFast": 0.16233779859402778,
+      "doorFast": 0.17572994670144307,
       "openNow": false
     },
     {
-      "doorFast": 0.2315285026768034,
+      "doorFast": 0.14121007260877871,
       "openNow": false
     },
     {
-      "doorFast": 0.2558062232336692,
+      "doorFast": 0.08398630794430505,
       "openNow": false
     },
     {
-      "doorFast": 0.3188064811532574,
-      "openNow": false
+      "doorFast": 0.07153117245568177,
+      "openNow": true
     },
     {
-      "doorFast": 0.349507447926228,
-      "openNow": false
+      "doorFast": 0.12636306825549326,
+      "openNow": true
     },
     {
-      "doorFast": 0.27419442348314005,
+      "doorFast": 0.13330171676472521,
       "openNow": false
     },
     {
-      "doorFast": 0.2762244825928707,
+      "doorFast": 0.16709534495764117,
       "openNow": false
     },
     {
-      "doorFast": 0.30227873159392527,
+      "doorFast": 0.14014083533473926,
       "openNow": false
     },
     {
-      "doorFast": 0.25722731877044935,
+      "doorFast": 0.21012718004846256,
       "openNow": false
     },
     {
-      "doorFast": 0.28673835580038276,
+      "doorFast": 0.22251758721549178,
       "openNow": false
     },
     {
-      "doorFast": 0.20802306973745752,
+      "doorFast": 0.15675850550952772,
       "openNow": false
     },
     {
-      "doorFast": 0.35993631327292663,
+      "doorFast": 0.09173858530844102,
       "openNow": false
     },
     {
-      "doorFast": 0.32882978577321836,
+      "doorFast": 0.14125678415836193,
       "openNow": false
     },
     {
-      "doorFast": 0.2882156268234028,
+      "doorFast": 0.14269019018998716,
       "openNow": false
     },
     {
-      "doorFast": 0.2710492138359519,
+      "doorFast": 0.18262038278371417,
       "openNow": false
     },
     {
-      "doorFast": 0.24323129149064004,
+      "doorFast": 0.19295055248804,
       "openNow": false
     },
     {
-      "doorFast": 0.21511152052020685,
+      "doorFast": 0.12406111264397875,
       "openNow": false
     },
     {
-      "doorFast": 0.1526412589182356,
+      "doorFast": 0.12892599350348438,
       "openNow": false
-    },
-    {
-      "doorFast": 0.18286377700551892,
-      "openNow": true
-    },
-    {
-      "doorFast": 0.1774501868391897,
-      "openNow": true
     },
     {
-      "doorFast": 0.23595782900645576,
-      "openNow": true
-    },
-    {
-      "doorFast": 0.24026751172748162,
-      "openNow": true
-    },
-    {
-      "doorFast": 0.22394462620061467,
-      "openNow": true
-    },
-    {
-      "doorFast": 0.14607484060588824,
-      "openNow": true
-    },
-    {
-      "doorFast": 0.28980995080194893,
-      "openNow": true
+      "doorFast": 0.12641814243129168,
+      "openNow": false
     },
     {
-      "doorFast": 0.2695222023449706,
-      "openNow": true
+      "doorFast": 0.18806971996431218,
+      "openNow": false
     },
     {
-      "doorFast": 0.17451545059979934,
-      "openNow": true
+      "doorFast": 0.21832963461991647,
+      "openNow": false
     },
     {
-      "doorFast": 0.23161422300136686,
-      "openNow": true
+      "doorFast": 0.18498104754553107,
+      "openNow": false
     },
     {
-      "doorFast": 0.23502259019777424,
+      "doorFast": 0.19325253032403356,
       "openNow": false
     },
     {
-      "doorFast": 0.3211328973279332,
+      "doorFast": 0.20118778657283332,
       "openNow": false
     },
     {
-      "doorFast": 0.27724165436312026,
+      "doorFast": 0.19741551280028993,
       "openNow": false
     },
     {
-      "doorFast": 0.23120380796952103,
-      "openNow": true
+      "doorFast": 0.20307411279087878,
+      "openNow": false
     },
     {
-      "doorFast": 0.19833280613179016,
-      "openNow": true
+      "doorFast": 0.256726122600689,
+      "openNow": false
     },
     {
-      "doorFast": 0.1416518161655937,
-      "openNow": true
+      "doorFast": 0.16967332791236447,
+      "openNow": false
     },
     {
-      "doorFast": 0.20113846549806177,
-      "openNow": true
+      "doorFast": 0.16032915033356415,
+      "openNow": false
     },
     {
-      "doorFast": 0.24401712882129414,
-      "openNow": true
+      "doorFast": 0.14795852192190967,
+      "openNow": false
     },
     {
-      "doorFast": 0.2304605847747329,
-      "openNow": true
+      "doorFast": 0.1295139936619236,
+      "openNow": false
     },
     {
-      "doorFast": 0.1881563219358447,
-      "openNow": true
+      "doorFast": 0.13864542625197426,
+      "openNow": false
     },
     {
-      "doorFast": 0.21875733543226225,
-      "openNow": true
+      "doorFast": 0.20971995000563418,
+      "openNow": false
     },
     {
-      "doorFast": 0.11964173618966253,
-      "openNow": true
+      "doorFast": 0.2533273337172837,
+      "openNow": false
     },
     {
-      "doorFast": 0.10970646694510641,
-      "openNow": true
+      "doorFast": 0.26979194961598835,
+      "openNow": false
     },
     {
-      "doorFast": 0.22333472165880272,
-      "openNow": true
+      "doorFast": 0.19453009379979508,
+      "openNow": false
     },
     {
-      "doorFast": 0.20182001924285634,
-      "openNow": true
+      "doorFast": 0.18484676661368324,
+      "openNow": false
     },
     {
-      "doorFast": 0.24677000596763052,
-      "openNow": true
+      "doorFast": 0.214192589542233,
+      "openNow": false
     },
     {
-      "doorFast": 0.17422736995546464,
-      "openNow": true
+      "doorFast": 0.21691523288441708,
+      "openNow": false
     },
     {
-      "doorFast": 0.15621700028170635,
-      "openNow": true
+      "doorFast": 0.22487241042553488,
+      "openNow": false
     },
     {
-      "doorFast": 0.11150751125071391,
-      "openNow": true
+      "doorFast": 0.27517531345796103,
+      "openNow": false
     },
     {
-      "doorFast": 0.12271522378458756,
-      "openNow": true
+      "doorFast": 0.22380647173676313,
+      "openNow": false
     },
     {
-      "doorFast": 0.15920233346045665,
+      "doorFast": 0.20573871915160147,
       "openNow": false
     },
     {
-      "doorFast": 0.1568515971383904,
+      "doorFast": 0.18887536664011106,
       "openNow": false
     },
     {
-      "doorFast": 0.2089546113060173,
+      "doorFast": 0.17643791739899126,
       "openNow": false
     },
     {
-      "doorFast": 0.14499058023001882,
+      "doorFast": 0.17574744954970975,
       "openNow": false
     },
     {
-      "doorFast": 0.13629516222436777,
+      "doorFast": 0.13541615242729618,
       "openNow": false
     },
     {
-      "doorFast": 0.09887516298554438,
+      "doorFast": 0.13609072528347907,
       "openNow": false
     },
     {
-      "doorFast": 0.11335892596758497,
+      "doorFast": 0.19345868950505837,
       "openNow": false
     },
     {
-      "doorFast": 0.12243258934068647,
+      "doorFast": 0.26123439187358893,
       "openNow": false
     },
     {
-      "doorFast": 0.11938839858251696,
+      "doorFast": 0.18519482745508,
       "openNow": false
     },
     {
-      "doorFast": 0.1216602150597742,
+      "doorFast": 0.3954342113272382,
       "openNow": false
     },
     {
-      "doorFast": 0.09359962936176282,
+      "doorFast": 0.42840717491323416,
       "openNow": false
     },
     {
-      "doorFast": 0.09121943499954628,
+      "doorFast": 0.3396930422892708,
       "openNow": false
     },
     {
-      "doorFast": 0.12754305024853604,
+      "doorFast": 0.3593365861604903,
       "openNow": false
     },
     {
-      "doorFast": 0.21002409005438316,
+      "doorFast": 0.37656405208562665,
       "openNow": false
     },
     {
-      "doorFast": 0.22697038787555585,
+      "doorFast": 0.274574616771511,
       "openNow": false
     },
     {
-      "doorFast": 0.1462990050180959,
+      "doorFast": 0.22513648627998725,
       "openNow": false
     },
     {
-      "doorFast": 0.1423590457648977,
+      "doorFast": 0.2246345986887444,
       "openNow": false
     },
     {
-      "doorFast": 0.10701097720751455,
+      "doorFast": 0.2589226448404535,
       "openNow": false
     },
     {
-      "doorFast": 0.11621315796342921,
+      "doorFast": 0.25687520139597475,
       "openNow": false
     },
     {
-      "doorFast": 0.0860457850349669,
+      "doorFast": 0.28362788717060006,
       "openNow": false
     },
     {
-      "doorFast": 0.12438056589624197,
+      "doorFast": 0.2831159882161866,
       "openNow": false
     },
     {
-      "doorFast": 0.1560136383374359,
+      "doorFast": 0.22392380237762374,
       "openNow": false
     },
     {
-      "doorFast": 0.13276576763874254,
+      "doorFast": 0.21849507195959453,
       "openNow": false
     },
     {
-      "doorFast": 0.19593855592450402,
+      "doorFast": 0.22845650259031938,
       "openNow": false
     },
     {
-      "doorFast": 0.23164434284702107,
-      "openNow": false
+      "doorFast": 0.23572616923283804,
+      "openNow": true
     },
     {
-      "doorFast": 0.21455673265863634,
-      "openNow": false
+      "doorFast": 0.15732333217889582,
+      "openNow": true
     },
     {
-      "doorFast": 0.262761383583259,
+      "doorFast": 0.21771125335311273,
       "openNow": false
     },
     {
-      "doorFast": 0.16539527002644994,
+      "doorFast": 0.18543045256577545,
       "openNow": false
     },
     {
-      "doorFast": 0.1545222126763274,
+      "doorFast": 0.2028661207451631,
       "openNow": false
     },
     {
-      "doorFast": 0.15614713254506482,
+      "doorFast": 0.17735463831303153,
       "openNow": false
     },
     {
-      "doorFast": 0.15046727716153185,
+      "doorFast": 0.11015117148063902,
       "openNow": false
     },
     {
-      "doorFast": 0.22812892439322363,
+      "doorFast": 0.09652351882654035,
       "openNow": false
     },
     {
-      "doorFast": 0.17855632481457823,
-      "openNow": true
+      "doorFast": 0.10256354782295153,
+      "openNow": false
     },
     {
-      "doorFast": 0.15917229141309963,
+      "doorFast": 0.08008117837523818,
       "openNow": true
     },
     {
-      "doorFast": 0.1428016492551481,
+      "doorFast": 0.12767305429923861,
       "openNow": true
     },
     {
-      "doorFast": 0.16674983090129972,
+      "doorFast": 0.16685790041408347,
       "openNow": true
     },
     {
-      "doorFast": 0.1489737079591346,
+      "doorFast": 0.13069217501181582,
       "openNow": true
     },
     {
-      "doorFast": 0.09911353512048432,
+      "doorFast": 0.12592084008712862,
       "openNow": true
     },
     {
-      "doorFast": 0.12331967841921272,
+      "doorFast": 0.12910810219483046,
       "openNow": true
     },
     {
-      "doorFast": 0.13973879495422026,
+      "doorFast": 0.16850271868661187,
       "openNow": true
     },
     {
-      "doorFast": 0.12115979078395855,
+      "doorFast": 0.17666328891009497,
       "openNow": true
     },
     {
-      "doorFast": 0.14004986545180692,
+      "doorFast": 0.14620517703318828,
       "openNow": true
     },
     {
-      "doorFast": 0.18092425742810597,
+      "doorFast": 0.22367916818153924,
       "openNow": true
     },
     {
-      "doorFast": 0.151829702492322,
-      "openNow": true
+      "doorFast": 0.2673651473880688,
+      "openNow": false
     },
     {
-      "doorFast": 0.22084937590507356,
-      "openNow": true
+      "doorFast": 0.28818453778953557,
+      "openNow": false
     },
     {
-      "doorFast": 0.24587607361615574,
-      "openNow": true
+      "doorFast": 0.2880879466160492,
+      "openNow": false
     },
     {
-      "doorFast": 0.29851394076954024,
+      "doorFast": 0.1690156076628586,
       "openNow": false
     },
     {
-      "doorFast": 0.2430125215079609,
-      "openNow": false
+      "doorFast": 0.14666621503135152,
+      "openNow": true
     },
     {
-      "doorFast": 0.20995847421492841,
+      "doorFast": 0.13804277735193307,
       "openNow": true
     },
     {
-      "doorFast": 0.20844523043641558,
+      "doorFast": 0.19566975864347205,
       "openNow": true
     },
     {
-      "doorFast": 0.15047499788235927,
+      "doorFast": 0.2270371543962775,
       "openNow": true
     },
     {
-      "doorFast": 0.20106131121031343,
+      "doorFast": 0.24179034641875832,
       "openNow": false
     },
     {
-      "doorFast": 0.2350639707627507,
+      "doorFast": 0.23287267487660784,
       "openNow": false
     },
     {
-      "doorFast": 0.26071025626525984,
+      "doorFast": 0.24743963393752655,
       "openNow": false
     },
     {
-      "doorFast": 0.21824614447907575,
+      "doorFast": 0.22517509948702732,
       "openNow": false
     },
     {
-      "doorFast": 0.2348813128641314,
+      "doorFast": 0.23967797700641,
       "openNow": false
     },
     {
-      "doorFast": 0.2884130590152617,
+      "doorFast": 0.30484858875512294,
       "openNow": true
     },
     {
-      "doorFast": 0.28568803157223965,
-      "openNow": true
+      "doorFast": 0.30510075207228393,
+      "openNow": false
     },
     {
-      "doorFast": 0.27891426924053325,
-      "openNow": true
+      "doorFast": 0.24621604186186186,
+      "openNow": false
     },
     {
-      "doorFast": 0.2396598134080168,
+      "doorFast": 0.22416791824661148,
       "openNow": true
     },
     {
-      "doorFast": 0.22447693101242178,
+      "doorFast": 0.21251226767985465,
       "openNow": true
     },
     {
-      "doorFast": 0.2410129531706051,
+      "doorFast": 0.2710692336129698,
       "openNow": true
     },
     {
-      "doorFast": 0.22207355059923475,
+      "doorFast": 0.22942671572823856,
       "openNow": true
     },
     {
-      "doorFast": 0.1720596856799999,
+      "doorFast": 0.20326068269127578,
       "openNow": true
     },
     {
-      "doorFast": 0.17902605322984527,
+      "doorFast": 0.18213079229735357,
       "openNow": true
     },
     {
-      "doorFast": 0.179115056702403,
+      "doorFast": 0.24495337239650136,
       "openNow": true
     },
     {
-      "doorFast": 0.1506033348741662,
+      "doorFast": 0.27396589299782675,
       "openNow": true
     },
     {
-      "doorFast": 0.1746350428000434,
+      "doorFast": 0.29631340870058703,
       "openNow": true
     },
     {
-      "doorFast": 0.14530062105348324,
+      "doorFast": 0.2548828019468048,
       "openNow": true
     },
     {
-      "doorFast": 0.14537138547251505,
+      "doorFast": 0.2417278554255726,
       "openNow": true
     },
     {
-      "doorFast": 0.07115253686967889,
+      "doorFast": 0.19301688875261322,
       "openNow": true
     },
     {
-      "doorFast": 0.10429472255488241,
+      "doorFast": 0.1755092536031007,
       "openNow": true
     },
     {
-      "doorFast": 0.13751962283561253,
-      "openNow": true
+      "doorFast": 0.17024460002915787,
+      "openNow": false
     },
     {
-      "doorFast": 0.13478606146769895,
-      "openNow": true
+      "doorFast": 0.16108735248703035,
+      "openNow": false
     },
     {
-      "doorFast": 0.14749675049660926,
-      "openNow": true
+      "doorFast": 0.14127763117472536,
+      "openNow": false
     },
     {
-      "doorFast": 0.14795708425073606,
-      "openNow": true
+      "doorFast": 0.1323786969405051,
+      "openNow": false
     },
     {
-      "doorFast": 0.1933339386218087,
+      "doorFast": 0.13039366728091872,
       "openNow": true
     },
     {
-      "doorFast": 0.11953197499974068,
+      "doorFast": 0.13307674026120891,
       "openNow": true
     },
     {
-      "doorFast": 0.11591338914938226,
+      "doorFast": 0.24101753436315687,
       "openNow": true
     },
     {
-      "doorFast": 0.1603027318347186,
-      "openNow": true
+      "doorFast": 0.21909080917118498,
+      "openNow": false
     },
     {
-      "doorFast": 0.1610187256791618,
-      "openNow": true
+      "doorFast": 0.14626772217193948,
+      "openNow": false
     },
     {
-      "doorFast": 0.14965750270706948,
+      "doorFast": 0.18500846047576597,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.1719389613974138,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.13256374851723066,
+      "openNow": false
+    },
+    {
+      "doorFast": 0.149489129274322,
       "openNow": true
     },
     {
-      "doorFast": 0.15246823110456814,
+      "doorFast": 0.18316140396211908,
       "openNow": true
     },
     {
-      "doorFast": 0.12775633331161823,
+      "doorFast": 0.15942135581226383,
       "openNow": true
     },
     {
-      "doorFast": 0.1223144273494268,
+      "doorFast": 0.14551241666351694,
       "openNow": true
     },
     {
-      "doorFast": 0.16044107245133823,
+      "doorFast": 0.09227373579687928,
       "openNow": true
     },
     {
-      "doorFast": 0.20062530922764413,
+      "doorFast": 0.11446704963800956,
       "openNow": true
     },
     {
-      "doorFast": 0.23207196341469857,
-      "openNow": false
+      "doorFast": 0.1525750293065329,
+      "openNow": true
     },
     {
-      "doorFast": 0.1973999069845312,
-      "openNow": false
+      "doorFast": 0.27136087616173277,
+      "openNow": true
     },
     {
-      "doorFast": 0.17890327795896135,
-      "openNow": false
+      "doorFast": 0.25591913648955916,
+      "openNow": true
     },
     {
-      "doorFast": 0.21079716849086513,
-      "openNow": false
+      "doorFast": 0.16567622839513899,
+      "openNow": true
     },
     {
-      "doorFast": 0.1580112071448626,
-      "openNow": false
+      "doorFast": 0.16479672507325308,
+      "openNow": true
     },
     {
-      "doorFast": 0.15444662665717995,
-      "openNow": false
+      "doorFast": 0.13996550628695464,
+      "openNow": true
     },
     {
-      "doorFast": 0.11806592261093418,
-      "openNow": false
+      "doorFast": 0.18672195097297659,
+      "openNow": true
     },
     {
-      "doorFast": 0.1895470916791468,
-      "openNow": false
+      "doorFast": 0.10358991348943726,
+      "openNow": true
     },
     {
-      "doorFast": 0.3136022312058572,
-      "openNow": false
+      "doorFast": 0.1377884086704227,
+      "openNow": true
     },
     {
-      "doorFast": 0.33582924844752726,
-      "openNow": false
+      "doorFast": 0.16305553417706867,
+      "openNow": true
     },
     {
-      "doorFast": 0.25158194895210484,
-      "openNow": false
+      "doorFast": 0.19903828675881463,
+      "openNow": true
     },
     {
-      "doorFast": 0.2633075615853372,
-      "openNow": false
+      "doorFast": 0.22485290466212093,
+      "openNow": true
     },
     {
-      "doorFast": 0.48289078936695556,
-      "openNow": false
+      "doorFast": 0.23407989740722387,
+      "openNow": true
     },
     {
-      "doorFast": 0.5826518729055364,
-      "openNow": false
+      "doorFast": 0.2307623338738051,
+      "openNow": true
     },
     {
-      "doorFast": 0.3200552770866397,
+      "doorFast": 0.08273653409824308,
       "openNow": false
     },
     {
-      "doorFast": 0.3194777465356988,
+      "doorFast": 0.16355766877872271,
       "openNow": false
     },
     {
-      "doorFast": 0.32536527004722043,
+      "doorFast": 0.1679796008195963,
       "openNow": false
     },
     {
-      "doorFast": 0.24815193848732653,
+      "doorFast": 0.18271822620577624,
       "openNow": false
     },
     {
-      "doorFast": 0.23352254810012146,
+      "doorFast": 0.13381894002388728,
       "openNow": false
     },
     {
-      "doorFast": 0.23692253012698444,
+      "doorFast": 0.15026597438702186,
       "openNow": false
     },
     {
-      "doorFast": 0.21338523675085683,
+      "doorFast": 0.17102698876755484,
       "openNow": false
     },
     {
-      "doorFast": 0.1879403048661444,
+      "doorFast": 0.1439241051151651,
       "openNow": false
     },
     {
-      "doorFast": 0.12002567454474362,
+      "doorFast": 0.194035685873611,
       "openNow": false
     },
     {
-      "doorFast": 0.1071208230131005,
+      "doorFast": 0.171211855491065,
       "openNow": false
     },
     {
-      "doorFast": 0.11056948776741791,
+      "doorFast": 0.20352967990201876,
       "openNow": false
     },
     {
-      "doorFast": 0.1286743499897043,
+      "doorFast": 0.281226509001814,
       "openNow": false
     },
     {
-      "doorFast": 0.18067661037795477,
+      "doorFast": 0.24838448884926345,
       "openNow": false
     },
     {
-      "doorFast": 0.15250678412671906,
+      "doorFast": 0.20667119867809502,
       "openNow": false
     },
     {
-      "doorFast": 0.23718112265891228,
+      "doorFast": 0.14738857288009097,
       "openNow": false
     },
     {
-      "doorFast": 0.2281144073231686,
+      "doorFast": 0.1646664678541344,
       "openNow": false
     },
     {
-      "doorFast": 0.18530846245453997,
+      "doorFast": 0.16874873530275933,
       "openNow": false
     },
     {
-      "doorFast": 0.1751388071869801,
+      "doorFast": 0.17273410967452807,
       "openNow": false
     },
     {
-      "doorFast": 0.17658377736495143,
+      "doorFast": 0.21349801438922128,
       "openNow": false
     },
     {
-      "doorFast": 0.16722435775213657,
+      "doorFast": 0.22311743015418928,
       "openNow": false
     },
     {
-      "doorFast": 0.2594384571240654,
+      "doorFast": 0.17094665719818056,
       "openNow": false
     },
     {
-      "doorFast": 0.28178821822659844,
+      "doorFast": 0.13805183777477328,
       "openNow": false
     },
     {
-      "doorFast": 0.24776663060890897,
+      "doorFast": 0.07203065878459351,
       "openNow": false
     },
     {
-      "doorFast": 0.17994015773305105,
+      "doorFast": 0.08459433914869767,
       "openNow": false
     },
     {
-      "doorFast": 0.10122874759492709,
+      "doorFast": 0.16089236391321235,
       "openNow": false
     },
     {
-      "doorFast": 0.10772846130206422,
+      "doorFast": 0.1522702962385334,
       "openNow": false
     },
     {
-      "doorFast": 0.08587912099263816,
-      "openNow": true
+      "doorFast": 0.2141244364378359,
+      "openNow": false
     },
     {
-      "doorFast": 0.09482411411373275,
-      "openNow": true
+      "doorFast": 0.13228782296957145,
+      "openNow": false
     },
     {
-      "doorFast": 0.09304189942625633,
-      "openNow": true
+      "doorFast": 0.14684589570097323,
+      "openNow": false
     },
     {
-      "doorFast": 0.13717979440140335,
-      "openNow": true
+      "doorFast": 0.17909247908779888,
+      "openNow": false
     },
     {
-      "doorFast": 0.24300828584983164,
-      "openNow": true
+      "doorFast": 0.20456241070022313,
+      "openNow": false
     },
     {
-      "doorFast": 0.24426323365384434,
-      "openNow": true
+      "doorFast": 0.19057534787951252,
+      "openNow": false
     },
     {
-      "doorFast": 0.21395366192551005,
-      "openNow": true
+      "doorFast": 0.22410014068383527,
+      "openNow": false
     },
     {
-      "doorFast": 0.13030199465583228,
+      "doorFast": 0.21013615718081805,
       "openNow": false
     },
     {
-      "doorFast": 0.1290881116210869,
+      "doorFast": 0.22454629894141434,
       "openNow": false
     },
     {
-      "doorFast": 0.12086361510495978,
+      "doorFast": 0.22184137880306182,
       "openNow": false
     },
     {
-      "doorFast": 0.17886815479910628,
+      "doorFast": 0.19731219732109523,
       "openNow": false
     },
     {
-      "doorFast": 0.1740639417434044,
+      "doorFast": 0.1676534236905638,
       "openNow": false
     },
     {
-      "doorFast": 0.10081659982883792,
+      "doorFast": 0.1665217747389976,
       "openNow": false
     },
     {
-      "doorFast": 0.12312838521225641,
+      "doorFast": 0.18587343447667423,
       "openNow": false
     },
     {
-      "doorFast": 0.10397917052291043,
+      "doorFast": 0.1696334179133554,
       "openNow": false
     },
     {
-      "doorFast": 0.1858807813142276,
+      "doorFast": 0.16119343960710458,
       "openNow": false
     },
     {
-      "doorFast": 0.18636900918149252,
+      "doorFast": 0.15419217584835335,
       "openNow": false
     },
     {
-      "doorFast": 0.2688626579701222,
+      "doorFast": 0.15374333107671206,
       "openNow": false
     },
     {
-      "doorFast": 0.29508972557510654,
+      "doorFast": 0.1063508430297929,
       "openNow": false
     },
     {
-      "doorFast": 0.24969817294102853,
+      "doorFast": 0.1559047660891409,
       "openNow": false
     },
     {
-      "doorFast": 0.2089696060278396,
+      "doorFast": 0.14405801156910739,
       "openNow": false
     },
     {
-      "doorFast": 0.18810761353984146,
+      "doorFast": 0.17562040338901488,
       "openNow": false
     },
     {
-      "doorFast": 0.1850448061764608,
+      "doorFast": 0.16265980871279007,
       "openNow": false
     },
     {
-      "doorFast": 0.2087465205484062,
+      "doorFast": 0.11387746562803361,
       "openNow": false
     },
     {
-      "doorFast": 0.2496303513142801,
+      "doorFast": 0.15227751747642132,
       "openNow": false
     },
     {
-      "doorFast": 0.1944682073959519,
+      "doorFast": 0.14994230789872406,
       "openNow": false
     },
     {
-      "doorFast": 0.17339084370357327,
+      "doorFast": 0.18051059372175715,
       "openNow": false
     },
     {
-      "doorFast": 0.12004418258483145,
+      "doorFast": 0.15556301406773218,
       "openNow": false
     },
     {
-      "doorFast": 0.09013332904920246,
+      "doorFast": 0.1993894950955223,
       "openNow": false
     },
     {
-      "doorFast": 0.1595728717464723,
+      "doorFast": 0.2319088946211775,
       "openNow": false
     },
     {
-      "doorFast": 0.16225181961863278,
+      "doorFast": 0.22407845816508357,
       "openNow": false
     },
     {
-      "doorFast": 0.2310378627932267,
+      "doorFast": 0.22913665262710425,
       "openNow": false
     },
     {
-      "doorFast": 0.25550062288874903,
+      "doorFast": 0.20315418364797552,
       "openNow": false
     },
     {
-      "doorFast": 0.2820564634553202,
+      "doorFast": 0.16110733265631186,
       "openNow": false
     },
     {
-      "doorFast": 0.19089292184556825,
+      "doorFast": 0.12624869398819594,
       "openNow": false
     },
     {
-      "doorFast": 0.15992916461781634,
+      "doorFast": 0.12249080655141434,
       "openNow": false
     },
     {
-      "doorFast": 0.14890481778120812,
-      "openNow": false
+      "doorFast": 0.10501363917988324,
+      "openNow": true
     },
     {
-      "doorFast": 0.15180192085537736,
+      "doorFast": 0.1934348952069491,
       "openNow": false
     },
     {
-      "doorFast": 0.16716610869747014,
+      "doorFast": 0.19820182769607236,
       "openNow": false
     },
     {
-      "doorFast": 0.1879987114801438,
+      "doorFast": 0.1893036091243731,
       "openNow": false
     },
     {
-      "doorFast": 0.1955202845412964,
+      "doorFast": 0.15192821486682573,
       "openNow": false
     },
     {
-      "doorFast": 0.18766781854508868,
+      "doorFast": 0.15676373732433477,
       "openNow": false
     },
     {
-      "doorFast": 0.2464226727012224,
+      "doorFast": 0.1732422230202669,
       "openNow": false
     },
     {
-      "doorFast": 0.22099932356185928,
+      "doorFast": 0.16776914014606759,
       "openNow": false
     },
     {
-      "doorFast": 0.20119273477589747,
+      "doorFast": 0.1898043853175044,
       "openNow": false
     },
     {
-      "doorFast": 0.22104886960667053,
+      "doorFast": 0.18798282772185765,
       "openNow": false
     },
     {
-      "doorFast": 0.2003746084818836,
+      "doorFast": 0.29252436966498524,
       "openNow": false
     },
     {
-      "doorFast": 0.2097901558435257,
-      "openNow": true
+      "doorFast": 0.22477845182229794,
+      "openNow": false
     },
     {
-      "doorFast": 0.1625328320121446,
+      "doorFast": 0.1543371561203066,
       "openNow": true
     },
     {
-      "doorFast": 0.15085711222063347,
-      "openNow": true
+      "doorFast": 0.14084025997476712,
+      "openNow": false
     },
     {
-      "doorFast": 0.18736338062182153,
-      "openNow": true
+      "doorFast": 0.1916098827211189,
+      "openNow": false
     },
     {
-      "doorFast": 0.20559123535417143,
+      "doorFast": 0.19341680006653977,
       "openNow": true
     },
     {
-      "doorFast": 0.24997357599783734,
+      "doorFast": 0.14425371091213668,
       "openNow": true
     },
     {
-      "doorFast": 0.2576669289064459,
+      "doorFast": 0.1862248985746446,
       "openNow": true
     },
     {
-      "doorFast": 0.2368396449493999,
+      "doorFast": 0.23383892869552728,
       "openNow": true
     },
     {
-      "doorFast": 0.1894156736360786,
+      "doorFast": 0.2719581023111442,
       "openNow": true
     },
     {
-      "doorFast": 0.12210773436221814,
+      "doorFast": 0.28190540293412175,
       "openNow": true
     },
     {
-      "doorFast": 0.15817372764099413,
+      "doorFast": 0.21759712266226935,
       "openNow": true
     },
     {
-      "doorFast": 0.17735367516923609,
+      "doorFast": 0.21157754401482645,
       "openNow": true
     },
     {
-      "doorFast": 0.13891406302463086,
+      "doorFast": 0.1774915215251288,
       "openNow": true
     },
     {
-      "doorFast": 0.16334458098347857,
+      "doorFast": 0.19763094430694522,
       "openNow": true
     },
     {
-      "doorFast": 0.16470989788096352,
+      "doorFast": 0.16207284885632176,
       "openNow": true
     },
     {
-      "doorFast": 0.19433810287835832,
+      "doorFast": 0.15755053971624453,
       "openNow": true
     },
     {
-      "doorFast": 0.1585758847680949,
+      "doorFast": 0.16151984088380883,
       "openNow": true
     },
     {
-      "doorFast": 0.15555086085830563,
+      "doorFast": 0.12913794973966483,
       "openNow": true
     },
     {
-      "doorFast": 0.12646140928732988,
+      "doorFast": 0.17499131653881517,
       "openNow": false
     },
     {
-      "doorFast": 0.2126694044497273,
+      "doorFast": 0.18851317899610184,
       "openNow": false
     },
     {
-      "doorFast": 0.20134076150109234,
+      "doorFast": 0.19201539117955307,
       "openNow": false
-    },
-    {
-      "doorFast": 0.22467583557252885,
-      "openNow": true
     },
     {
-      "doorFast": 0.2349945379835576,
+      "doorFast": 0.1681323174856759,
       "openNow": true
-    },
-    {
-      "doorFast": 0.16941372566338905,
-      "openNow": false
-    },
-    {
-      "doorFast": 0.1972474697301639,
-      "openNow": false
     },
     {
-      "doorFast": 0.20987915643995012,
+      "doorFast": 0.13080176850625516,
       "openNow": false
     },
     {
-      "doorFast": 0.15215513717695808,
+      "doorFast": 0.12016523569654237,
       "openNow": false
     },
     {
-      "doorFast": 0.14137537800310784,
+      "doorFast": 0.17420975190437943,
       "openNow": false
     },
     {
-      "doorFast": 0.14483079576852706,
+      "doorFast": 0.2116302832892579,
       "openNow": false
     },
     {
-      "doorFast": 0.21369053794678525,
+      "doorFast": 0.23825438253168513,
       "openNow": false
     },
     {
-      "doorFast": 0.20115878040993287,
+      "doorFast": 0.22622381787078466,
       "openNow": false
     },
     {
-      "doorFast": 0.15903275106992149,
+      "doorFast": 0.22620304922982157,
       "openNow": false
     },
     {
-      "doorFast": 0.11224694121524748,
+      "doorFast": 0.120611236368495,
       "openNow": false
     },
     {
-      "doorFast": 0.09716581515756566,
+      "doorFast": 0.10047176946478152,
       "openNow": false
     },
     {
-      "doorFast": 0.13793970396506564,
+      "doorFast": 0.14230153098453993,
       "openNow": false
     },
     {
-      "doorFast": 0.15503978802764987,
+      "doorFast": 0.15538107663311476,
       "openNow": false
     },
     {
-      "doorFast": 0.16785163502410505,
+      "doorFast": 0.16799090067723024,
       "openNow": false
     },
     {
-      "doorFast": 0.11814212915766388,
+      "doorFast": 0.15853657508735677,
       "openNow": false
     },
     {
-      "doorFast": 0.11742490702873955,
+      "doorFast": 0.19587223697626344,
       "openNow": false
     },
     {
-      "doorFast": 0.04984365277808007,
+      "doorFast": 0.21475386026473373,
       "openNow": false
     },
     {
-      "doorFast": 0.11407692844646217,
+      "doorFast": 0.2473402376329419,
       "openNow": false
     },
     {
-      "doorFast": 0.1471372365471382,
+      "doorFast": 0.23491339658834295,
       "openNow": false
     },
     {
-      "doorFast": 0.19146761816698993,
+      "doorFast": 0.21925738034400616,
       "openNow": false
     },
     {
-      "doorFast": 0.17546758506785187,
-      "openNow": false
+      "doorFast": 0.21085312816461282,
+      "openNow": true
     },
     {
-      "doorFast": 0.12825161470736385,
-      "openNow": false
+      "doorFast": 0.18221762822164073,
+      "openNow": true
     },
     {
-      "doorFast": 0.15327002252950636,
-      "openNow": false
+      "doorFast": 0.13339022855601065,
+      "openNow": true
     },
     {
-      "doorFast": 0.1600839304110201,
-      "openNow": false
+      "doorFast": 0.010609291435931369,
+      "openNow": true
     },
     {
-      "doorFast": 0.13782667433841955,
+      "doorFast": 0.05402023545659888,
       "openNow": true
     },
     {
-      "doorFast": 0.11076277657162525,
+      "doorFast": 0.1227998731318669,
       "openNow": true
     },
     {
-      "doorFast": 0.13842011904674267,
+      "doorFast": 0.17726144712171843,
       "openNow": false
     },
     {
-      "doorFast": 0.11717007900427522,
+      "doorFast": 0.1753360366407347,
       "openNow": false
     },
     {
-      "doorFast": 0.11835887303246205,
+      "doorFast": 0.14954393579385578,
       "openNow": false
     },
     {
-      "doorFast": 0.08090569705548513,
+      "doorFast": 0.18517677417256498,
       "openNow": false
     },
     {
-      "doorFast": 0.15937256491175283,
+      "doorFast": 0.06890657156550707,
       "openNow": false
     },
     {
-      "doorFast": 0.17288160614127013,
-      "openNow": false
+      "doorFast": 0.13556248518383734,
+      "openNow": true
     },
     {
-      "doorFast": 0.1365636612356527,
-      "openNow": false
+      "doorFast": 0.14017300202572483,
+      "openNow": true
     },
     {
-      "doorFast": 0.17280677658386015,
-      "openNow": false
+      "doorFast": 0.13371234082964373,
+      "openNow": true
     },
     {
-      "doorFast": 0.20534228028513257,
-      "openNow": false
+      "doorFast": 0.11959652477182349,
+      "openNow": true
     },
     {
-      "doorFast": 0.1398259226577423,
-      "openNow": false
+      "doorFast": 0.20563555902110084,
+      "openNow": true
     },
     {
-      "doorFast": 0.14343996305048815,
-      "openNow": false
+      "doorFast": 0.22141855165161656,
+      "openNow": true
     },
     {
-      "doorFast": 0.16895252545642647,
-      "openNow": false
+      "doorFast": 0.21055715909044356,
+      "openNow": true
     },
     {
-      "doorFast": 0.20538770353548166,
-      "openNow": false
+      "doorFast": 0.21099012208466164,
+      "openNow": true
     },
     {
-      "doorFast": 0.1929465226651346,
-      "openNow": false
+      "doorFast": 0.16891370436862974,
+      "openNow": true
     },
     {
-      "doorFast": 0.16999290763581776,
-      "openNow": false
+      "doorFast": 0.1667279937092358,
+      "openNow": true
     },
     {
-      "doorFast": 0.17994306846870117,
-      "openNow": false
+      "doorFast": 0.2079005544685904,
+      "openNow": true
     },
     {
-      "doorFast": 0.15183495569805838,
-      "openNow": false
+      "doorFast": 0.1981709564560326,
+      "openNow": true
     },
     {
-      "doorFast": 0.12159571960447069,
-      "openNow": false
+      "doorFast": 0.16524666889252101,
+      "openNow": true
     },
     {
-      "doorFast": 0.037309461689725786,
-      "openNow": false
+      "doorFast": 0.19748768965998048,
+      "openNow": true
     },
     {
-      "doorFast": 0.15813374077085768,
-      "openNow": false
+      "doorFast": 0.07484171665513648,
+      "openNow": true
     },
     {
-      "doorFast": 0.1844375653903582,
-      "openNow": false
+      "doorFast": 0.09967250283665408,
+      "openNow": true
     },
     {
-      "doorFast": 0.18481943971411602,
-      "openNow": false
+      "doorFast": 0.19336058855574556,
+      "openNow": true
     },
     {
-      "doorFast": 0.16922840200174474,
-      "openNow": false
+      "doorFast": 0.16158672072962127,
+      "openNow": true
     },
     {
-      "doorFast": 0.16772768823249176,
-      "openNow": false
+      "doorFast": 0.143832598877268,
+      "openNow": true
     },
     {
-      "doorFast": 0.10226065640233782,
-      "openNow": false
+      "doorFast": 0.16349641034634788,
+      "openNow": true
     },
     {
-      "doorFast": 0.08827201965533714,
-      "openNow": false
+      "doorFast": 0.19053024991823225,
+      "openNow": true
     },
     {
-      "doorFast": 0.1748141308312408,
-      "openNow": false
+      "doorFast": 0.14827294942271033,
+      "openNow": true
+    },
+    {
+      "doorFast": 0.17255757142409556,
+      "openNow": true
     },
     {
-      "doorFast": 0.1752477346694486,
+      "doorFast": 0.1316659016236007,
       "openNow": false
     },
     {
-      "doorFast": 0.26237365039468175,
+      "doorFast": 0.12310380070490126,
       "openNow": false
     },
     {
-      "doorFast": 0.2629645711865647,
+      "doorFast": 0.11819962024368426,
       "openNow": false
     },
     {
-      "doorFast": 0.2130860856253654,
+      "doorFast": 0.17551733699502634,
       "openNow": false
     },
     {
-      "doorFast": 0.16197815437866625,
+      "doorFast": 0.22698210125033205,
       "openNow": false
     }
   ],
   "plasticity": [
     {
-      "edge": 66259,
-      "source": 35,
-      "target": 22516,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.5755171954631806,
-      "score": 1.9183906515439353,
-      "direction": "weakened"
-    },
-    {
-      "edge": 119469,
-      "source": 19804,
-      "target": 2249,
-      "sourceLayer": 3,
-      "targetLayer": 0,
-      "delta": -0.6087086868286133,
-      "score": 1.9022146463394167,
-      "direction": "weakened"
-    },
-    {
-      "edge": 12123,
-      "source": 334,
-      "target": 22085,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.6435854697227479,
-      "score": 1.892898440361023,
-      "direction": "weakened"
-    },
-    {
-      "edge": 143104,
-      "source": 1095,
-      "target": 470,
+      "edge": 10063,
+      "source": 644,
+      "target": 2807,
       "sourceLayer": 0,
       "targetLayer": 0,
-      "delta": -0.7515881299972534,
-      "score": 1.8789703249931335,
+      "delta": -0.600000011920929,
+      "score": 2.00000003973643,
       "direction": "weakened"
     },
     {
-      "edge": 7516,
-      "source": 1160,
-      "target": 19804,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -4.462001423835755,
-      "score": 1.7991941225144172,
-      "direction": "weakened"
-    },
-    {
-      "edge": 46766,
-      "source": 24499,
-      "target": 2458,
-      "sourceLayer": 3,
-      "targetLayer": 0,
-      "delta": -0.42891558051109313,
-      "score": 1.7871482521295547,
-      "direction": "weakened"
-    },
-    {
-      "edge": 122586,
-      "source": 44,
-      "target": 1197,
-      "sourceLayer": 0,
-      "targetLayer": 0,
-      "delta": -0.37229338407516477,
-      "score": 1.6922426548871126,
-      "direction": "weakened"
-    },
-    {
-      "edge": 71860,
-      "source": 1346,
-      "target": 21078,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.5007204443216324,
-      "score": 1.6690681477387748,
-      "direction": "weakened"
-    },
-    {
-      "edge": 2655,
-      "source": 2835,
-      "target": 18875,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.8313246667385101,
-      "score": 1.6626493334770203,
-      "direction": "weakened"
-    },
-    {
-      "edge": 66336,
-      "source": 632,
-      "target": 19792,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.3589006823301315,
-      "score": 1.631366737864234,
-      "direction": "weakened"
-    },
-    {
-      "edge": 131038,
-      "source": 1251,
-      "target": 22085,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.780426572561264,
-      "score": 1.6258886928359668,
-      "direction": "weakened"
-    },
-    {
-      "edge": 47878,
-      "source": 2425,
-      "target": 20983,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.3223391890525818,
-      "score": 1.611695945262909,
-      "direction": "weakened"
-    },
-    {
-      "edge": 65360,
-      "source": 22591,
-      "target": 20690,
-      "sourceLayer": 3,
-      "targetLayer": 3,
-      "delta": -0.38217713475227355,
-      "score": 1.592404728134473,
-      "direction": "weakened"
-    },
-    {
-      "edge": 114918,
-      "source": 20589,
-      "target": 19890,
-      "sourceLayer": 3,
-      "targetLayer": 3,
-      "delta": -0.34721666693687436,
-      "score": 1.5782575769857925,
-      "direction": "weakened"
-    },
-    {
-      "edge": 104998,
-      "source": 2608,
-      "target": 20690,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.7175424015522003,
-      "score": 1.559874785983044,
-      "direction": "weakened"
-    },
-    {
-      "edge": 110201,
-      "source": 1036,
-      "target": 20983,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.5275776201486588,
-      "score": 1.551698882790173,
-      "direction": "weakened"
-    },
-    {
-      "edge": 29769,
-      "source": 779,
-      "target": 20983,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.4022962695360184,
-      "score": 1.5472933443693013,
-      "direction": "weakened"
-    },
-    {
-      "edge": 24193,
-      "source": 790,
-      "target": 23348,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -1.515827338695526,
-      "score": 1.5467625905056388,
-      "direction": "weakened"
-    },
-    {
-      "edge": 45089,
-      "source": 19686,
-      "target": 2437,
-      "sourceLayer": 3,
-      "targetLayer": 0,
-      "delta": -1.36018342256546,
-      "score": 1.5456629801880228,
-      "direction": "weakened"
-    },
-    {
-      "edge": 59325,
-      "source": 19686,
-      "target": 20564,
-      "sourceLayer": 3,
-      "targetLayer": 3,
-      "delta": -0.340045855641365,
-      "score": 1.5456629801880228,
-      "direction": "weakened"
-    },
-    {
-      "edge": 88112,
-      "source": 243,
-      "target": 2489,
-      "sourceLayer": 0,
-      "targetLayer": 0,
-      "delta": -0.9490311396121979,
-      "score": 1.530695386471287,
-      "direction": "weakened"
-    },
-    {
-      "edge": 14946,
-      "source": 2435,
-      "target": 2489,
-      "sourceLayer": 0,
-      "targetLayer": 0,
-      "delta": -2.2654259610176086,
-      "score": 1.5306932169037897,
-      "direction": "weakened"
-    },
-    {
-      "edge": 124028,
-      "source": 2575,
-      "target": 2489,
-      "sourceLayer": 0,
-      "targetLayer": 0,
-      "delta": -0.7959600877761841,
-      "score": 1.5306924764926617,
-      "direction": "weakened"
-    },
-    {
-      "edge": 150677,
-      "source": 218,
-      "target": 22516,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.5717326897382736,
-      "score": 1.504559709837562,
-      "direction": "weakened"
-    },
-    {
-      "edge": 1623,
-      "source": 360,
+      "edge": 24496,
+      "source": 700,
       "target": 13639,
       "sourceLayer": 0,
       "targetLayer": 2,
-      "delta": -0.8059195363521576,
-      "score": 1.4924435858373288,
+      "delta": -1.200000023841858,
+      "score": 2.00000003973643,
       "direction": "weakened"
     },
     {
-      "edge": 151574,
-      "source": 1207,
-      "target": 875,
+      "edge": 41893,
+      "source": 853,
+      "target": 8800,
+      "sourceLayer": 0,
+      "targetLayer": 1,
+      "delta": -1.200000023841858,
+      "score": 2.00000003973643,
+      "direction": "weakened"
+    },
+    {
+      "edge": 126717,
+      "source": 2730,
+      "target": 1087,
       "sourceLayer": 0,
       "targetLayer": 0,
-      "delta": -0.3259377864003181,
-      "score": 1.4815353927287187,
+      "delta": -0.600000011920929,
+      "score": 2.00000003973643,
       "direction": "weakened"
     },
     {
-      "edge": 58966,
+      "edge": 234,
+      "source": 2428,
+      "target": 8800,
+      "sourceLayer": 0,
+      "targetLayer": 1,
+      "delta": -1.0800000214576722,
+      "score": 2.0000000397364297,
+      "direction": "weakened"
+    },
+    {
+      "edge": 3244,
+      "source": 737,
+      "target": 2397,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.7200000143051147,
+      "score": 2.0000000397364297,
+      "direction": "weakened"
+    },
+    {
+      "edge": 49254,
+      "source": 44,
+      "target": 1429,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.7200000143051147,
+      "score": 2.0000000397364297,
+      "direction": "weakened"
+    },
+    {
+      "edge": 62888,
+      "source": 466,
+      "target": 2850,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.7200000143051147,
+      "score": 2.0000000397364297,
+      "direction": "weakened"
+    },
+    {
+      "edge": 120910,
+      "source": 1290,
+      "target": 243,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.7200000143051147,
+      "score": 2.0000000397364297,
+      "direction": "weakened"
+    },
+    {
+      "edge": 138438,
+      "source": 2171,
+      "target": 13639,
+      "sourceLayer": 0,
+      "targetLayer": 2,
+      "delta": -1.4400000286102295,
+      "score": 2.0000000397364297,
+      "direction": "weakened"
+    },
+    {
+      "edge": 140171,
+      "source": 1138,
+      "target": 8800,
+      "sourceLayer": 0,
+      "targetLayer": 1,
+      "delta": -0.7200000143051147,
+      "score": 2.0000000397364297,
+      "direction": "weakened"
+    },
+    {
+      "edge": 107059,
       "source": 165,
-      "target": 2655,
+      "target": 1241,
       "sourceLayer": 0,
       "targetLayer": 0,
-      "delta": -0.35167699098587035,
-      "score": 1.4653207957744598,
+      "delta": -1.8400000166893005,
+      "score": 2.0000000181405437,
       "direction": "weakened"
     },
     {
-      "edge": 72593,
-      "source": 506,
+      "edge": 135883,
+      "source": 632,
+      "target": 44,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -1.8400000166893005,
+      "score": 2.0000000181405437,
+      "direction": "weakened"
+    },
+    {
+      "edge": 59140,
+      "source": 435,
+      "target": 8800,
+      "sourceLayer": 0,
+      "targetLayer": 1,
+      "delta": -1.7200000143051146,
+      "score": 2.0000000166338543,
+      "direction": "weakened"
+    },
+    {
+      "edge": 19257,
+      "source": 2405,
+      "target": 639,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.40000000298023225,
+      "score": 2.000000014901161,
+      "direction": "weakened"
+    },
+    {
+      "edge": 27449,
+      "source": 1157,
+      "target": 2446,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.40000000298023225,
+      "score": 2.000000014901161,
+      "direction": "weakened"
+    },
+    {
+      "edge": 28868,
+      "source": 65,
+      "target": 2437,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.40000000298023225,
+      "score": 2.000000014901161,
+      "direction": "weakened"
+    },
+    {
+      "edge": 33472,
+      "source": 2407,
+      "target": 8800,
+      "sourceLayer": 0,
+      "targetLayer": 1,
+      "delta": -0.40000000298023225,
+      "score": 2.000000014901161,
+      "direction": "weakened"
+    },
+    {
+      "edge": 36729,
+      "source": 764,
+      "target": 8800,
+      "sourceLayer": 0,
+      "targetLayer": 1,
+      "delta": -0.40000000298023225,
+      "score": 2.000000014901161,
+      "direction": "weakened"
+    },
+    {
+      "edge": 39904,
+      "source": 2410,
+      "target": 92,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -1.600000011920929,
+      "score": 2.000000014901161,
+      "direction": "weakened"
+    },
+    {
+      "edge": 47700,
+      "source": 2291,
+      "target": 8800,
+      "sourceLayer": 0,
+      "targetLayer": 1,
+      "delta": -0.40000000298023225,
+      "score": 2.000000014901161,
+      "direction": "weakened"
+    },
+    {
+      "edge": 56489,
+      "source": 2494,
+      "target": 643,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.40000000298023225,
+      "score": 2.000000014901161,
+      "direction": "weakened"
+    },
+    {
+      "edge": 70232,
+      "source": 99,
+      "target": 8800,
+      "sourceLayer": 0,
+      "targetLayer": 1,
+      "delta": -0.40000000298023225,
+      "score": 2.000000014901161,
+      "direction": "weakened"
+    },
+    {
+      "edge": 154575,
+      "source": 1173,
+      "target": 13639,
+      "sourceLayer": 0,
+      "targetLayer": 2,
+      "delta": -0.40000000298023225,
+      "score": 2.000000014901161,
+      "direction": "weakened"
+    },
+    {
+      "edge": 6825,
+      "source": 847,
+      "target": 8800,
+      "sourceLayer": 0,
+      "targetLayer": 1,
+      "delta": -1.4800000095367432,
+      "score": 2.0000000128874906,
+      "direction": "weakened"
+    },
+    {
+      "edge": 1776,
+      "source": 793,
+      "target": 8800,
+      "sourceLayer": 0,
+      "targetLayer": 1,
+      "delta": -1.3600000071525575,
+      "score": 2.000000010518467,
+      "direction": "weakened"
+    },
+    {
+      "edge": 61355,
+      "source": 68,
+      "target": 8800,
+      "sourceLayer": 0,
+      "targetLayer": 1,
+      "delta": -0.6800000035762788,
+      "score": 2.000000010518467,
+      "direction": "weakened"
+    },
+    {
+      "edge": 83333,
+      "source": 2195,
+      "target": 253,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.6800000035762788,
+      "score": 2.000000010518467,
+      "direction": "weakened"
+    },
+    {
+      "edge": 3935,
+      "source": 1262,
+      "target": 8800,
+      "sourceLayer": 0,
+      "targetLayer": 1,
+      "delta": -1.2400000047683717,
+      "score": 2.000000007690922,
+      "direction": "weakened"
+    },
+    {
+      "edge": 59864,
+      "source": 2182,
+      "target": 8800,
+      "sourceLayer": 0,
+      "targetLayer": 1,
+      "delta": -0.5600000011920929,
+      "score": 2.0000000042574744,
+      "direction": "weakened"
+    },
+    {
+      "edge": 121907,
+      "source": 800,
+      "target": 2272,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -2,
+      "score": 2,
+      "direction": "weakened"
+    },
+    {
+      "edge": 88284,
+      "source": 2462,
+      "target": 359,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -1.8799999976158142,
+      "score": 1.999999997463632,
+      "direction": "weakened"
+    },
+    {
+      "edge": 59704,
+      "source": 2827,
+      "target": 13639,
+      "sourceLayer": 0,
+      "targetLayer": 2,
+      "delta": -0.4399999988079071,
+      "score": 1.9999999945813958,
+      "direction": "weakened"
+    },
+    {
+      "edge": 69827,
+      "source": 51,
+      "target": 769,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.4399999988079071,
+      "score": 1.9999999945813958,
+      "direction": "weakened"
+    },
+    {
+      "edge": 75482,
+      "source": 372,
+      "target": 1180,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.4399999988079071,
+      "score": 1.9999999945813958,
+      "direction": "weakened"
+    },
+    {
+      "edge": 134538,
+      "source": 220,
       "target": 22516,
       "sourceLayer": 0,
       "targetLayer": 3,
-      "delta": -0.3804758733510971,
-      "score": 1.4633687436580658,
+      "delta": -0.4399999988079071,
+      "score": 1.9999999945813958,
+      "direction": "weakened"
+    },
+    {
+      "edge": 145767,
+      "source": 653,
+      "target": 13639,
+      "sourceLayer": 0,
+      "targetLayer": 2,
+      "delta": -0.4399999988079071,
+      "score": 1.9999999945813958,
+      "direction": "weakened"
+    },
+    {
+      "edge": 146826,
+      "source": 1339,
+      "target": 2172,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.4399999988079071,
+      "score": 1.9999999945813958,
+      "direction": "weakened"
+    },
+    {
+      "edge": 107769,
+      "source": 1066,
+      "target": 282,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -1.5199999904632568,
+      "score": 1.9999999874516536,
+      "direction": "weakened"
+    },
+    {
+      "edge": 108716,
+      "source": 678,
+      "target": 11,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.7599999952316284,
+      "score": 1.9999999874516536,
+      "direction": "weakened"
+    },
+    {
+      "edge": 2674,
+      "source": 2480,
+      "target": 8800,
+      "sourceLayer": 0,
+      "targetLayer": 1,
+      "delta": -1.2799999856948854,
+      "score": 1.9999999776482584,
+      "direction": "weakened"
+    },
+    {
+      "edge": 3089,
+      "source": 1415,
+      "target": 13639,
+      "sourceLayer": 0,
+      "targetLayer": 2,
+      "delta": -1.2799999856948854,
+      "score": 1.9999999776482584,
+      "direction": "weakened"
+    },
+    {
+      "edge": 56669,
+      "source": 548,
+      "target": 22516,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.6399999928474427,
+      "score": 1.9999999776482584,
+      "direction": "weakened"
+    },
+    {
+      "edge": 76233,
+      "source": 910,
+      "target": 878,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.6399999928474427,
+      "score": 1.9999999776482584,
+      "direction": "weakened"
+    },
+    {
+      "edge": 89546,
+      "source": 2231,
+      "target": 309,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.6399999928474427,
+      "score": 1.9999999776482584,
+      "direction": "weakened"
+    },
+    {
+      "edge": 144933,
+      "source": 1171,
+      "target": 2383,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.6399999928474427,
+      "score": 1.9999999776482584,
+      "direction": "weakened"
+    },
+    {
+      "edge": 10257,
+      "source": 525,
+      "target": 8800,
+      "sourceLayer": 0,
+      "targetLayer": 1,
+      "delta": -0.47999999463558196,
+      "score": 1.9999999776482582,
+      "direction": "weakened"
+    },
+    {
+      "edge": 11093,
+      "source": 51,
+      "target": 901,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.47999999463558196,
+      "score": 1.9999999776482582,
+      "direction": "weakened"
+    },
+    {
+      "edge": 27481,
+      "source": 24014,
+      "target": 1385,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": -0.47999999463558196,
+      "score": 1.9999999776482582,
       "direction": "weakened"
     },
     {
@@ -2210,228 +2420,178 @@
       "target": 912,
       "sourceLayer": 0,
       "targetLayer": 0,
-      "delta": -0.34984038561582564,
-      "score": 1.4576682733992736,
+      "delta": -0.47999999463558196,
+      "score": 1.9999999776482582,
       "direction": "weakened"
     },
     {
-      "edge": 18503,
-      "source": 2562,
-      "target": 19207,
+      "edge": 117234,
+      "source": 2241,
+      "target": 981,
       "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -5.30247832775116,
-      "score": 1.4567248153162529,
+      "targetLayer": 0,
+      "delta": -0.47999999463558196,
+      "score": 1.9999999776482582,
       "direction": "weakened"
     },
     {
-      "edge": 134384,
+      "edge": 117536,
+      "source": 2281,
+      "target": 405,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.47999999463558196,
+      "score": 1.9999999776482582,
+      "direction": "weakened"
+    },
+    {
+      "edge": 117810,
+      "source": 1078,
+      "target": 8800,
+      "sourceLayer": 0,
+      "targetLayer": 1,
+      "delta": -0.47999999463558196,
+      "score": 1.9999999776482582,
+      "direction": "weakened"
+    },
+    {
+      "edge": 129538,
+      "source": 2378,
+      "target": 1208,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.47999999463558196,
+      "score": 1.9999999776482582,
+      "direction": "weakened"
+    },
+    {
+      "edge": 142412,
+      "source": 466,
+      "target": 2743,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.47999999463558196,
+      "score": 1.9999999776482582,
+      "direction": "weakened"
+    },
+    {
+      "edge": 2529,
+      "source": 84,
+      "target": 13639,
+      "sourceLayer": 0,
+      "targetLayer": 2,
+      "delta": -1.799999976158142,
+      "score": 1.9999999735090466,
+      "direction": "weakened"
+    },
+    {
+      "edge": 28046,
+      "source": 1077,
+      "target": 13639,
+      "sourceLayer": 0,
+      "targetLayer": 2,
+      "delta": -1.1599999833106995,
+      "score": 1.9999999712253442,
+      "direction": "weakened"
+    },
+    {
+      "edge": 38613,
       "source": 2519,
-      "target": 24182,
+      "target": 24499,
       "sourceLayer": 0,
       "targetLayer": 3,
-      "delta": -0.639129968881607,
-      "score": 1.4525681110945614,
+      "delta": -1.1599999833106995,
+      "score": 1.9999999712253442,
       "direction": "weakened"
     },
     {
-      "edge": 49900,
-      "source": 1096,
-      "target": 22299,
+      "edge": 6089,
+      "source": 356,
+      "target": 818,
       "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.31779215604066846,
-      "score": 1.4445098001848566,
-      "direction": "weakened"
-    },
-    {
-      "edge": 27109,
-      "source": 22239,
-      "target": 2268,
-      "sourceLayer": 3,
       "targetLayer": 0,
-      "delta": -1.0105384409427645,
-      "score": 1.4436263442039492,
+      "delta": -1.0399999809265137,
+      "score": 1.9999999633202186,
       "direction": "weakened"
     },
     {
-      "edge": 115659,
-      "source": 2176,
-      "target": 22516,
+      "edge": 77099,
+      "source": 231,
+      "target": 1310,
       "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.5166763371229172,
-      "score": 1.435212047563659,
-      "direction": "weakened"
-    },
-    {
-      "edge": 98912,
-      "source": 772,
-      "target": 22516,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.2870422199368477,
-      "score": 1.4352110996842384,
-      "direction": "weakened"
-    },
-    {
-      "edge": 21011,
-      "source": 183,
-      "target": 22516,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.6027886253595351,
-      "score": 1.435211012760798,
-      "direction": "weakened"
-    },
-    {
-      "edge": 28656,
-      "source": 764,
-      "target": 22516,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.3444504642486572,
-      "score": 1.4352102677027385,
-      "direction": "weakened"
-    },
-    {
-      "edge": 124333,
-      "source": 2765,
-      "target": 22516,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.31574584662914273,
-      "score": 1.4352083937688307,
-      "direction": "weakened"
-    },
-    {
-      "edge": 72547,
-      "source": 19890,
-      "target": 20554,
-      "sourceLayer": 3,
-      "targetLayer": 3,
-      "delta": -2.2031270051002503,
-      "score": 1.4306019513637989,
-      "direction": "weakened"
-    },
-    {
-      "edge": 38751,
-      "source": 20554,
-      "target": 19890,
-      "sourceLayer": 3,
-      "targetLayer": 3,
-      "delta": -1.6594980990886687,
-      "score": 1.4306018095591972,
-      "direction": "weakened"
-    },
-    {
-      "edge": 131233,
-      "source": 24930,
-      "target": 2250,
-      "sourceLayer": 3,
       "targetLayer": 0,
-      "delta": -1.5159738039970398,
-      "score": 1.4301639660349432,
+      "delta": -0.5199999904632568,
+      "score": 1.9999999633202186,
       "direction": "weakened"
     },
     {
-      "edge": 148037,
-      "source": 2250,
-      "target": 24930,
+      "edge": 83313,
+      "source": 2310,
+      "target": 900,
       "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -2.7173055052757267,
-      "score": 1.4301607922503823,
-      "direction": "weakened"
-    },
-    {
-      "edge": 76775,
-      "source": 476,
-      "target": 22085,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.5705323457717896,
-      "score": 1.4263308644294739,
-      "direction": "weakened"
-    },
-    {
-      "edge": 1901,
-      "source": 22954,
-      "target": 20477,
-      "sourceLayer": 3,
-      "targetLayer": 3,
-      "delta": -1.2441433417797088,
-      "score": 1.4137992520223963,
-      "direction": "weakened"
-    },
-    {
-      "edge": 93779,
-      "source": 397,
-      "target": 22098,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.33907758980989455,
-      "score": 1.4128232908745606,
-      "direction": "weakened"
-    },
-    {
-      "edge": 106148,
-      "source": 18240,
-      "target": 1290,
-      "sourceLayer": 3,
       "targetLayer": 0,
-      "delta": -0.5915221405029296,
-      "score": 1.4083860488164992,
+      "delta": -0.5199999904632568,
+      "score": 1.9999999633202186,
       "direction": "weakened"
     },
     {
-      "edge": 13340,
-      "source": 21411,
-      "target": 22771,
-      "sourceLayer": 3,
-      "targetLayer": 3,
-      "delta": -0.36480476170778275,
-      "score": 1.403095237337626,
-      "direction": "weakened"
-    },
-    {
-      "edge": 45307,
-      "source": 377,
-      "target": 22516,
+      "edge": 115393,
+      "source": 2785,
+      "target": 292,
       "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.41803412437438964,
-      "score": 1.3934470812479656,
-      "direction": "weakened"
-    },
-    {
-      "edge": 28496,
-      "source": 1198,
-      "target": 22085,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.4435223710536957,
-      "score": 1.386007409542799,
-      "direction": "weakened"
-    },
-    {
-      "edge": 142397,
-      "source": 1306,
-      "target": 22781,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.30354074507951734,
-      "score": 1.3797306594523515,
-      "direction": "weakened"
-    },
-    {
-      "edge": 54138,
-      "source": 23204,
-      "target": 2807,
-      "sourceLayer": 3,
       "targetLayer": 0,
-      "delta": -0.3794575619697571,
-      "score": 1.355205578463418,
+      "delta": -0.5199999904632568,
+      "score": 1.9999999633202186,
+      "direction": "weakened"
+    },
+    {
+      "edge": 133926,
+      "source": 182,
+      "target": 749,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.5199999904632568,
+      "score": 1.9999999633202186,
+      "direction": "weakened"
+    },
+    {
+      "edge": 11315,
+      "source": 693,
+      "target": 453,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.9599701869487762,
+      "score": 1.999937889476617,
+      "direction": "weakened"
+    },
+    {
+      "edge": 116265,
+      "source": 107,
+      "target": 708,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.5599790799617768,
+      "score": 1.999925285577774,
+      "direction": "weakened"
+    },
+    {
+      "edge": 21999,
+      "source": 165,
+      "target": 2827,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.43996860206127164,
+      "score": 1.9998572820966893,
+      "direction": "weakened"
+    },
+    {
+      "edge": 26928,
+      "source": 1183,
+      "target": 8800,
+      "sourceLayer": 0,
+      "targetLayer": 1,
+      "delta": -0.8798880302906036,
+      "score": 1.9997455233877355,
       "direction": "weakened"
     },
     {
@@ -2440,1129 +2600,669 @@
       "target": 13639,
       "sourceLayer": 0,
       "targetLayer": 2,
-      "delta": -0.8644698703289032,
-      "score": 1.3507341723889112,
+      "delta": -1.279804244041443,
+      "score": 1.9996941313147547,
       "direction": "weakened"
     },
     {
-      "edge": 76189,
-      "source": 1180,
-      "target": 2489,
+      "edge": 19805,
+      "source": 600,
+      "target": 2250,
       "sourceLayer": 0,
       "targetLayer": 0,
-      "delta": -0.6745970845222473,
-      "score": 1.3491941690444946,
+      "delta": -0.39986459612846376,
+      "score": 1.9993229806423187,
       "direction": "weakened"
     },
     {
-      "edge": 75044,
-      "source": 182,
-      "target": 493,
-      "sourceLayer": 0,
-      "targetLayer": 0,
-      "delta": -0.26957365572452546,
-      "score": 1.3478682786226273,
-      "direction": "weakened"
-    },
-    {
-      "edge": 24791,
-      "source": 499,
-      "target": 18240,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -1.5295547389984132,
-      "score": 1.3417146833319413,
-      "direction": "weakened"
-    },
-    {
-      "edge": 111621,
-      "source": 1129,
-      "target": 753,
-      "sourceLayer": 0,
-      "targetLayer": 0,
-      "delta": -0.26732024252414704,
-      "score": 1.3366012126207352,
-      "direction": "weakened"
-    },
-    {
-      "edge": 46216,
-      "source": 1129,
-      "target": 919,
-      "sourceLayer": 0,
-      "targetLayer": 0,
-      "delta": -0.3742479968070984,
-      "score": 1.3365999885967799,
-      "direction": "weakened"
-    },
-    {
-      "edge": 74066,
-      "source": 836,
-      "target": 19792,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.29375766336917875,
-      "score": 1.3352621062235397,
-      "direction": "weakened"
-    },
-    {
-      "edge": 97800,
-      "source": 780,
-      "target": 19792,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.2670522898435593,
-      "score": 1.3352614492177963,
-      "direction": "weakened"
-    },
-    {
-      "edge": 89767,
-      "source": 2830,
-      "target": 20039,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.373235656619072,
-      "score": 1.332984487925257,
-      "direction": "weakened"
-    },
-    {
-      "edge": 131870,
-      "source": 20039,
-      "target": 32,
-      "sourceLayer": 3,
-      "targetLayer": 0,
-      "delta": -0.3465759626030922,
-      "score": 1.3329844715503545,
-      "direction": "weakened"
-    },
-    {
-      "edge": 143879,
-      "source": 2623,
-      "target": 20039,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.29325651496648786,
-      "score": 1.3329841589385811,
-      "direction": "weakened"
-    },
-    {
-      "edge": 59,
-      "source": 22954,
-      "target": 20039,
-      "sourceLayer": 3,
-      "targetLayer": 3,
-      "delta": -1.7595388960838318,
-      "score": 1.332984012184721,
-      "direction": "weakened"
-    },
-    {
-      "edge": 94803,
-      "source": 634,
-      "target": 18856,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.2663747563958168,
-      "score": 1.331873781979084,
-      "direction": "weakened"
-    },
-    {
-      "edge": 83606,
-      "source": 58,
-      "target": 24798,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -1.8894068729877471,
-      "score": 1.3305682204139064,
-      "direction": "weakened"
-    },
-    {
-      "edge": 54847,
-      "source": 22954,
-      "target": 19804,
-      "sourceLayer": 3,
-      "targetLayer": 3,
-      "delta": -0.7979989260435104,
-      "score": 1.3299982100725174,
-      "direction": "weakened"
-    },
-    {
-      "edge": 50225,
-      "source": 9305,
-      "target": 18856,
-      "sourceLayer": 1,
-      "targetLayer": 3,
-      "delta": -1.168523256778717,
-      "score": 1.327867337248542,
-      "direction": "weakened"
-    },
-    {
-      "edge": 31692,
-      "source": 2850,
-      "target": 18856,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.37180282801389697,
-      "score": 1.3278672429067748,
-      "direction": "weakened"
-    },
-    {
-      "edge": 79960,
-      "source": 165,
-      "target": 1193,
-      "sourceLayer": 0,
-      "targetLayer": 0,
-      "delta": -0.3151395598053932,
-      "score": 1.3130814991891384,
-      "direction": "weakened"
-    },
-    {
-      "edge": 27167,
-      "source": 24930,
-      "target": 1274,
-      "sourceLayer": 3,
-      "targetLayer": 0,
-      "delta": -0.2613069906830788,
-      "score": 1.3065349534153938,
-      "direction": "weakened"
-    },
-    {
-      "edge": 103119,
-      "source": 413,
-      "target": 21859,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.36309056609869006,
-      "score": 1.2967520217810358,
-      "direction": "weakened"
-    },
-    {
-      "edge": 70830,
-      "source": 18240,
-      "target": 2775,
-      "sourceLayer": 3,
-      "targetLayer": 0,
-      "delta": -0.8023574602603912,
-      "score": 1.294124935903857,
-      "direction": "weakened"
-    },
-    {
-      "edge": 142502,
-      "source": 18240,
-      "target": 900,
-      "sourceLayer": 3,
-      "targetLayer": 0,
-      "delta": -0.4400023111701012,
-      "score": 1.2941244446179445,
-      "direction": "weakened"
-    },
-    {
-      "edge": 45099,
-      "source": 18240,
-      "target": 507,
-      "sourceLayer": 3,
-      "targetLayer": 0,
-      "delta": -0.5377703142166137,
-      "score": 1.2804055100395564,
-      "direction": "weakened"
-    },
-    {
-      "edge": 131727,
-      "source": 24167,
-      "target": 24798,
-      "sourceLayer": 3,
-      "targetLayer": 3,
-      "delta": -0.6637601894140244,
-      "score": 1.2764619027192776,
-      "direction": "weakened"
-    },
-    {
-      "edge": 108217,
-      "source": 398,
-      "target": 20983,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.27962489917874334,
-      "score": 1.2710222689942878,
-      "direction": "weakened"
-    },
-    {
-      "edge": 122003,
-      "source": 1156,
-      "target": 20589,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.3295647895336151,
-      "score": 1.2675568828215966,
-      "direction": "weakened"
-    },
-    {
-      "edge": 132401,
-      "source": 372,
-      "target": 24499,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.6012710738182068,
-      "score": 1.2526480704545975,
-      "direction": "weakened"
-    },
-    {
-      "edge": 107366,
-      "source": 1410,
-      "target": 22516,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.27466692522168157,
-      "score": 1.2484860237349162,
-      "direction": "weakened"
-    },
-    {
-      "edge": 152460,
-      "source": 1107,
-      "target": 737,
-      "sourceLayer": 0,
-      "targetLayer": 0,
-      "delta": -0.24808502271771432,
-      "score": 1.2404251135885715,
-      "direction": "weakened"
-    },
-    {
-      "edge": 143207,
-      "source": 2768,
-      "target": 22098,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.61660036444664,
-      "score": 1.23320072889328,
-      "direction": "weakened"
-    },
-    {
-      "edge": 73066,
+      "edge": 83839,
       "source": 2420,
-      "target": 22098,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.32063153967261315,
-      "score": 1.2331982295100505,
-      "direction": "weakened"
-    },
-    {
-      "edge": 140289,
-      "source": 875,
-      "target": 24797,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -3.2526169562339784,
-      "score": 1.2320518773613554,
-      "direction": "weakened"
-    },
-    {
-      "edge": 64017,
-      "source": 20393,
-      "target": 20551,
-      "sourceLayer": 3,
-      "targetLayer": 3,
-      "delta": -0.2461477153003216,
-      "score": 1.230738576501608,
-      "direction": "weakened"
-    },
-    {
-      "edge": 14735,
-      "source": 1239,
-      "target": 2304,
+      "target": 1174,
       "sourceLayer": 0,
       "targetLayer": 0,
-      "delta": -0.7132590728998184,
-      "score": 1.2297570222410663,
+      "delta": -0.9996327757835388,
+      "score": 1.9992655515670776,
       "direction": "weakened"
     },
     {
-      "edge": 31847,
-      "source": 678,
-      "target": 19792,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.5643392196297645,
-      "score": 1.226824390499488,
-      "direction": "weakened"
-    },
-    {
-      "edge": 148125,
-      "source": 372,
-      "target": 18942,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.2694587048888206,
-      "score": 1.2248122949491846,
-      "direction": "weakened"
-    },
-    {
-      "edge": 42475,
-      "source": 1172,
-      "target": 939,
+      "edge": 145253,
+      "source": 693,
+      "target": 450,
       "sourceLayer": 0,
       "targetLayer": 0,
-      "delta": -0.24412683472037316,
-      "score": 1.2206341736018658,
+      "delta": -0.4398170721530914,
+      "score": 1.999168509786779,
       "direction": "weakened"
     },
     {
-      "edge": 4835,
-      "source": 2730,
-      "target": 1698,
-      "sourceLayer": 0,
-      "targetLayer": 0,
-      "delta": -0.3136540672183037,
-      "score": 1.2063617969934757,
-      "direction": "weakened"
-    },
-    {
-      "edge": 21416,
-      "source": 2575,
-      "target": 18724,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.4253303936123848,
-      "score": 1.1814733155899577,
-      "direction": "weakened"
-    },
-    {
-      "edge": 23847,
-      "source": 2519,
-      "target": 23634,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.8388441663980484,
-      "score": 1.1650613422195117,
-      "direction": "weakened"
-    },
-    {
-      "edge": 75976,
-      "source": 561,
-      "target": 22516,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.365411366969347,
-      "score": 1.1419105217792094,
-      "direction": "weakened"
-    },
-    {
-      "edge": 108900,
-      "source": 20535,
-      "target": 24930,
-      "sourceLayer": 3,
-      "targetLayer": 3,
-      "delta": -0.22790810354053975,
-      "score": 1.1395405177026987,
-      "direction": "weakened"
-    },
-    {
-      "edge": 34176,
-      "source": 2506,
-      "target": 21797,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.4765013699233532,
-      "score": 1.134527071246079,
-      "direction": "weakened"
-    },
-    {
-      "edge": 99984,
-      "source": 18724,
-      "target": 22095,
-      "sourceLayer": 3,
-      "targetLayer": 3,
-      "delta": -0.45092793703079226,
-      "score": 1.1273198425769806,
-      "direction": "weakened"
-    },
-    {
-      "edge": 43441,
-      "source": 644,
-      "target": 24167,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.5598587952554226,
-      "score": 1.1197175905108452,
-      "direction": "weakened"
-    },
-    {
-      "edge": 97112,
-      "source": 22299,
-      "target": 2652,
-      "sourceLayer": 3,
-      "targetLayer": 0,
-      "delta": -0.2456957970559597,
-      "score": 1.1167990775270895,
-      "direction": "weakened"
-    },
-    {
-      "edge": 15640,
-      "source": 22299,
-      "target": 2554,
-      "sourceLayer": 3,
-      "targetLayer": 0,
-      "delta": -1.8315498673915864,
-      "score": 1.116798699629016,
-      "direction": "weakened"
-    },
-    {
-      "edge": 55074,
-      "source": 345,
-      "target": 22771,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.3571876023709774,
-      "score": 1.1162112574093044,
-      "direction": "weakened"
-    },
-    {
-      "edge": 42645,
-      "source": 605,
-      "target": 215,
-      "sourceLayer": 0,
-      "targetLayer": 0,
-      "delta": -0.2453022015094757,
-      "score": 1.1150100068612532,
-      "direction": "weakened"
-    },
-    {
-      "edge": 83279,
-      "source": 21797,
-      "target": 21859,
-      "sourceLayer": 3,
-      "targetLayer": 3,
-      "delta": -0.24505588717758656,
-      "score": 1.113890396261757,
-      "direction": "weakened"
-    },
-    {
-      "edge": 130542,
-      "source": 2279,
-      "target": 875,
-      "sourceLayer": 0,
-      "targetLayer": 0,
-      "delta": -0.9795201095938683,
-      "score": 1.1130910336293958,
-      "direction": "weakened"
-    },
-    {
-      "edge": 70019,
-      "source": 2422,
-      "target": 875,
-      "sourceLayer": 0,
-      "targetLayer": 0,
-      "delta": -0.22261815778911115,
-      "score": 1.1130907889455557,
-      "direction": "weakened"
-    },
-    {
-      "edge": 145685,
-      "source": 1006,
-      "target": 23348,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.4220048497617245,
-      "score": 1.1105390783203275,
-      "direction": "weakened"
-    },
-    {
-      "edge": 59830,
-      "source": 2654,
-      "target": 23348,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.3109499651193619,
-      "score": 1.1105355897120066,
-      "direction": "weakened"
-    },
-    {
-      "edge": 138176,
-      "source": 2851,
-      "target": 23084,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.28646393328905106,
-      "score": 1.1017843588040426,
-      "direction": "weakened"
-    },
-    {
-      "edge": 111419,
-      "source": 22095,
-      "target": 2575,
-      "sourceLayer": 3,
-      "targetLayer": 0,
-      "delta": -0.7458814236521721,
-      "score": 1.096884446547312,
-      "direction": "weakened"
-    },
-    {
-      "edge": 131694,
-      "source": 18234,
-      "target": 18986,
-      "sourceLayer": 3,
-      "targetLayer": 3,
-      "delta": -0.3064671128243208,
-      "score": 1.0945254029440028,
-      "direction": "weakened"
-    },
-    {
-      "edge": 134516,
-      "source": 1238,
-      "target": 22865,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.24035490982234478,
-      "score": 1.0925223173742944,
-      "direction": "weakened"
-    },
-    {
-      "edge": 29193,
-      "source": 119,
-      "target": 24692,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -1.8549503207206726,
-      "score": 1.0911472474827486,
-      "direction": "weakened"
-    },
-    {
-      "edge": 144331,
-      "source": 18875,
-      "target": 22591,
-      "sourceLayer": 3,
-      "targetLayer": 3,
-      "delta": -0.5648761060833931,
-      "score": 1.0863002040065253,
-      "direction": "weakened"
-    },
-    {
-      "edge": 124027,
-      "source": 22591,
-      "target": 18875,
-      "sourceLayer": 3,
-      "targetLayer": 3,
-      "delta": -0.3258895978331566,
-      "score": 1.0862986594438553,
-      "direction": "weakened"
-    },
-    {
-      "edge": 29858,
-      "source": 1160,
-      "target": 20039,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -1.9939737582206727,
-      "score": 1.0836813903373221,
-      "direction": "weakened"
-    },
-    {
-      "edge": 101589,
-      "source": 22299,
-      "target": 162,
-      "sourceLayer": 3,
-      "targetLayer": 0,
-      "delta": -0.2813816650211811,
-      "score": 1.0822371731583889,
-      "direction": "weakened"
-    },
-    {
-      "edge": 108205,
-      "source": 22299,
-      "target": 1039,
-      "sourceLayer": 3,
-      "targetLayer": 0,
-      "delta": -0.43289475291967394,
-      "score": 1.0822368822991848,
-      "direction": "weakened"
-    },
-    {
-      "edge": 90915,
-      "source": 22299,
-      "target": 228,
-      "sourceLayer": 3,
-      "targetLayer": 0,
-      "delta": -0.9956578445434571,
-      "score": 1.0822367875472358,
-      "direction": "weakened"
-    },
-    {
-      "edge": 122355,
-      "source": 22299,
-      "target": 1254,
-      "sourceLayer": 3,
-      "targetLayer": 0,
-      "delta": -0.2139266373589635,
-      "score": 1.0696331867948174,
-      "direction": "weakened"
-    },
-    {
-      "edge": 41852,
-      "source": 2769,
-      "target": 22225,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.25578148640692233,
-      "score": 1.0657561933621764,
-      "direction": "weakened"
-    },
-    {
-      "edge": 34485,
-      "source": 875,
-      "target": 20322,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.2972102376818657,
-      "score": 1.0614651345780917,
-      "direction": "weakened"
-    },
-    {
-      "edge": 27825,
-      "source": 44,
-      "target": 19173,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.5494500552117825,
-      "score": 1.05663472156112,
-      "direction": "weakened"
-    },
-    {
-      "edge": 114156,
-      "source": 504,
-      "target": 20535,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.358324863165617,
-      "score": 1.0538966563694618,
-      "direction": "weakened"
-    },
-    {
-      "edge": 53011,
-      "source": 1339,
-      "target": 22964,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.5254030097275972,
-      "score": 1.0508060194551945,
-      "direction": "weakened"
-    },
-    {
-      "edge": 102618,
-      "source": 2869,
-      "target": 22964,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.3152415670454502,
-      "score": 1.050805223484834,
-      "direction": "weakened"
-    },
-    {
-      "edge": 120842,
-      "source": 2730,
-      "target": 22964,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.3572737240791321,
-      "score": 1.0508050708209766,
-      "direction": "weakened"
-    },
-    {
-      "edge": 86971,
-      "source": 2231,
-      "target": 22964,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.3777157036960125,
-      "score": 1.0492102880444791,
-      "direction": "weakened"
-    },
-    {
-      "edge": 104753,
-      "source": 779,
-      "target": 23305,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.5012254095822573,
-      "score": 1.0442196032963693,
-      "direction": "weakened"
-    },
-    {
-      "edge": 23875,
-      "source": 912,
-      "target": 606,
-      "sourceLayer": 0,
-      "targetLayer": 0,
-      "delta": -0.43696491241455077,
-      "score": 1.0403926486060733,
-      "direction": "weakened"
-    },
-    {
-      "edge": 123578,
-      "source": 1450,
-      "target": 23634,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.20754356663674117,
-      "score": 1.0377178331837058,
-      "direction": "weakened"
-    },
-    {
-      "edge": 99528,
-      "source": 32,
-      "target": 23297,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.3525983972102404,
-      "score": 1.0370541094418835,
-      "direction": "weakened"
-    },
-    {
-      "edge": 14160,
-      "source": 2730,
-      "target": 24214,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.26940311048179866,
-      "score": 1.0361658095453794,
-      "direction": "weakened"
-    },
-    {
-      "edge": 22945,
-      "source": 22299,
-      "target": 1429,
-      "sourceLayer": 3,
-      "targetLayer": 0,
-      "delta": -0.3705415191501379,
-      "score": 1.029281997639272,
-      "direction": "weakened"
-    },
-    {
-      "edge": 94526,
-      "source": 18240,
-      "target": 23106,
-      "sourceLayer": 3,
-      "targetLayer": 3,
-      "delta": -0.2667926663905382,
-      "score": 1.0261256399636085,
-      "direction": "weakened"
-    },
-    {
-      "edge": 107296,
-      "source": 22095,
-      "target": 2489,
-      "sourceLayer": 3,
-      "targetLayer": 0,
-      "delta": -0.20411133468151094,
-      "score": 1.0205566734075546,
-      "direction": "weakened"
-    },
-    {
-      "edge": 87719,
-      "source": 2525,
-      "target": 19270,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.5088890008628368,
-      "score": 1.0177780017256737,
-      "direction": "weakened"
-    },
-    {
-      "edge": 23934,
-      "source": 1023,
-      "target": 19270,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -1.4045326682925225,
-      "score": 1.0177772958641467,
-      "direction": "weakened"
-    },
-    {
-      "edge": 23752,
-      "source": 18234,
-      "target": 23084,
-      "sourceLayer": 3,
-      "targetLayer": 3,
-      "delta": -2.6849167899787427,
-      "score": 1.0170139355980086,
-      "direction": "weakened"
-    },
-    {
-      "edge": 23262,
-      "source": 23272,
-      "target": 23675,
-      "sourceLayer": 3,
-      "targetLayer": 3,
-      "delta": -0.40432359660044315,
-      "score": 1.0108089915011078,
-      "direction": "weakened"
-    },
-    {
-      "edge": 136350,
-      "source": 353,
-      "target": 22591,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.46303669855929913,
-      "score": 1.006601518607172,
-      "direction": "weakened"
-    },
-    {
-      "edge": 18844,
-      "source": 441,
-      "target": 22516,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": -0.26118542020209135,
-      "score": 1.004559308469582,
-      "direction": "weakened"
-    },
-    {
-      "edge": 90369,
-      "source": 24118,
-      "target": 9305,
-      "sourceLayer": 3,
-      "targetLayer": 1,
-      "delta": -0.5014385377289727,
-      "score": 1.0028770754579455,
-      "direction": "weakened"
-    },
-    {
-      "edge": 8859,
-      "source": 190,
-      "target": 24917,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": 0.3600000286102295,
-      "score": 1.0000000794728598,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 31267,
-      "source": 861,
-      "target": 18389,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": 0.3000000238418579,
-      "score": 1.0000000794728598,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 36014,
-      "source": 20858,
-      "target": 292,
-      "sourceLayer": 3,
-      "targetLayer": 0,
-      "delta": 0.3600000286102295,
-      "score": 1.0000000794728598,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 69074,
-      "source": 397,
-      "target": 22487,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": 0.3600000286102295,
-      "score": 1.0000000794728598,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 75031,
-      "source": 22866,
-      "target": 2674,
-      "sourceLayer": 3,
-      "targetLayer": 0,
-      "delta": 0.3000000238418579,
-      "score": 1.0000000794728598,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 97206,
-      "source": 44,
-      "target": 826,
-      "sourceLayer": 0,
-      "targetLayer": 0,
-      "delta": 0.6000000476837158,
-      "score": 1.0000000794728598,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 114217,
-      "source": 18389,
-      "target": 2476,
-      "sourceLayer": 3,
-      "targetLayer": 0,
-      "delta": 0.3000000238418579,
-      "score": 1.0000000794728598,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 127064,
-      "source": 20308,
-      "target": 348,
-      "sourceLayer": 3,
-      "targetLayer": 0,
-      "delta": 0.3000000238418579,
-      "score": 1.0000000794728598,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 136343,
-      "source": 1939,
-      "target": 2734,
-      "sourceLayer": 0,
-      "targetLayer": 0,
-      "delta": 0.3000000238418579,
-      "score": 1.0000000794728598,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 140927,
-      "source": 2173,
-      "target": 19049,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": 0.3000000238418579,
-      "score": 1.0000000794728598,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 150144,
+      "edge": 142721,
       "source": 182,
-      "target": 21651,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": 0.6000000476837158,
-      "score": 1.0000000794728598,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 52561,
-      "source": 24914,
-      "target": 1646,
-      "sourceLayer": 3,
-      "targetLayer": 0,
-      "delta": 1.8200001049041747,
-      "score": 1.0000000576396564,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 144158,
-      "source": 21090,
-      "target": 19837,
-      "sourceLayer": 3,
-      "targetLayer": 3,
-      "delta": 1.8200001049041747,
-      "score": 1.0000000576396564,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 110232,
-      "source": 2842,
-      "target": 18492,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": 0.9800000381469727,
-      "score": 1.0000000389254824,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 135883,
-      "source": 632,
-      "target": 44,
+      "target": 128,
       "sourceLayer": 0,
       "targetLayer": 0,
-      "delta": 0.920000033378601,
-      "score": 1.0000000362810881,
-      "direction": "strengthened"
+      "delta": -0.7996664881706238,
+      "score": 1.9991662204265594,
+      "direction": "weakened"
     },
     {
-      "edge": 137946,
-      "source": 2730,
-      "target": 1340,
+      "edge": 81390,
+      "source": 182,
+      "target": 100,
       "sourceLayer": 0,
       "targetLayer": 0,
-      "delta": 0.4600000166893005,
-      "score": 1.0000000362810881,
-      "direction": "strengthened"
+      "delta": -0.8796330416202545,
+      "score": 1.9991660036823966,
+      "direction": "weakened"
     },
     {
-      "edge": 67932,
-      "source": 22832,
-      "target": 20393,
-      "sourceLayer": 3,
-      "targetLayer": 3,
-      "delta": 0.8600000286102295,
-      "score": 1.0000000332677088,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 679,
-      "source": 1308,
-      "target": 19378,
+      "edge": 104335,
+      "source": 165,
+      "target": 20,
       "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": 0.20000000596046447,
-      "score": 1.0000000298023222,
-      "direction": "strengthened"
+      "targetLayer": 0,
+      "delta": -1.119509813785553,
+      "score": 1.9991246674742016,
+      "direction": "weakened"
     },
     {
-      "edge": 15452,
-      "source": 1443,
+      "edge": 148028,
+      "source": 1095,
+      "target": 2591,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.43971522271633146,
+      "score": 1.9987055578015067,
+      "direction": "weakened"
+    },
+    {
+      "edge": 42755,
+      "source": 1095,
+      "target": 2562,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.47968932032585143,
+      "score": 1.9987055013577144,
+      "direction": "weakened"
+    },
+    {
+      "edge": 110553,
+      "source": 965,
+      "target": 1194,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.439653308391571,
+      "score": 1.9984241290525955,
+      "direction": "weakened"
+    },
+    {
+      "edge": 113716,
+      "source": 634,
+      "target": 9305,
+      "sourceLayer": 0,
+      "targetLayer": 1,
+      "delta": -0.5994102835655213,
+      "score": 1.9980342785517378,
+      "direction": "weakened"
+    },
+    {
+      "edge": 42054,
+      "source": 92,
+      "target": 217,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.43900220215320584,
+      "score": 1.9954645552418449,
+      "direction": "weakened"
+    },
+    {
+      "edge": 17156,
+      "source": 693,
+      "target": 1154,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.5184845721721649,
+      "score": 1.9941714314314034,
+      "direction": "weakened"
+    },
+    {
+      "edge": 139241,
+      "source": 32,
+      "target": 1325,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.5580357003211975,
+      "score": 1.9929846440042767,
+      "direction": "weakened"
+    },
+    {
+      "edge": 1320,
+      "source": 1224,
       "target": 8800,
       "sourceLayer": 0,
       "targetLayer": 1,
-      "delta": 0.20000000596046447,
-      "score": 1.0000000298023222,
-      "direction": "strengthened"
+      "delta": -1.3140995836257936,
+      "score": 1.9910599751905962,
+      "direction": "weakened"
     },
     {
-      "edge": 31359,
-      "source": 21199,
-      "target": 20477,
-      "sourceLayer": 3,
-      "targetLayer": 3,
-      "delta": 0.20000000596046447,
-      "score": 1.0000000298023222,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 50665,
-      "source": 182,
-      "target": 20060,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": 0.40000001192092893,
-      "score": 1.0000000298023222,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 55962,
-      "source": 965,
-      "target": 190,
+      "edge": 115687,
+      "source": 2442,
+      "target": 628,
       "sourceLayer": 0,
       "targetLayer": 0,
-      "delta": 0.40000001192092893,
-      "score": 1.0000000298023222,
-      "direction": "strengthened"
+      "delta": -0.39772113859653474,
+      "score": 1.9886056929826736,
+      "direction": "weakened"
     },
     {
-      "edge": 57583,
-      "source": 1646,
-      "target": 23084,
+      "edge": 128164,
+      "source": 1090,
+      "target": 628,
       "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": 0.20000000596046447,
-      "score": 1.0000000298023222,
-      "direction": "strengthened"
+      "targetLayer": 0,
+      "delta": -0.7158979034423828,
+      "score": 1.9886052873399522,
+      "direction": "weakened"
     },
     {
-      "edge": 60818,
-      "source": 243,
-      "target": 24499,
+      "edge": 100254,
+      "source": 1282,
+      "target": 8800,
+      "sourceLayer": 0,
+      "targetLayer": 1,
+      "delta": -0.4374485772848129,
+      "score": 1.9884026240218768,
+      "direction": "weakened"
+    },
+    {
+      "edge": 28127,
+      "source": 44,
+      "target": 417,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.6356552910804749,
+      "score": 1.9864227846264841,
+      "direction": "weakened"
+    },
+    {
+      "edge": 144550,
+      "source": 728,
+      "target": 2446,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.913303188085556,
+      "score": 1.9854417132294695,
+      "direction": "weakened"
+    },
+    {
+      "edge": 24087,
+      "source": 25,
+      "target": 13639,
+      "sourceLayer": 0,
+      "targetLayer": 2,
+      "delta": -0.6737878286838532,
+      "score": 1.9817289078936857,
+      "direction": "weakened"
+    },
+    {
+      "edge": 22634,
+      "source": 2210,
+      "target": 1207,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.4755777025222778,
+      "score": 1.981573760509491,
+      "direction": "weakened"
+    },
+    {
+      "edge": 72307,
+      "source": 986,
+      "target": 8800,
+      "sourceLayer": 0,
+      "targetLayer": 1,
+      "delta": -0.47549872636795043,
+      "score": 1.9812446931997936,
+      "direction": "weakened"
+    },
+    {
+      "edge": 23725,
+      "source": 1129,
+      "target": 1103,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.513705620765686,
+      "score": 1.9757908490987923,
+      "direction": "weakened"
+    },
+    {
+      "edge": 33319,
+      "source": 1079,
+      "target": 8800,
+      "sourceLayer": 0,
+      "targetLayer": 1,
+      "delta": -0.47416945338249206,
+      "score": 1.9757060557603836,
+      "direction": "weakened"
+    },
+    {
+      "edge": 80354,
+      "source": 1323,
+      "target": 2751,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.7901814818382263,
+      "score": 1.9754537045955658,
+      "direction": "weakened"
+    },
+    {
+      "edge": 138242,
+      "source": 2319,
+      "target": 19837,
       "sourceLayer": 0,
       "targetLayer": 3,
-      "delta": 0.8000000238418579,
-      "score": 1.0000000298023222,
-      "direction": "strengthened"
+      "delta": -0.4330404710769653,
+      "score": 1.9683657776225696,
+      "direction": "weakened"
+    },
+    {
+      "edge": 33293,
+      "source": 170,
+      "target": 2441,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.7478979575634003,
+      "score": 1.968152519903685,
+      "direction": "weakened"
+    },
+    {
+      "edge": 145584,
+      "source": 397,
+      "target": 1229,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.5112653470039368,
+      "score": 1.966405180784372,
+      "direction": "weakened"
+    },
+    {
+      "edge": 10984,
+      "source": 330,
+      "target": 1419,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.4324565839767456,
+      "score": 1.9657117453488435,
+      "direction": "weakened"
+    },
+    {
+      "edge": 117030,
+      "source": 289,
+      "target": 1419,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.4714762622117996,
+      "score": 1.9644844258824985,
+      "direction": "weakened"
+    },
+    {
+      "edge": 52396,
+      "source": 1095,
+      "target": 20477,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -1.0608153128623963,
+      "score": 1.96447280159703,
+      "direction": "weakened"
+    },
+    {
+      "edge": 24944,
+      "source": 289,
+      "target": 1007,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.47115862905979156,
+      "score": 1.9631609544157982,
+      "direction": "weakened"
+    },
+    {
+      "edge": 117660,
+      "source": 20398,
+      "target": 1392,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": -0.4711195731163025,
+      "score": 1.9629982213179271,
+      "direction": "weakened"
+    },
+    {
+      "edge": 19086,
+      "source": 893,
+      "target": 371,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.7045525169372558,
+      "score": 1.9570903248257108,
+      "direction": "weakened"
+    },
+    {
+      "edge": 68369,
+      "source": 19792,
+      "target": 2420,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": -0.5477578926086426,
+      "score": 1.9562781878880091,
+      "direction": "weakened"
+    },
+    {
+      "edge": 53763,
+      "source": 777,
+      "target": 22516,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.39112257659435273,
+      "score": 1.9556128829717636,
+      "direction": "weakened"
+    },
+    {
+      "edge": 133869,
+      "source": 2542,
+      "target": 22516,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.39112257659435273,
+      "score": 1.9556128829717636,
+      "direction": "weakened"
+    },
+    {
+      "edge": 21011,
+      "source": 183,
+      "target": 22516,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.8213573825359344,
+      "score": 1.9556128155617485,
+      "direction": "weakened"
+    },
+    {
+      "edge": 72456,
+      "source": 542,
+      "target": 24014,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.9769324064254761,
+      "score": 1.9538648128509521,
+      "direction": "weakened"
+    },
+    {
+      "edge": 109687,
+      "source": 1285,
+      "target": 23106,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -1.1324842143058778,
+      "score": 1.952558990182548,
+      "direction": "weakened"
+    },
+    {
+      "edge": 83815,
+      "source": 44,
+      "target": 20,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -3.1974777126312257,
+      "score": 1.9496815320922107,
+      "direction": "weakened"
+    },
+    {
+      "edge": 131141,
+      "source": 956,
+      "target": 1173,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.4674288535118103,
+      "score": 1.9476202229658763,
+      "direction": "weakened"
+    },
+    {
+      "edge": 115843,
+      "source": 2250,
+      "target": 870,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.5842115163803101,
+      "score": 1.9473717212677004,
+      "direction": "weakened"
+    },
+    {
+      "edge": 131008,
+      "source": 870,
+      "target": 9305,
+      "sourceLayer": 0,
+      "targetLayer": 1,
+      "delta": -1.090527949333191,
+      "score": 1.9473713380949838,
+      "direction": "weakened"
+    },
+    {
+      "edge": 48606,
+      "source": 870,
+      "target": 2250,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.6231588196754456,
+      "score": 1.9473713114857676,
+      "direction": "weakened"
+    },
+    {
+      "edge": 140864,
+      "source": 2741,
+      "target": 626,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.38835943937301637,
+      "score": 1.9417971968650818,
+      "direction": "weakened"
+    },
+    {
+      "edge": 32887,
+      "source": 1256,
+      "target": 1104,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.38817536532878877,
+      "score": 1.9408768266439438,
+      "direction": "weakened"
+    },
+    {
+      "edge": 113524,
+      "source": 179,
+      "target": 743,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.6962805843353271,
+      "score": 1.9341127342647977,
+      "direction": "weakened"
+    },
+    {
+      "edge": 128231,
+      "source": 19792,
+      "target": 626,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": -0.7326033163070679,
+      "score": 1.927903463965968,
+      "direction": "weakened"
+    },
+    {
+      "edge": 69194,
+      "source": 1303,
+      "target": 8800,
+      "sourceLayer": 0,
+      "targetLayer": 1,
+      "delta": -0.38243737518787385,
+      "score": 1.9121868759393692,
+      "direction": "weakened"
+    },
+    {
+      "edge": 125576,
+      "source": 44,
+      "target": 2634,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.5734837234020234,
+      "score": 1.9116124113400779,
+      "direction": "weakened"
+    },
+    {
+      "edge": 101969,
+      "source": 44,
+      "target": 1198,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -1.4910573649406433,
+      "score": 1.911612006334158,
+      "direction": "weakened"
+    },
+    {
+      "edge": 100426,
+      "source": 44,
+      "target": 2328,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.7264124798774719,
+      "score": 1.9116117891512419,
+      "direction": "weakened"
+    },
+    {
+      "edge": 26521,
+      "source": 44,
+      "target": 1059,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.7646446466445923,
+      "score": 1.9116116166114807,
+      "direction": "weakened"
+    },
+    {
+      "edge": 105969,
+      "source": 44,
+      "target": 2826,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.6881801640987396,
+      "score": 1.9116115669409435,
+      "direction": "weakened"
+    },
+    {
+      "edge": 143991,
+      "source": 44,
+      "target": 919,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -1.1851989579200746,
+      "score": 1.9116112224517332,
+      "direction": "weakened"
+    },
+    {
+      "edge": 94262,
+      "source": 44,
+      "target": 2768,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.9940377962589264,
+      "score": 1.9116111466517816,
+      "direction": "weakened"
+    },
+    {
+      "edge": 45126,
+      "source": 1129,
+      "target": 2839,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.8783501303195953,
+      "score": 1.9094568050425984,
+      "direction": "weakened"
+    },
+    {
+      "edge": 27159,
+      "source": 397,
+      "target": 19855,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.7618844151496887,
+      "score": 1.9047110378742218,
+      "direction": "weakened"
+    },
+    {
+      "edge": 88650,
+      "source": 2394,
+      "target": 22516,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.45625688672065734,
+      "score": 1.9010703613360722,
+      "direction": "weakened"
+    },
+    {
+      "edge": 116925,
+      "source": 2869,
+      "target": 1342,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.6076637279987336,
+      "score": 1.8989491499960425,
+      "direction": "weakened"
+    },
+    {
+      "edge": 33640,
+      "source": 2290,
+      "target": 24014,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.86940061211586,
+      "score": 1.8900013306866519,
+      "direction": "weakened"
+    },
+    {
+      "edge": 116284,
+      "source": 1036,
+      "target": 1429,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.6044824194908143,
+      "score": 1.8890075609087946,
+      "direction": "weakened"
+    },
+    {
+      "edge": 98912,
+      "source": 772,
+      "target": 22516,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.3776588708162308,
+      "score": 1.8882943540811539,
+      "direction": "weakened"
+    },
+    {
+      "edge": 120164,
+      "source": 2205,
+      "target": 1306,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.5284809309244156,
+      "score": 1.887431896158627,
+      "direction": "weakened"
+    },
+    {
+      "edge": 82468,
+      "source": 1306,
+      "target": 2205,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.4152349096536636,
+      "score": 1.8874314075166527,
+      "direction": "weakened"
     },
     {
       "edge": 105053,
@@ -3570,159 +3270,459 @@
       "target": 537,
       "sourceLayer": 0,
       "targetLayer": 0,
-      "delta": 0.20000000596046447,
-      "score": 1.0000000298023222,
-      "direction": "strengthened"
+      "delta": -0.3772119104862213,
+      "score": 1.8860595524311066,
+      "direction": "weakened"
     },
     {
-      "edge": 105997,
-      "source": 21199,
-      "target": 2249,
-      "sourceLayer": 3,
-      "targetLayer": 0,
-      "delta": 0.20000000596046447,
-      "score": 1.0000000298023222,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 110429,
-      "source": 182,
-      "target": 2303,
-      "sourceLayer": 0,
-      "targetLayer": 0,
-      "delta": 0.40000001192092893,
-      "score": 1.0000000298023222,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 115662,
-      "source": 2450,
-      "target": 18081,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": 0.20000000596046447,
-      "score": 1.0000000298023222,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 116692,
-      "source": 288,
-      "target": 22579,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": 0.20000000596046447,
-      "score": 1.0000000298023222,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 128516,
-      "source": 1285,
-      "target": 2237,
-      "sourceLayer": 0,
-      "targetLayer": 0,
-      "delta": 0.20000000596046447,
-      "score": 1.0000000298023222,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 151947,
-      "source": 832,
-      "target": 44,
-      "sourceLayer": 0,
-      "targetLayer": 0,
-      "delta": 0.20000000596046447,
-      "score": 1.0000000298023222,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 154566,
-      "source": 23516,
-      "target": 1153,
-      "sourceLayer": 3,
-      "targetLayer": 0,
-      "delta": 0.20000000596046447,
-      "score": 1.0000000298023222,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 7511,
-      "source": 24872,
+      "edge": 35166,
+      "source": 324,
       "target": 13639,
-      "sourceLayer": 3,
+      "sourceLayer": 0,
       "targetLayer": 2,
-      "delta": 0.7400000190734863,
-      "score": 1.0000000257749815,
-      "direction": "strengthened"
+      "delta": -1.09130348443985,
+      "score": 1.881557731792845,
+      "direction": "weakened"
     },
     {
-      "edge": 88007,
-      "source": 2510,
-      "target": 23719,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": 0.7400000190734863,
-      "score": 1.0000000257749815,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 31149,
-      "source": 21199,
-      "target": 765,
+      "edge": 67260,
+      "source": 23106,
+      "target": 2695,
       "sourceLayer": 3,
       "targetLayer": 0,
-      "delta": 0.34000000715255735,
-      "score": 1.0000000210369333,
-      "direction": "strengthened"
+      "delta": -0.6757172501087189,
+      "score": 1.876992361413108,
+      "direction": "weakened"
     },
     {
-      "edge": 37284,
-      "source": 901,
-      "target": 24917,
+      "edge": 8218,
+      "source": 737,
+      "target": 582,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -1.3500681829452514,
+      "score": 1.8750946985350716,
+      "direction": "weakened"
+    },
+    {
+      "edge": 65488,
+      "source": 109,
+      "target": 582,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.4500226879119873,
+      "score": 1.8750945329666138,
+      "direction": "weakened"
+    },
+    {
+      "edge": 128087,
+      "source": 2241,
+      "target": 582,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.4500226879119873,
+      "score": 1.8750945329666138,
+      "direction": "weakened"
+    },
+    {
+      "edge": 154665,
+      "source": 612,
+      "target": 22085,
       "sourceLayer": 0,
       "targetLayer": 3,
-      "delta": 0.6800000143051147,
-      "score": 1.0000000210369333,
-      "direction": "strengthened"
+      "delta": -0.5609134614467621,
+      "score": 1.8697115381558738,
+      "direction": "weakened"
     },
     {
-      "edge": 53923,
+      "edge": 87333,
+      "source": 1256,
+      "target": 21078,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.8589383280277252,
+      "score": 1.8672572348428809,
+      "direction": "weakened"
+    },
+    {
+      "edge": 24193,
+      "source": 790,
+      "target": 23348,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -1.8242217111587524,
+      "score": 1.8614507256721964,
+      "direction": "weakened"
+    },
+    {
+      "edge": 145860,
+      "source": 250,
+      "target": 2205,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.7800037693977355,
+      "score": 1.8571518318993703,
+      "direction": "weakened"
+    },
+    {
+      "edge": 55545,
+      "source": 2374,
+      "target": 558,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.6685605800151825,
+      "score": 1.857112722264396,
+      "direction": "weakened"
+    },
+    {
+      "edge": 110887,
+      "source": 784,
+      "target": 22516,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.4453660750389099,
+      "score": 1.8556919793287914,
+      "direction": "weakened"
+    },
+    {
+      "edge": 34885,
+      "source": 2237,
+      "target": 19516,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -2.5599871921539306,
+      "score": 1.8550631827202393,
+      "direction": "weakened"
+    },
+    {
+      "edge": 5353,
+      "source": 753,
+      "target": 13639,
+      "sourceLayer": 0,
+      "targetLayer": 2,
+      "delta": -0.890019725561142,
+      "score": 1.8542077615857124,
+      "direction": "weakened"
+    },
+    {
+      "edge": 79133,
+      "source": 2506,
+      "target": 601,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.4446458274126053,
+      "score": 1.852690947552522,
+      "direction": "weakened"
+    },
+    {
+      "edge": 82511,
+      "source": 1394,
+      "target": 13639,
+      "sourceLayer": 0,
+      "targetLayer": 2,
+      "delta": -0.4812541997432709,
+      "score": 1.8509776913202725,
+      "direction": "weakened"
+    },
+    {
+      "edge": 78261,
+      "source": 625,
+      "target": 8800,
+      "sourceLayer": 0,
+      "targetLayer": 1,
+      "delta": -0.40618850409984586,
+      "score": 1.8463113822720267,
+      "direction": "weakened"
+    },
+    {
+      "edge": 132722,
+      "source": 1257,
+      "target": 2751,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.36907677054405214,
+      "score": 1.8453838527202606,
+      "direction": "weakened"
+    },
+    {
+      "edge": 12518,
+      "source": 31,
+      "target": 240,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.6993855285644531,
+      "score": 1.8404882330643504,
+      "direction": "weakened"
+    },
+    {
+      "edge": 5814,
+      "source": 590,
+      "target": 8800,
+      "sourceLayer": 0,
+      "targetLayer": 1,
+      "delta": -0.4785267210006714,
+      "score": 1.8404873884641206,
+      "direction": "weakened"
+    },
+    {
+      "edge": 95764,
+      "source": 919,
+      "target": 529,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -2.7201304244995117,
+      "score": 1.83792596249967,
+      "direction": "weakened"
+    },
+    {
+      "edge": 221,
+      "source": 2674,
+      "target": 1179,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.6979470002651215,
+      "score": 1.8367026322766353,
+      "direction": "weakened"
+    },
+    {
+      "edge": 5101,
+      "source": 1170,
+      "target": 19250,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -1.8303181529045105,
+      "score": 1.8303181529045105,
+      "direction": "weakened"
+    },
+    {
+      "edge": 105671,
+      "source": 2842,
+      "target": 860,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.9105461835861206,
+      "score": 1.8210923671722412,
+      "direction": "weakened"
+    },
+    {
+      "edge": 147259,
+      "source": 163,
+      "target": 81,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.47249961853027345,
+      "score": 1.8173062251164362,
+      "direction": "weakened"
+    },
+    {
+      "edge": 9101,
+      "source": 329,
+      "target": 24014,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.9796017193794251,
+      "score": 1.8140772581100464,
+      "direction": "weakened"
+    },
+    {
+      "edge": 65960,
+      "source": 663,
+      "target": 1081,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.5040245193243027,
+      "score": 1.8000875690153666,
+      "direction": "weakened"
+    },
+    {
+      "edge": 129971,
+      "source": 816,
+      "target": 1290,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.5755356621742249,
+      "score": 1.798548944294453,
+      "direction": "weakened"
+    },
+    {
+      "edge": 69977,
+      "source": 1279,
+      "target": 282,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -1.4362707614898682,
+      "score": 1.7953384518623352,
+      "direction": "weakened"
+    },
+    {
+      "edge": 98612,
+      "source": 678,
+      "target": 1865,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.42829406797885894,
+      "score": 1.784558616578579,
+      "direction": "weakened"
+    },
+    {
+      "edge": 38386,
+      "source": 347,
+      "target": 475,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.8504140186309814,
+      "score": 1.771695872147878,
+      "direction": "weakened"
+    },
+    {
+      "edge": 64888,
+      "source": 1129,
+      "target": 2425,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.46055124163627625,
+      "score": 1.7713509293702931,
+      "direction": "weakened"
+    },
+    {
+      "edge": 1474,
       "source": 2425,
-      "target": 18081,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": 0.34000000715255735,
-      "score": 1.0000000210369333,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 61874,
-      "source": 2766,
-      "target": 23015,
-      "sourceLayer": 0,
-      "targetLayer": 3,
-      "delta": 0.34000000715255735,
-      "score": 1.0000000210369333,
-      "direction": "strengthened"
-    },
-    {
-      "edge": 67925,
-      "source": 182,
-      "target": 1162,
+      "target": 1129,
       "sourceLayer": 0,
       "targetLayer": 0,
-      "delta": 0.34000000715255735,
-      "score": 1.0000000210369333,
-      "direction": "strengthened"
+      "delta": -4.428376913070679,
+      "score": 1.7713507652282714,
+      "direction": "weakened"
     },
     {
-      "edge": 75309,
-      "source": 44,
-      "target": 1218,
+      "edge": 144213,
+      "source": 14,
+      "target": 22516,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.3877412092685699,
+      "score": 1.7624600421298633,
+      "direction": "weakened"
+    },
+    {
+      "edge": 133093,
+      "source": 347,
+      "target": 99,
       "sourceLayer": 0,
       "targetLayer": 0,
-      "delta": 0.34000000715255735,
-      "score": 1.0000000210369333,
-      "direction": "strengthened"
+      "delta": -0.562391586303711,
+      "score": 1.757473707199097,
+      "direction": "weakened"
+    },
+    {
+      "edge": 145633,
+      "source": 2156,
+      "target": 19792,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.3858367663621902,
+      "score": 1.753803483464501,
+      "direction": "weakened"
+    },
+    {
+      "edge": 16040,
+      "source": 178,
+      "target": 2773,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -1.1533131337165834,
+      "score": 1.7474441419948232,
+      "direction": "weakened"
+    },
+    {
+      "edge": 120844,
+      "source": 178,
+      "target": 2761,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.5591819059848786,
+      "score": 1.7474434562027457,
+      "direction": "weakened"
+    },
+    {
+      "edge": 100508,
+      "source": 165,
+      "target": 529,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -2.6541341733932495,
+      "score": 1.7461409035481905,
+      "direction": "weakened"
+    },
+    {
+      "edge": 11062,
+      "source": 347,
+      "target": 2480,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.4529602026939392,
+      "score": 1.74215462574592,
+      "direction": "weakened"
+    },
+    {
+      "edge": 140412,
+      "source": 347,
+      "target": 2321,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.7665476524829864,
+      "score": 1.742153755643151,
+      "direction": "weakened"
+    },
+    {
+      "edge": 116723,
+      "source": 165,
+      "target": 402,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.48718188583850863,
+      "score": 1.739935306566102,
+      "direction": "weakened"
+    },
+    {
+      "edge": 117084,
+      "source": 678,
+      "target": 529,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.8685395121574402,
+      "score": 1.7370790243148804,
+      "direction": "weakened"
+    },
+    {
+      "edge": 53469,
+      "source": 1108,
+      "target": 480,
+      "sourceLayer": 0,
+      "targetLayer": 0,
+      "delta": -0.5558493953943253,
+      "score": 1.7370293606072666,
+      "direction": "weakened"
+    },
+    {
+      "edge": 71971,
+      "source": 1308,
+      "target": 19959,
+      "sourceLayer": 0,
+      "targetLayer": 3,
+      "delta": -0.5902000927925111,
+      "score": 1.7358826258603266,
+      "direction": "weakened"
+    },
+    {
+      "edge": 69399,
+      "source": 19792,
+      "target": 2773,
+      "sourceLayer": 3,
+      "targetLayer": 0,
+      "delta": -0.6238072371482849,
+      "score": 1.732797880967458,
+      "direction": "weakened"
     }
   ]
 }

@@ -106,6 +106,9 @@
 </div>
 <main>
   <div class="grid">
+    <div class="card" style="grid-column: 1 / -1;"><h2>Results by laboratory</h2>
+      <div class="sub">which experiments have reported in this session (updated live)</div>
+      <div id="labBoard"></div></div>
     <div class="card"><h2>Learning curve — demon agreement</h2>
       <div class="sub">mean agreement with the classical demon per 10-trial block</div>
       <canvas id="cAgree"></canvas><div class="legend" id="lAgree"></div></div>
@@ -135,22 +138,36 @@
         <span id="sixAnimStatus" style="font-size:11px; color:#8b98a5; margin-left:8px"></span></div>
       </div>
       <div class="sub">one mini heatmap per finished run (mean spikes/step per region); click a snapshot to download it</div>
-      <div id="brainGallery"><div class="empty">no snapshots yet — finish an experiment with a fly brain (E2–E5, E7, E8)</div></div>
+      <div id="brainGallery"><div class="empty">no snapshots yet — finish an experiment with a fly brain (E2–E5, E7–E9)</div></div>
       <div class="dlbar"><button id="dlBrainSheet">⬇ all snapshots · contact sheet (PNG)</button></div>
     </div>
     <div class="card" style="grid-column: 1 / -1;"><h2>Brain outcome — learning deltas (late − early)</h2>
       <div class="sub">3D fly brain (real FAFB v783 anatomy) showing WHERE training changed firing —
       one region + one pathway highlighted per condition: red = fires more after learning,
       blue = fires less, gray = unchanged; one snapshot per experiment, click to download</div>
-      <div id="deltaGallery"><div class="empty">no 3D brain deltas yet — finish an experiment with a fly brain (E2–E5, E7, E8)</div></div>
+      <div id="deltaGallery"><div class="empty">no 3D brain deltas yet — finish an experiment with a fly brain (E2–E5, E7–E9)</div></div>
       <div class="dlbar"><button id="dlDeltaSheet">⬇ all deltas · 3D brains figure (PNG)</button></div>
     </div>
     <div class="card" style="grid-column: 1 / -1;"><h2>Brain outcome — which neurons fired (real anatomy)</h2>
       <div class="sub">every circuit neuron drawn at its measured FAFB v783 synapse position, jet-colored by its
       mean firing during the run (blue quiet → red most-active). One map per condition.
-      For experiments without a fly brain (E1, E6) this card stays empty by design.</div>
+      For experiments without a fly brain (E1, E6, and the physics-only E10/E11) this card stays empty by design.</div>
       <div id="brainWrap"><div class="empty">waiting for a run with a fly brain…</div></div>
       <div class="dlbar"><button id="dlBrainPNG">⬇ anatomy firing map (PNG)</button></div>
+    </div>
+    <div class="card" style="grid-column: 1 / -1;"><h2>Brain outcome — 3D brain anatomy (live firing)</h2>
+      <div class="sub">The run's actual per-neuron firing rendered on the real FAFB anatomy —
+      the same signal as the main screen — wired by the real connectome, showing firing paths
+      between neurons that actually fired. One view per condition; drag to orbit, wheel to zoom.</div>
+      <div id="ct3dChips" style="display:flex; flex-wrap:wrap; gap:6px; margin:8px 0 10px"></div>
+      <div id="ct3dMount" style="position:relative; width:100%; aspect-ratio:16/8.2; min-height:360px;
+           border:1px solid #30363d; border-radius:8px; overflow:hidden; background:#05070d">
+        <div id="ct3dLoad" style="position:absolute; inset:0; display:flex; align-items:center;
+             justify-content:center; color:#8b98a5; font:13px ui-sans-serif,system-ui">
+          loading neuron positions…
+        </div>
+      </div>
+      <div id="ct3dLegend" style="color:#8b98a5; font:11.5px ui-sans-serif,system-ui; margin-top:6px"></div>
     </div>
     <div class="card" style="grid-column: 1 / -1;"><h2>Predictions vs observations</h2>
       <div class="sub">auto-evaluated from the finished run's condition summaries — ✓ observed, ✗ not observed, ≈ within noise / low power</div>
@@ -202,6 +219,7 @@ function palette() {
 const FALLBACK = ["#58a6ff", "#3fb950", "#f0883e", "#bc8cff", "#f778ba", "#79c0ff"];  // unused fallback
 let CURVE = [];            // latest progress curve
 let DONE = null;           // { summary, rows, provenance }
+let CUR_EXP = null;        // experiment id of the latest streamed/reported run
 let LABEL = "—";
 
 function byCond(curve) {
@@ -231,7 +249,7 @@ function plot(canvasId, legendId, series, yLabel, opts = {}) {
   g.fillStyle = th.bg; g.fillRect(0, 0, W, H);
   if (!series.length || !series.some(s => s.pts.length)) {
     g.fillStyle = "#8b949e"; g.font = "12px system-ui";
-    g.fillText("waiting for data…", 12, H / 2); return;
+    g.fillText(opts.emptyNote || "waiting for data…", 12, H / 2); return;
   }
   const padL = 46, padR = 10, padT = 10, padB = 20;
   let xmin = Infinity, xmax = -Infinity, ymin = Infinity, ymax = -Infinity;
@@ -241,6 +259,12 @@ function plot(canvasId, legendId, series, yLabel, opts = {}) {
     ymin = Math.min(ymin, y); ymax = Math.max(ymax, y);
   }
   if (!Number.isFinite(xmin)) return;
+  // widen the range to include the 95% CI bands so ribbons never clip
+  for (const s of series) for (let i = 0; i < s.pts.length; i++) {
+    const y = s.pts[i][1], c = s.ci ? s.ci[i] : 0;
+    if (!Number.isFinite(y)) continue;
+    ymin = Math.min(ymin, y - c); ymax = Math.max(ymax, y + c);
+  }
   if (xmax === xmin) xmax = xmin + 1;
   if (ymax === ymin) { ymax = ymin + 1; ymin -= 0.5; }
   if (opts.logY) { ymin = Math.max(ymin, 1e-22); ymax = Math.max(ymax, ymin * 10); }
@@ -257,6 +281,51 @@ function plot(canvasId, legendId, series, yLabel, opts = {}) {
       g.beginPath(); g.moveTo(padL, gy); g.lineTo(W - padR, gy); g.stroke();
     }
   }
+  // TRAIN|TEST divider: dashed vertical line where the test phase begins
+  // (first block tagged phase "test"); only drawn when a phase split exists.
+  const testStart = (() => {
+    let first = Infinity, lastTrain = -1;
+    for (const s of series) for (const [x, p] of (s.meta || [])) {
+      if (p === "test") first = Math.min(first, x);
+    }
+    return first;
+  })();
+  if (Number.isFinite(testStart) && series.some(s => (s.meta || []).some(m => m[1] === "train"))) {
+    g.save();
+    g.strokeStyle = th.fg || "#8b949e"; g.globalAlpha = 0.55; g.setLineDash([4, 4]);
+    g.beginPath(); g.moveTo(X(testStart), padT); g.lineTo(X(testStart), H - padB); g.stroke();
+    g.setLineDash([]); g.globalAlpha = 1;
+    g.font = "10px system-ui"; g.fillStyle = th.fg || "#8b949e";
+    g.fillText("TEST (weights frozen)", Math.min(X(testStart) + 5, W - 110), padT + 10);
+    g.textAlign = "right";
+    g.fillText("TRAIN", Math.max(padL + 2, X(testStart) - 5), padT + 10);
+    g.textAlign = "left";
+    g.restore();
+  }
+  // 95% CI ribbons (multi-seed aggregation) beneath the mean lines,
+  // clipped to the plot rect so wide bands never bleed outside
+  const bandPath = (up, dn) => {
+    if (up.length < 2 || dn.length < 2) return;
+    g.beginPath(); g.moveTo(up[0][0], up[0][1]);
+    for (let i = 1; i < up.length; i++) g.lineTo(up[i][0], up[i][1]);
+    for (let i = 0; i < dn.length; i++) g.lineTo(dn[i][0], dn[i][1]);
+    g.closePath(); g.fill();
+  };
+  g.save();
+  g.beginPath(); g.rect(padL, padT, W - padL - padR, H - padT - padB); g.clip();
+  for (const s of series) {
+    if (!s.ci || !s.ci.some(c => c > 0)) continue;
+    g.fillStyle = s.color + "26";
+    const up = [], dn = [];
+    for (let i = 0; i < s.pts.length; i++) {
+      const [x, y] = s.pts[i], c = s.ci[i];
+      if (!Number.isFinite(y)) { bandPath(up, dn); up.length = 0; dn.length = 0; continue; }
+      up.push([X(x), Y(y + c)]);
+      dn.unshift([X(x), Y(y - c)]);
+    }
+    bandPath(up, dn);
+  }
+  g.restore();
   // series (theme line width; kind-switchable)
   const lw = th.lw, kind = STYLE.kind;
   for (const s of series) {
@@ -325,10 +394,11 @@ function plot(canvasId, legendId, series, yLabel, opts = {}) {
       }
     }
   }
-  // legend swatches
+  // legend swatches (with a CI tag when ribbons are shown)
   for (const s of series) {
     const d = document.createElement("span");
-    d.innerHTML = `<span class="sw" style="background:${s.color}"></span>${s.name}`;
+    d.innerHTML = `<span class="sw" style="background:${s.color}"></span>${s.name}` +
+      (s.ci && s.ci.some(c => c > 0) ? ` <span style="opacity:.55;font-size:10px">±95% CI</span>` : "");
     lg.appendChild(d);
   }
 }
@@ -338,12 +408,18 @@ function fmt(v) {
   if (a !== 0 && (a < 1e-3 || a >= 1e4)) return v.toExponential(1);
   return String(+v.toFixed(3));
 }
+// point accessors: curve fields may be scalars (live/single-seed) or
+// {mean,ci,n} aggregations (multi-seed CORE.apparatusCurve)
+const plotVal = (v) => (v && typeof v === "object") ? v.mean : v;
+const ciVal   = (v) => (v && typeof v === "object" && Number.isFinite(v.ci)) ? v.ci : 0;
 function seriesFrom(map, colors, field, xField = "block") {
   const out = [];
   let i = 0;
   for (const [k, pts] of map) {
     out.push({ name: k, color: colors(k, i++),
-      pts: pts.map(p => [p[xField], p[field]]) });
+      pts: pts.map(p => [p[xField], plotVal(p[field])]),
+      ci: pts.map(p => ciVal(p[field])),               // 95% CI per point
+      meta: pts.map(p => [p[xField], p.phase]) });   // phase per point (TRAIN/TEST divider)
   }
   return out;
 }
@@ -446,7 +522,131 @@ const BEHAVIOR_SPECS = {
       "Thermodynamically, expect every controller to be jet-subsidized (efficiency ≪ 1) — the ledger shows who is least subsidized.",
     ],
   },
+  e9: {
+    demon: [
+      "Five valve policies on one pressure engine: <b>demon_neural</b> (the fly's connectome decides from 8 local sensors), <b>demon_frozen</b> (same brain, weights frozen from trial 0), <b>demon_speed</b> (classical speed rule, reference), <b>demon_random</b>, <b>never_open</b>.",
+      "<b>Neural conditions:</b> the valve command originates in motor-layer population activity (fast EMA vs its own baseline); the classical rule is only a reference for the agreement metric — it never drives the neural valve.",
+      "<b>Learning:</b> reward = work + selection − wrong-action penalty, delivered to the same dopamine-gated eligibility-trace plasticity as E4. Weights persist across trials; episode 13+ runs with frozen weights (TEST region).",
+      "Thermodynamic ledger: spring work vs the <b>theoretical Landauer minimum</b> kT·ln2·bits. The bit count here is a <b>decision-bit proxy</b> (one decision per measurement), not a measured memory-erasure cost.",
+    ],
+    fly: [
+      "The fly IS the demon: it stands at the valve in the 3D pressure stage, its brain receives the 8-channel sensory vector, and its motor population opens/closes the valve.",
+      "<b>Watch:</b> demon_neural's reward and accuracy climb over training while frozen stays flat; weight drift (Σ|Δw|) grows only in the learning condition.",
+      "demon_speed shows what an optimal rule extracts; the gap to demon_neural is the learning deficit — the quantity E9 Phase 1 exists to measure.",
+    ],
+  },
+  e10: {
+    demon: [
+      "No demon at all: a spring-loaded trapdoor flips open only when molecules bang into it from the left.",
+      "<b>Watch:</b> a light door gets kicked open often and passes more molecules; a heavy door rarely opens — mass gates flow, not intelligence.",
+      "Either way the gas <b>relaxes to equilibrium</b>: while the door is open, molecules pass both directions — a Smoluchowski flap rectifies nothing alone.",
+      "This is the null model behind E1: without measurement and decision, door mechanics alone cannot sort.",
+    ],
+    fly: [
+      "No fly here — this is the passive trapdoor that fooled Smoluchowski (1912).",
+      "In the 3D lab the microscopic trapdoor stage opens while E10 runs (ESC restores the default scene).",
+    ],
+  },
+  e11: {
+    demon: [
+      "A ratchet-and-pawl wheel between a hot vanes bath (Th) and a cold pawl bath (Tc), with an exact detailed-balance event model.",
+      "<b>Watch:</b> with Th &gt; Tc forward slips outweigh reversals and the wheel lifts the load; at Th = Tc the pawl lifts as often as it slips — net rotation ≈ 0.",
+      "Equilibrium doing nothing <b>is the result</b> (Feynman's rectification theorem): you cannot sieve work from a single bath.",
+      "A heavier load turns the gradient wheel slower — torque trades against speed exactly as in a real engine.",
+    ],
+    fly: [
+      "No fly here — the ratchet is the molecular-machine analogue of the demon's gate.",
+      "In the 3D lab the ratchet-engine stage opens while E11 runs (ESC restores the default scene).",
+    ],
+  },
 };
+// ---- apparatus experiments (E9/E10/E11) ------------------------------------
+// These runs report apparatus metrics instead of demon/fly behavioral fields,
+// so the predictions/ledger paths get an apparatus-specific metric table and
+// the generic evaluators get null-guards (below).
+const APP_SPEC = {
+  e9: { title: "Pressure engine — brain → valve → ΔP → piston → mechanical work", panels: [
+      { f: "reward", label: "reward / episode", fmt: v => v.toFixed(2) },
+      { f: "decisionAccuracy", label: "decision accuracy", fmt: v => (v * 100).toFixed(0) + "%" },
+      { f: "demonAgree", label: "demon agreement", fmt: v => (v * 100).toFixed(0) + "%" },
+      { f: "dPfinal", label: "ΔP (relative)", fmt: v => v.toFixed(4) },
+      { f: "pistonX", label: "piston position", fmt: v => v.toFixed(1) },
+      { f: "workJ", label: "spring work (J)", fmt: v => v.toExponential(2) },
+      { f: "openFraction", label: "valve open", fmt: v => (v * 100).toFixed(0) + "%" },
+      { f: "crossings", label: "crossings / episode", fmt: v => v.toFixed(0) },
+      { f: "goodCrossings", label: "good crossings", fmt: v => v.toFixed(1) },
+      { f: "badCrossings", label: "bad crossings", fmt: v => v.toFixed(1) },
+      { f: "spikeRate", label: "motor spikes / decision", fmt: v => v.toFixed(2) },
+      { f: "dopamineMean", label: "dopamine (mean)", fmt: v => v.toFixed(3) },
+      { f: "weightDrift", label: "Σ|Δw| from baseline", fmt: v => v.toExponential(2) },
+      { f: "sensorDecisionBits", label: "decision bits (proxy)", fmt: v => v.toFixed(0) },
+      { f: "netWorkJ", label: "net work − Landauer min (J)", fmt: v => v.toExponential(2) },
+    ] },
+  e10: { title: "Smoluchowski trapdoor — populations & door mechanics", panels: [
+      { f: "leftCount", label: "left count", fmt: v => v.toFixed(0) },
+      { f: "rightCount", label: "right count", fmt: v => v.toFixed(0) },
+      { f: "densityDiff", label: "density diff (nL−nR)/n", fmt: v => v.toFixed(3) },
+      { f: "trapdoorAngle", label: "final door angle", fmt: v => v.toFixed(2) },
+      { f: "trapdoorFluctuation", label: "door angle RMS", fmt: v => v.toFixed(2) },
+      { f: "crossingRate", label: "crossings / s", fmt: v => v.toFixed(2) },
+      { f: "directionalBias", label: "directional bias", fmt: v => v.toFixed(3) },
+      { f: "dTfinal", label: "ΔT between sides", fmt: v => v.toFixed(1) },
+    ] },
+  e11: { title: "Feynman ratchet — rotation & thermodynamic accounting", panels: [
+      { f: "netPerEpisode", label: "net rotation / episode (rad)", fmt: v => v.toFixed(2) },
+      { f: "angularVelocity", label: "final ω (rad/s)", fmt: v => v.toFixed(2) },
+      { f: "torque", label: "load torque", fmt: v => v.toFixed(3) },
+      { f: "forwardSteps", label: "forward slips", fmt: v => v.toFixed(0) },
+      { f: "reverseSteps", label: "reverse slips", fmt: v => v.toFixed(0) },
+      { f: "thermalFluctuation", label: "|thermal wobble|", fmt: v => v.toFixed(2) },
+      { f: "workJ", label: "work extracted (J)", fmt: v => v.toExponential(2) },
+      { f: "heatJ", label: "heat drawn (J)", fmt: v => v.toExponential(2) },
+      { f: "entropyProduction", label: "entropy Qh/Th − Qc/Tc", fmt: v => v.toFixed(2) },
+      { f: "efficiency", label: "η = W/Qh", fmt: v => (v * 100).toFixed(2) + "%" },
+    ] },
+};
+const appNum = (c, k) => (c && c[k] && Number.isFinite(c[k].mean)) ? c[k] : { mean: 0, ci: 0 };
+function appStatsFromRows(rows) {   // apparatus: summary.conditions carries no apparatus fields — derive from rows
+  const by = {};
+  for (const r of rows || []) (by[r.condition] = by[r.condition] || []).push(r);
+  const out = {};
+  for (const [k, list] of Object.entries(by)) {
+    const acc = {};
+    for (const r of list) for (const [f, v] of Object.entries(r)) {
+      if (typeof v !== "number" || !Number.isFinite(v) || f === "trial" || f === "seed" || f === "steps") continue;
+      (acc[f] = acc[f] || []).push(v);
+    }
+    const stats = {};
+    for (const [f, arr] of Object.entries(acc)) {
+      const m = arr.reduce((a, x) => a + x, 0) / arr.length;
+      const sd = arr.length > 1 ? Math.sqrt(arr.reduce((a, x) => a + (x - m) ** 2, 0) / (arr.length - 1)) : 0;
+      stats[f] = { mean: m, ci: sd / Math.sqrt(arr.length), n: arr.length };
+    }
+    out[k] = stats;
+  }
+  return out;
+}
+function appCell(c, pp) {   // mean ± 95% CI when the stat carries an interval
+  const st = appNum(c, pp.f);
+  const base = pp.fmt(st.mean);
+  return st.ci > 0 ? `${base} <span style="opacity:.55">±${pp.fmt(st.ci)}</span>` : base;
+}
+function renderApparatus(expId, conds, wrap) {
+  const spec = APP_SPEC[expId];
+  if (!spec) return false;
+  const colors = palette();
+  const nSeeds = (DONE && DONE.provenance && DONE.provenance.seeds) || 1;
+  let html = `<div class="sub" style="margin:2px 0 8px">${spec.title} — per-condition episode means` +
+             (nSeeds > 1 ? ` (mean ± 95% CI, cross-seed × episode)` : ` (seeded, deterministic)`) + `</div>`;
+  html += `<table class="ledger"><tr><th>condition</th>` +
+          spec.panels.map(pp => `<th>${pp.label}</th>`).join("") + `</tr>`;
+  Object.entries(conds).forEach(([k, c], i) => {
+    html += `<tr><td style="color:${colors(k, i)}"><b>${k}</b></td>` +
+            spec.panels.map(pp => `<td>${appCell(c, pp)}</td>`).join("") + `</tr>`;
+  });
+  wrap.innerHTML = html + `</table>`;
+  return true;
+}
 function renderBehavior(expId, label) {
   const spec = BEHAVIOR_SPECS[expId] || BEHAVIOR_SPECS.e5;
   document.getElementById("behSub").textContent =
@@ -478,33 +678,36 @@ function evaluatePredictions(conds) {
     } else {
       add(`<b>${k}</b> — sorting selectivity: good:bad ratio improves with training`, "amb", "no bad crossings recorded (ratio undefined)");
     }
-    const se = c.testSortEntropy;
+    const se = c.testSortEntropy || { mean: 0, ci: 0 };
     add(`<b>${k}</b> — velocity distribution sorted (ΔH > 0)`,
         se.mean > 2*(se.ci||0) ? "ok" : (se.mean < -2*(se.ci||0) ? "bad" : "amb"),
         `ΔH = ${se.mean.toExponential(2)}`);
-    const dt = c.testDT;
+    const dt = c.testDT || { mean: 0, ci: 0 };
     add(`<b>${k}</b> — temperature gradient established (ΔT > 0, hot side wins)`,
         dt.mean > 2*(dt.ci||0) ? "ok" : (dt.mean < -2*(dt.ci||0) ? "bad" : "amb"),
         `ΔT = ${dt.mean.toFixed(1)}`);
     const of_ = c.testOpenFraction;
-    add(`<b>${k}</b> — gate used selectively (open fraction < 0.5)`,
+    if (of_) add(`<b>${k}</b> — gate used selectively (open fraction < 0.5)`,
         of_.mean < 0.5 ? "ok" : "bad",
         `open ${(of_.mean*100).toFixed(0)}%`);
     const mi = c.testMiNeural;
-    add(`<b>${k}</b> — neural policy carries task information (MI > 0.002 bits)`,
-        mi.mean > 0.002 ? "ok" : (mi.mean > 0 ? "amb" : "amb"),
+    if (mi) add(`<b>${k}</b> — neural policy carries task information (MI > 0.002 bits)`,
+        mi.mean > 0.002 ? "ok" : "amb",
         `MI = ${mi.mean > 0 ? mi.mean.toFixed(4) : "n/a"} bits`);
-    const eff = c.testWorkInJ.mean > 0 ? c.testExtractableJ.mean / c.testWorkInJ.mean : 0;
-    add(`<b>${k}</b> — jet-subsidized regime (extractable ≪ work-in, efficiency < 1%)`,
-        eff < 0.01 ? "ok" : "bad",
-        `η = ${(eff*100).toExponential(1)}%`);
+    if (c.testWorkInJ && c.testExtractableJ && c.testWorkInJ.mean > 0) {
+      const eff = c.testExtractableJ.mean / c.testWorkInJ.mean;
+      add(`<b>${k}</b> — jet-subsidized regime (extractable ≪ work-in, efficiency < 1%)`,
+          eff < 0.01 ? "ok" : "bad",
+          `η = ${(eff*100).toExponential(1)}%`);
+    }
   }
   return out;
 }
 function renderPredictions() {
   if (!DONE) return;
   const conds = DONE.summary.conditions || {};
-  const preds = evaluatePredictions(conds);
+  const appExp = DONE.provenance && APP_SPEC[DONE.provenance.experiment] ? DONE.provenance.experiment : null;
+  const preds = appExp ? evaluateApparatusPredictions(appExp, appStatsFromRows(DONE.rows)) : evaluatePredictions(conds);
   const wrap = document.getElementById("predWrap");
   if (!preds.length) { wrap.innerHTML = '<div class="empty">no conditions</div>'; return; }
   const singleSeed = (DONE.provenance.seeds || 1) < 3;
@@ -515,6 +718,84 @@ function renderPredictions() {
            `<span class="ptext">${pr.text}</span><span class="pval">${pr.val}</span></div>`;
   }).join("") +
   (singleSeed ? `<div class="reading">⚠ single-seed run — treat ≈ verdicts as low statistical power, not as falsified predictions.</div>` : "");
+}
+
+function evaluateApparatusPredictions(expId, conds) {
+  const out = [];
+  const add = (text, verdict, val) => out.push({ text, verdict, val });
+  const g = (c, f) => (c && c[f] && Number.isFinite(c[f].mean)) ? c[f] : { mean: 0, ci: 0 };
+  const pick = (re) => Object.keys(conds).find(n => re.test(n));
+  if (expId === "e9") {
+    const n = conds[pick(/neural/)], fz = conds[pick(/frozen/)];
+    if (n) {
+      const wd = g(n, "weightDrift");
+      add(`<b>demon_neural</b> — training changed the brain (Σ|Δw| > 0; frozen control must stay ≈ 0)`,
+          wd.mean > 0 && (!fz || g(fz, "weightDrift").mean < wd.mean * 0.05) ? "ok" :
+          (wd.mean > 0 ? "amb" : "bad"),
+          `neural ${wd.mean.toExponential(2)}` + (fz ? ` vs frozen ${g(fz, "weightDrift").mean.toExponential(2)}` : ""));
+      const acc = g(n, "decisionAccuracy");
+      add(`<b>demon_neural</b> — decisions better than chance (accuracy > 50%)`,
+          acc.mean > 0.5 ? "ok" : (acc.mean > 0.35 ? "amb" : "bad"),
+          `accuracy ${(acc.mean * 100).toFixed(0)}%`);
+      const rw = g(n, "reward");
+      add(`<b>demon_neural</b> — reward ≫ penalty floor (net teaching signal positive)`,
+          rw.mean > -0.5 ? "ok" : (rw.mean > -2 ? "amb" : "bad"), `reward ${rw.mean.toFixed(2)}/episode`);
+    }
+    if (n && fz) {
+      const rwN = g(n, "reward"), rwF = g(fz, "reward");
+      add(`<b>learning vs frozen</b> — learned policy earns more reward than the frozen brain`,
+          rwN.mean > rwF.mean ? "ok" : (rwN.mean < rwF.mean - 1 ? "bad" : "amb"),
+          `${rwN.mean.toFixed(2)} vs ${rwF.mean.toFixed(2)} reward/episode`);
+    }
+    const d = conds[pick(/demon_speed|_speed/)];
+    if (d) {
+      const acc = g(d, "decisionAccuracy");
+      add(`<b>demon_speed (reference)</b> — the classical rule scores ~100% on its own metric`,
+          acc.mean > 0.9 ? "ok" : "amb", `accuracy ${(acc.mean * 100).toFixed(0)}%`);
+    }
+    const f = conds[pick(/never/)];
+    if (d && f) {
+      // volume-aware relative pressure difference: the quantity that drives
+      // the piston (raw ΔT is fluctuation-dominated at n=260 particles)
+      const dP = g(d, "dPfinal"), fP = g(f, "dPfinal");
+      const sig = Math.sqrt((dP.ci||0)**2 + (fP.ci||0)**2);
+      add(`<b>demon_speed</b> — real pressure head: |ΔP| ≫ never-open noise floor`,
+          Math.abs(dP.mean) > Math.abs(fP.mean) + 2*sig ? "ok" : (Math.abs(dP.mean) > Math.abs(fP.mean) ? "amb" : "bad"),
+          `|ΔP| ${Math.abs(dP.mean).toFixed(3)} vs floor ${Math.abs(fP.mean).toFixed(3)}`);
+      const net = g(d, "netWorkJ");
+      add(`<b>demon_speed</b> — thermodynamic budget: spring work vs theoretical Landauer minimum`,
+          net.mean > 0 ? "ok" : "bad", `W − kT·ln2·bits = ${net.mean.toExponential(2)} J (bit count is a decision proxy)`);
+      const px = g(d, "pistonX");
+      add(`<b>demon_speed</b> — ΔP drives the piston against the spring`,
+          px.mean > 2 ? "ok" : (px.mean > 0 ? "amb" : "bad"), `piston x = ${px.mean.toFixed(1)}`);
+    }
+  } else if (expId === "e10") {
+    const li = conds[pick(/light/)], he = conds[pick(/heavy/)];
+    if (li && he) {
+      add(`<b>light vs heavy door</b> — lighter door passes more molecules (mass gates flow, not intelligence)`,
+          g(li, "crossingRate").mean > g(he, "crossingRate").mean ? "ok" : "bad",
+          `${g(li, "crossingRate").mean.toFixed(2)} vs ${g(he, "crossingRate").mean.toFixed(2)} crossings/s`);
+    }
+    const db = Math.max(...Object.values(conds).map(c => Math.abs(g(c, "directionalBias").mean)));
+    add(`<b>all doors</b> — trapdoor rectifies nothing: directional bias ≈ 0 (Smoluchowski 1912)`,
+        db < 0.2 ? "ok" : "bad", `max |bias| = ${db.toFixed(3)}`);
+    const dd = g(Object.values(conds)[0], "densityDiff");
+    add(`<b>gas</b> — relaxes toward equal densities, no demon here`,
+        Math.abs(dd.mean) < 0.25 ? "ok" : "amb", `final density diff = ${dd.mean.toFixed(3)}`);
+  } else if (expId === "e11") {
+    const grad = conds[pick(/gradient/)], eq = conds[pick(/equilib/)];
+    if (grad) add(`<b>gradient</b> — Th > Tc drives net rotation (forward slips ≫ reversals)`,
+        g(grad, "netPerEpisode").mean > 0 ? "ok" : "bad",
+        `net ${g(grad, "netPerEpisode").mean.toFixed(2)} rad/ep · fwd ${Math.round(g(grad, "forwardSteps").mean)} / rev ${Math.round(g(grad, "reverseSteps").mean)}`);
+    if (eq) { const net = g(eq, "netPerEpisode");
+      add(`<b>equilibrium</b> — Th = Tc: net rotation ≈ 0 (Feynman's rectification theorem)`,
+          Math.abs(net.mean) < Math.max(1, 2*(net.ci||0)) ? "ok" : "bad",
+          `net = ${net.mean.toFixed(2)} rad/ep`); }
+    const eff = g(Object.values(conds)[0], "efficiency");
+    add(`<b>engine</b> — η far below Carnot: a real engine, not a perpetuum mobile`,
+        eff.mean < 0.5 ? "ok" : "amb", `η = ${(eff.mean*100).toFixed(2)}%`);
+  }
+  return out;
 }
 
 // ---- crossing ledger ---------------------------------------------------------
@@ -544,6 +825,8 @@ function renderLedger() {
   const conds = DONE.summary.conditions || {};
   const rows = DONE.rows || [];
   const wrap = document.getElementById("ledgerWrap");
+  const appExpL = DONE.provenance && APP_SPEC[DONE.provenance.experiment] ? DONE.provenance.experiment : null;
+  if (appExpL && renderApparatus(appExpL, appStatsFromRows(rows), wrap)) return;
   const keys = Object.keys(conds);
   if (!keys.length) { wrap.innerHTML = '<div class="empty">no conditions</div>'; return; }
   let html = '<table class="ledger"><tr><th>condition</th><th>crossings</th><th>good</th><th>bad</th>' +
@@ -566,23 +849,84 @@ function renderLedger() {
   wrap.innerHTML = html;
 }
 
+// ---- panel card titles -----------------------------------------------------
+// E1–E8 demon sorting and the E9 pressure demon plot different quantities in
+// the same six cards — swap each card's <h2>/<sub> to match what is plotted.
+const PANEL_TITLES = {
+  cAgree: ["Learning curve — demon agreement", "mean agreement with the classical demon per 10-trial block"],
+  cGood:  ["Good : bad crossing ratio", "sorting quality per block (higher is better; null = no bad crossings)"],
+  cDT:    ["Temperature differential ΔT", "T_left − T_right at trial end (K-scaled)"],
+  cSort:  ["Sorting entropy reduction", "ΔH from velocity distribution sorting (nats, higher is better)"],
+  cMI:    ["Neural mutual information", "I(spike pattern; particle speed class), bits"],
+  cThermo:["Thermodynamic budget", "extractable work vs Landauer erasure bill (J, log scale)"],
+};
+const E9_PANEL_TITLES = {
+  cAgree: ["Learning curve — reward per episode", "mean reward per 10-episode block (CI across seeds)"],
+  cGood:  ["Decision accuracy (vs classical reference)", "fraction of correct open/shut valve decisions per block"],
+  cDT:    ["Mechanical work per episode", "piston work extracted per episode (J, log scale)"],
+  cSort:  ["Pressure difference ΔP", "ΔP between chambers at episode end (relative)"],
+  cMI:    ["Demon agreement (neural vs classical)", "mean agreement with the classical demon per block"],
+  cThermo:["Thermodynamic budget — work vs Landauer", "piston work per condition vs the Landauer erasure bill (J, log scale)"],
+};
+const CARD_IDS = ["cAgree", "cGood", "cDT", "cSort", "cMI", "cThermo"];
+function applyPanelTitles(isE9) {
+  const set = isE9 ? E9_PANEL_TITLES : PANEL_TITLES;
+  for (const id of CARD_IDS) {
+    const card = document.getElementById(id).closest(".card");
+    if (!card) continue;
+    card.querySelector("h2").textContent = set[id][0];
+    card.querySelector(".sub").textContent = set[id][1];
+  }
+}
+
 // ---- render all panels ---------------------------------------------------
 function render() {
   const map = byCond(CURVE);
   const colors = palette();
-  plot("cAgree", "lAgree", seriesFrom(map, colors, "agree"), "agreement");
-  plot("cGood", "lGood", seriesFrom(map, colors, "goodBadRatio"), "good:bad");
-  plot("cDT", "lDT", seriesFrom(map, colors, "dT"), "ΔT");
-  plot("cSort", "lSort", seriesFrom(map, colors, "sortEntropy"), "ΔH");
-  plot("cMI", "lMI", seriesFrom(map, colors, "miNeural"), "bits");
-  // thermo: two series per condition (extractable vs erasure), log Y
-  const thermo = [];
-  let ti = 0;
-  for (const [k, pts] of map) {
-    thermo.push({ name: k + " extractable", color: palette()(k, ti++),
-      pts: pts.map(p => [p.block, p.energyJ >= 0 ? Math.max(p.energyJ, 1e-22) : NaN]) });
+  const isE9 = CUR_EXP ? CUR_EXP === "e9"
+    : !!(DONE && DONE.provenance && DONE.provenance.experiment === "e9");
+  applyPanelTitles(isE9);
+  if (isE9) {
+    // E9 apparatus learning panels: behavior first, physics separate
+    plot("cAgree", "lAgree", seriesFrom(map, colors, "reward"), "reward / episode");
+    plot("cGood", "lGood", seriesFrom(map, colors, "decisionAccuracy"), "decision accuracy");
+    plot("cDT", "lDT", seriesFrom(map, colors, "workJEp"), "work / episode (J)", { logY: true });
+    plot("cSort", "lSort", seriesFrom(map, colors, "dPfinal"), "ΔP (relative)");
+    plot("cMI", "lMI", seriesFrom(map, colors, "demonAgree"), "demon agreement");
+    // thermodynamic budget: extractable work vs Landauer erasure bill (log J)
+    const net = [];
+    let ni = 0;
+    for (const [k, pts] of map) {
+      const c = colors(k, ni++);
+      net.push({ name: k + " work", color: c,
+        pts: pts.map(p => { const v = plotVal(p.workJ); return [p.block, v > 0 ? Math.max(v, 1e-26) : NaN]; }),
+        ci: pts.map(p => ciVal(p.workJ)) });
+      net.push({ name: k + " Landauer bill", color: c,
+        pts: pts.map(p => { const v = plotVal(p.erasureCostJ); return [p.block, v > 0 ? v : NaN]; }),
+        ci: pts.map(p => ciVal(p.erasureCostJ)) });
+    }
+    plot("cThermo", "lThermo", net, "work vs Landauer (J)", { logY: true, xLabel: "block" });
+  } else {
+    plot("cAgree", "lAgree", seriesFrom(map, colors, "agree"), "agreement");
+    plot("cGood", "lGood", seriesFrom(map, colors, "goodBadRatio"), "good:bad",
+      { emptyNote: "null — no bad crossings this run" });
+    plot("cDT", "lDT", seriesFrom(map, colors, "dT"), "ΔT");
+    plot("cSort", "lSort", seriesFrom(map, colors, "sortEntropy"), "ΔH");
+    plot("cMI", "lMI", seriesFrom(map, colors, "miNeural"), "bits");
+    // thermo: extractable work per condition, log Y (unwrap apparatus stat
+    // objects; E10/E11 stream workJ instead of energyJ)
+    const thermo = [];
+    let ti = 0;
+    for (const [k, pts] of map) {
+      thermo.push({ name: k + " extractable", color: palette()(k, ti++),
+        pts: pts.map(p => {
+          const raw = (p.energyJ !== undefined && p.energyJ !== null) ? p.energyJ : p.workJ;
+          const v = plotVal(raw);
+          return [p.block, (v !== undefined && v !== null && v >= 0) ? Math.max(v, 1e-22) : NaN];
+        }) });
+    }
+    plot("cThermo", "lThermo", thermo, "J", { logY: true, xLabel: "block" });
   }
-  plot("cThermo", "lThermo", thermo, "J", { logY: true, xLabel: "block" });
   if (DONE) renderSummary();
 }
 
@@ -604,20 +948,35 @@ function renderSummary() {
   if (!keys.length) return;
   document.getElementById("sumSub").textContent =
     `${rows.length} trial rows · ${keys.length} conditions · elapsed ${provenance.elapsedSeconds.toFixed(0)} s`;
-  let html = "<table><tr><th>condition</th><th>test agreement</th><th>good:bad</th>" +
+  const appExp = provenance && APP_SPEC[provenance.experiment] ? provenance.experiment : null;
+  let html;
+  if (appExp) {
+    // apparatus runs: show the headline apparatus metrics instead of demon fields
+    const cols = APP_SPEC[appExp].panels.slice(0, 6);
+    const rc = appStatsFromRows(rows);
+    html = "<table><tr><th>condition</th>" + cols.map(pp => `<th>${pp.label}</th>`).join("") + "</tr>";
+    for (const k of keys) {
+      const c = rc[k] || {};
+      html += `<tr><td>${k}</td>` +
+        cols.map(pp => `<td>${appCell(c, pp)}</td>`).join("") + `</tr>`;
+    }
+  } else {
+  html = "<table><tr><th>condition</th><th>test agreement</th><th>good:bad</th>" +
     "<th>ΔT</th><th>sort ΔH</th><th>MI (bits)</th><th>work in (J)</th>" +
     "<th>erasure (J)</th><th>bits</th></tr>";
   for (const k of keys) {
     const c = conds[k];
     const gb = c.testGoodBadRatio ? c.testGoodBadRatio.mean : null;
     const mi = c.testMiNeural && c.testMiNeural.mean ? c.testMiNeural.mean : null;
-    html += `<tr><td>${k}</td><td>${c.testAgreement.mean.toFixed(3)}</td>` +
+    const num = (f, d) => (c[f] && Number.isFinite(c[f].mean)) ? c[f].mean.toFixed(d) : "n/a";
+    html += `<tr><td>${k}</td><td>${num("testAgreement", 3)}</td>` +
       `<td>${gb === null ? "n/a" : gb.toFixed(2)}</td>` +
-      `<td>${c.testDT.mean.toFixed(1)}</td><td>${c.testSortEntropy.mean.toExponential(2)}</td>` +
+      `<td>${num("testDT", 1)}</td><td>${c.testSortEntropy ? c.testSortEntropy.mean.toExponential(2) : "n/a"}</td>` +
       `<td>${mi === null ? "n/a" : mi.toFixed(4)}</td>` +
-      `<td>${c.testWorkInJ.mean.toExponential(2)}</td>` +
-      `<td>${c.testErasureCostJ.mean.toExponential(2)}</td>` +
-      `<td>${Math.round(c.testMeasuredBits.mean)}</td></tr>`;
+      `<td>${c.testWorkInJ ? c.testWorkInJ.mean.toExponential(2) : "n/a"}</td>` +
+      `<td>${c.testErasureCostJ ? c.testErasureCostJ.mean.toExponential(2) : "n/a"}</td>` +
+      `<td>${c.testMeasuredBits ? Math.round(c.testMeasuredBits.mean) : "n/a"}</td></tr>`;
+  }
   }
   html += "</table>";
   document.getElementById("sumWrap").innerHTML = html;
@@ -697,6 +1056,15 @@ const PANELS = [
   ["cMI",     "E · Neural mutual information"],
   ["cThermo", "F · Thermodynamic budget"],
 ];
+// E9 combo export uses the apparatus learning-panel lettering
+const E9_PANELS = [
+  ["cAgree",  "A · Learning curve — reward per episode"],
+  ["cGood",   "B · Decision accuracy (vs classical reference)"],
+  ["cDT",     "C · Mechanical work per episode (J)"],
+  ["cSort",   "D · Pressure difference ΔP"],
+  ["cMI",     "E · Demon agreement (neural vs classical)"],
+  ["cThermo", "F · Thermodynamic budget — work vs Landauer bill (J)"],
+];
 document.getElementById("dlCombo").onclick = () => {
   const th = THEMES[STYLE.theme] || THEMES.darkgrid;
   const dpr = Math.max(window.devicePixelRatio || 1, 2);   // >=2 for print
@@ -754,7 +1122,8 @@ document.getElementById("dlCombo").onclick = () => {
   }
 
   // --- panels ---
-  PANELS.forEach(([id, label], i) => {
+  const PANELSET = (DONE && DONE.provenance && DONE.provenance.experiment === "e9") ? E9_PANELS : PANELS;
+  PANELSET.forEach(([id, label], i) => {
     const src = document.getElementById(id);
     if (!src) return;
     const cx = pad + (i % cols) * (panelW + pad);
@@ -959,6 +1328,64 @@ function drawMiniBrainHeatmap(canvas, data, title){
   for (let y = 0; y < cbH; y++){ g.fillStyle = jetColor(1 - y / cbH); g.fillRect(cbX, cbY + y, 5, 1); }
 }
 
+function drawMiniCurvePanel(canvas, curve, title){
+  // Generic session panel for experiments without a fly-brain snapshot
+  // (apparatus demos like E10/E11): blockwise mean agreement + ΔT curves.
+  const g = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+  g.fillStyle = "#0d1117"; g.fillRect(0, 0, W, H);
+  g.strokeStyle = "#30363d"; g.strokeRect(0.5, 0.5, W - 1, H - 1);
+  const fg = getComputedStyle(document.documentElement).getPropertyValue("--fg") || "#e6edf3";
+  g.fillStyle = fg; g.font = "bold 13px ui-sans-serif,system-ui"; g.textAlign = "left";
+  g.fillText(title, 8, 15);
+  const num = v => (v && typeof v === "object") ? v.mean : v;
+  const byBlock = (field) => {
+    const byB = new Map();
+    for (const pt of curve){
+      const v = num(pt[field]);
+      if (!Number.isFinite(v)) continue;
+      if (!byB.has(pt.block)) byB.set(pt.block, []);
+      byB.get(pt.block).push(v);
+    }
+    return [...byB.keys()].sort((a, b) => a - b)
+      .map(b => ({ b, v: byB.get(b).reduce((x, y) => x + y, 0) / byB.get(b).length }));
+  };
+  const strips = [
+    { field: "agree", color: "#3fb950", txt: "demon agreement (0–1)", lo: 0, hi: 1 },
+    { field: "dT",    color: "#58a6ff", txt: "ΔT (sortedness)" },
+  ];
+  const padL = 12, padR = 150, top = 28, stripH = (H - top - 26) / strips.length;
+  strips.forEach((s, si) => {
+    const pts = byBlock(s.field);
+    const y0 = top + si * stripH, hh = stripH - 12;
+    g.strokeStyle = "#21262d"; g.strokeRect(padL + 0.5, y0 + 0.5, W - padL - padR - 1, hh);
+    if (pts.length < 2){
+      g.fillStyle = "#8b98a5"; g.font = "10px ui-sans-serif,system-ui";
+      g.fillText("not enough blocks", padL + 8, y0 + hh / 2 + 3);
+      return;
+    }
+    let lo = s.lo, hi = s.hi;
+    if (lo === undefined){
+      lo = Math.min(0, ...pts.map(p => p.v)); hi = Math.max(0, ...pts.map(p => p.v));
+      if (hi - lo < 1e-9){ lo -= 1; hi += 1; }
+    }
+    const X = i => padL + (i / (pts.length - 1)) * (W - padL - padR);
+    const Y = v => y0 + (1 - (v - lo) / (hi - lo)) * hh;
+    if (lo < 0 && hi > 0){                       // zero baseline
+      g.strokeStyle = "#30363d"; g.beginPath();
+      g.moveTo(padL, Y(0)); g.lineTo(W - padR, Y(0)); g.stroke();
+    }
+    g.strokeStyle = s.color; g.lineWidth = 2; g.beginPath();
+    pts.forEach((p, i) => { if (i) g.lineTo(X(i), Y(p.v)); else g.moveTo(X(i), Y(p.v)); });
+    g.stroke(); g.lineWidth = 1;
+    g.fillStyle = s.color; g.beginPath();
+    g.arc(X(pts.length - 1), Y(pts[pts.length - 1].v), 3, 0, 7); g.fill();
+    g.fillStyle = fg; g.font = "10px ui-sans-serif,system-ui";
+    g.fillText(s.txt, W - padR + 8, y0 + 14);
+    g.fillText("last: " + pts[pts.length - 1].v.toFixed(2), W - padR + 8, y0 + 28);
+  });
+}
+
 function galleryKeys(){
   return GALLERY_ORDER.filter(k => GALLERY.has(k))
     .concat([...GALLERY.keys()].filter(k => !GALLERY_ORDER.includes(k)));
@@ -968,7 +1395,7 @@ function renderBrainGallery(){
   if (!wrap) return;
   const keys = galleryKeys();
   if (!keys.length){
-    wrap.innerHTML = '<div class="empty">no snapshots yet — finish an experiment with a fly brain (E2–E5, E7, E8)</div>';
+    wrap.innerHTML = '<div class="empty">no snapshots yet — finish an experiment with a fly brain (E2–E5, E7–E9)</div>';
     return;
   }
   wrap.innerHTML = "";
@@ -993,7 +1420,7 @@ function renderDeltaGallery(){
   if (!wrap) return;
   const keys = galleryKeys().filter(k => GALLERY.get(k).deltaURL);
   if (!keys.length){
-    wrap.innerHTML = '<div class="empty">no delta snapshots yet — finish an experiment with a fly brain (E2–E5, E7, E8)</div>';
+    wrap.innerHTML = '<div class="empty">no delta snapshots yet — finish an experiment with a fly brain (E2–E5, E7–E9)</div>';
     return;
   }
   wrap.innerHTML = "";
@@ -1951,16 +2378,19 @@ const ws = new BroadcastChannel("fly-demon-experiments");
 ws.onmessage = (ev) => {
   const m = ev.data || {};
   if (m.kind !== "plots") return;
+  CUR_EXP = m.expId || CUR_EXP;
   LABEL = m.label || LABEL;
   document.getElementById("expLabel").textContent = LABEL;
   const st = document.getElementById("status");
   if (m.type === "progress") {
+    LAB_STATE[m.expId] = "running"; renderLabBoard();
     renderBehavior(m.expId, LABEL);
     CURVE = m.curve || [];
     st.textContent = `running · ${m.phase} trial ${m.trial + 1}/${m.nTrials} · seed ${m.seedIdx + 1}/${m.nSeeds}`;
     st.className = "status running";
     render();
   } else if (m.type === "done") {
+    LAB_STATE[m.expId] = "done"; renderLabBoard();
     CURVE = (m.summary && m.summary.curve) || CURVE;
     DONE = { summary: m.summary, rows: m.rows, provenance: m.provenance };
     BRAIN_DATA = collectBrainData(m.summary, m.rows, LABEL);
@@ -1968,6 +2398,8 @@ ws.onmessage = (ev) => {
     const ANAT_FIGS = renderAnatMaps(LAST_ROWS, LABEL);
     if (ANAT_FIGS && ANAT_FIGS.length) renderBrainEmpty();   // anat maps shown; skip block heatmap
     else renderBrain();                                      // no-anatomy fallback
+    window.__ct3dRun = { rows: LAST_ROWS, label: LABEL };   // late viewers catch up
+    if (window.__ct3dBrain) window.__ct3dBrain.showRun(LAST_ROWS, LABEL);
     if (BRAIN_DATA) captureBrainSnapshot(m.expId, LABEL);
     st.textContent = `done ✓ · ${m.rows.length} trials in ${m.provenance.elapsedSeconds.toFixed(0)} s`;
     st.className = "status done";
@@ -1977,6 +2409,29 @@ ws.onmessage = (ev) => {
     renderLedger();
   }
 };
+// ---- results-by-laboratory board -------------------------------------------
+const LABS = [
+  { name: "\uD83E\uDDEA DEMON LAB", exps: ["e1", "e6", "e7", "e9", "e10", "e11"] },
+  { name: "\uD83E\uDDE0 INFORMATION LAB", exps: ["e2", "e8"] },
+  { name: "\uD83E\uDD30 FLY BRAIN", exps: ["e3", "e4", "e5"] },
+];
+const LAB_STATE = {};
+const LAB_LABEL = { e1: "E1 · Classical Maxwell Demon", e6: "E6 · Jet-Closure Paradox",
+  e7: "E7 · Generalization Sweep", e9: "E9 · Pressure Demon", e10: "E10 · Smoluchowski Trapdoor",
+  e11: "E11 · Feynman Ratchet & Pawl", e2: "E2 · Artificial Neural Demon",
+  e8: "E8 · Information-Limited Demons", e3: "E3 · Drosophila-Inspired Network",
+  e4: "E4 · Connectome-Constrained", e5: "E5 · Full Comparator Study" };
+function renderLabBoard() {
+  document.getElementById("labBoard").innerHTML = LABS.map(lab =>
+    `<div style="margin:6px 0"><b style="color:#c9d1d9">${lab.name}</b> ` + lab.exps.map(id => {
+      const st = LAB_STATE[id] || "waiting";
+      const cls = st === "done" ? "ok" : st === "running" ? "amb" : "";
+      const dot = st === "done" ? "✓" : st === "running" ? "●" : "·";
+      return `<span class="badge ${cls}" style="margin:2px 6px 2px 0">${dot} ${LAB_LABEL[id]} — ${st}</span>`;
+    }).join("") + `</div>`).join("");
+}
+renderLabBoard();
+
 // ---- animated six-brain session figure -------------------------------------
 // A "run all six" click on the lab page announces a session; this canvas fills
 // one jet heatmap panel per finished experiment, in queue order.
@@ -2026,6 +2481,16 @@ function handleSixMsg(m) {
             url = cvF.toDataURL("image/png");
           }
         } catch (e) { /* snapshot unavailable for this panel */ }
+      }
+      // last resort: generic block-curve panel — apparatus demos without a
+      // fly brain (e.g. E10/E11) still get a live panel in the session figure
+      if (!url && m.summary && m.summary.curve && m.summary.curve.length) {
+        try {
+          const cvF = document.createElement("canvas");
+          cvF.width = 1000; cvF.height = 232;
+          drawMiniCurvePanel(cvF, m.summary.curve, label);
+          url = cvF.toDataURL("image/png");
+        } catch (e) { /* curve panel unavailable */ }
       }
       if (url) {
         SIX.done.set(m.expId, url);
@@ -2118,9 +2583,339 @@ function drawSixFrame(final) {
     10, H - 10);
 }
 window.__sixTest = handleSixMsg;   // debug handle for in-page verification
+window.__ct3dHooks = { fireVecFor, condMeanRates, label: () => LABEL };
 window.__plotsDebug = { renderAnatMaps, ANAT, drawAnatMap, b64ToBytes, drawAnatDeltaMap, drawRegionTimeStrip, fireVecFor, regionForRateName, GALLERY };
 window.addEventListener("resize", render);
 render();
 </script>
+
+<script type="module">
+// ==== Brain outcome — 3D brain anatomy viewer ================================
+// The run's actual per-neuron firing (worker fireVecMean — the same signal
+// the main screen's spiking brain shows) rendered at real FAFB positions,
+// plus firing paths drawn along the real connectome (fly_brain_circuit.json)
+// between neurons that actually fired.
+import * as THREE from "./three.module.js";
+
+const V = { ready:false, renderer:null, scene:null, cam:null,
+            pts:null, posGeo:null, lines:null, linesGeo:null, N:0,
+            POS:null, PRIM:null, npRegion:null,
+            edges:null,                      // {s,t,w,sign} parallel arrays, weight-sorted
+            rows:null, label:"", conds:[], cur:null,
+            restMode:true };
+
+const mount = document.getElementById("ct3dMount");
+const legend = document.getElementById("ct3dLegend");
+const chipsEl = document.getElementById("ct3dChips");
+const loadEl = document.getElementById("ct3dLoad");
+
+// ---- jet colormap (same scale family as the 2D maps) -----------------------
+function jet(t){
+  t = Math.min(1, Math.max(0, t));
+  return [Math.min(1, Math.max(0, 1.5 - Math.abs(4*t - 3))),
+          Math.min(1, Math.max(0, 1.5 - Math.abs(4*t - 2))),
+          Math.min(1, Math.max(0, 1.5 - Math.abs(4*t - 1)))];
+}
+
+// ---- renderer / scene / camera ---------------------------------------------
+function ensureView(){
+  if (V.ready) return;
+  const renderer = new THREE.WebGLRenderer({ antialias:true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setClearColor(0x05070d, 1);
+  mount.appendChild(renderer.domElement);
+  renderer.domElement.style.cssText = "position:absolute; inset:0; width:100%; height:100%; display:block";
+  const scene = new THREE.Scene();
+  scene.add(new THREE.HemisphereLight(0x8899bb, 0x080a10, 0.9));
+  const dl = new THREE.DirectionalLight(0xffffff, 1.1); dl.position.set(600, 900, 800); scene.add(dl);
+  const dl2 = new THREE.DirectionalLight(0x88aaff, 0.5); dl2.position.set(-700, -300, -600); scene.add(dl2);
+
+  const cam = new THREE.PerspectiveCamera(40, 2, 1, 6000);
+  // orbit state (damped): start framed on the brain/head, three-quarter view
+  const orb = { th: 0.55, ph: 1.25, r: 600, tgt: new THREE.Vector3(0, -4, 7),
+                dth: 0.55, dph: 1.25, dr: 600 };
+  let drag = null;
+  renderer.domElement.addEventListener("pointerdown", (e) => {
+    drag = { x: e.clientX, y: e.clientY };
+    renderer.domElement.setPointerCapture(e.pointerId);
+  });
+  renderer.domElement.addEventListener("pointermove", (e) => {
+    if (!drag) return;
+    orb.dth -= (e.clientX - drag.x) * 0.0055;
+    orb.dph = Math.min(2.6, Math.max(0.25, orb.dph - (e.clientY - drag.y) * 0.0045));
+    drag = { x: e.clientX, y: e.clientY };
+  });
+  renderer.domElement.addEventListener("pointerup", () => { drag = null; });
+  renderer.domElement.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    orb.dr = Math.min(2500, Math.max(80, orb.dr * (1 + Math.sign(e.deltaY) * 0.12)));
+  }, { passive:false });
+
+  new ResizeObserver(() => {
+    const w = mount.clientWidth || 640, h = mount.clientHeight || 360;
+    renderer.setSize(w, h, false);
+    cam.aspect = w / h; cam.updateProjectionMatrix();
+  }).observe(mount);
+
+  // toolbar: CT visibility + reset view
+  const bar = document.createElement("div");
+  bar.style.cssText = "position:absolute; top:8px; right:8px; display:flex; gap:6px; z-index:5";
+  const mkBtn = (txt, title, fn) => {
+    const b = document.createElement("button");
+    b.textContent = txt; b.title = title;
+    b.style.cssText = "background:#161b22; color:#c9d1d9; border:1px solid #30363d; border-radius:6px;" +
+                      "padding:3px 9px; font:11.5px ui-sans-serif,system-ui; cursor:pointer";
+    b.onclick = fn; bar.appendChild(b); return b;
+  };
+  mkBtn("reset view", "back to the default camera", () => {
+    orb.dth = 0.55; orb.dph = 1.25; orb.dr = 600;
+  });
+  mount.appendChild(bar);
+
+  V.renderer = renderer; V.scene = scene; V.cam = cam; V.orb = orb;
+  V.ready = true;
+  (function loop(){
+    requestAnimationFrame(loop);
+    if (!V.ready || window.__ct3dPaused) return;
+    const o = V.orb, k = 0.12;
+    o.th += (o.dth - o.th) * k; o.ph += (o.dph - o.ph) * k; o.r += (o.dr - o.r) * k;
+    V.cam.position.set(
+      o.tgt.x + o.r * Math.sin(o.ph) * Math.sin(o.th),
+      o.tgt.y + o.r * Math.cos(o.ph),
+      o.tgt.z + o.r * Math.sin(o.ph) * Math.cos(o.th));
+    V.cam.lookAt(o.tgt);
+    V.renderer.render(V.scene, V.cam);
+  })();
+}
+
+// ---- real neuron positions (FAFB, same file as the 2D maps) ----------------
+async function loadPositions(){
+  const [buf, meta] = await Promise.all([
+    fetch("fly_brain_positions.bin", { cache:"no-cache" }).then(r => r.ok ? r.arrayBuffer() : null),
+    fetch("fly_brain_meta.json",     { cache:"no-cache" }).then(r => r.ok ? r.json() : null),
+  ]);
+  if (!buf || !meta) throw new Error("positions unavailable");
+  const n = meta.n = Math.floor(buf.byteLength / 7);   // 7 B/neuron
+  V.N = n; V.POS = new Int16Array(buf, 0, n * 3); V.PRIM = new Uint8Array(buf, n * 6, n);
+  V.npRegion = new Map();
+  for (const rk in meta.region_of)
+    for (const nm of meta.region_of[rk]) V.npRegion.set(nm, rk);
+  // points cloud: hidden (black) until a firing vector arrives; resting tint
+  // shows the anatomy inside the CT even before any run
+  const g = new THREE.BufferGeometry();
+  const pos = new Float32Array(n * 3), col = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++){
+    pos[i*3] = V.POS[i*3] * 0.1; pos[i*3+1] = V.POS[i*3+1] * 0.1; pos[i*3+2] = V.POS[i*3+2] * 0.1;
+    col[i*3] = 0.03; col[i*3+1] = 0.055; col[i*3+2] = 0.10;   // resting blue
+  }
+  g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  g.setAttribute("color", new THREE.BufferAttribute(col, 3));
+  const mat = new THREE.PointsMaterial({ size:3.0, vertexColors:true, transparent:true,
+    opacity:0.95, depthWrite:false, blending:THREE.AdditiveBlending, sizeAttenuation:true });
+  V.pts = new THREE.Points(g, mat); V.pts.renderOrder = 3;
+  V.posGeo = g;
+}
+
+// ---- real connectome: strongest synapses between placed neurons ------------
+async function loadCircuit(){
+  try {
+    const j = await fetch("fly_brain_circuit.json", { cache:"no-cache" }).then(r => r.ok ? r.json() : null);
+    if (!j || !j.edges) return;
+    const E = j.edges, n = E.length;
+    const idx = new Uint32Array(n); for (let i = 0; i < n; i++) idx[i] = i;
+    const wOf = (i) => E[i].w;
+    // weight-sort a sampled subset (top ~300k by counting-sort on w<=64)
+    const cnt = new Uint32Array(65);
+    for (let i = 0; i < n; i++) cnt[Math.min(64, E[i].w)]++;
+    const order = new Uint32Array(n); let fill = 0;
+    const start = new Uint32Array(65); let acc = 0;
+    for (let w = 64; w >= 1; w--){ start[w] = acc; acc += cnt[w]; }
+    for (let i = 0; i < n; i++) order[start[Math.min(64, E[i].w)]++] = i;
+    const cap = Math.min(n, 300000);
+    const s = new Uint32Array(cap), t = new Uint32Array(cap), w = new Uint8Array(cap), sg = new Int8Array(cap);
+    for (let k = 0; k < cap; k++){ const e = E[order[k]]; s[k] = e.s; t[k] = e.t; w[k] = e.w; sg[k] = e.sign || 1; }
+    V.edges = { s, t, w, sg, n: cap };
+    // if a firing vector was already applied before the circuit arrived, redraw paths now
+    if (V.cur && V.rows){ const fv = fireVec(V.cur); if (fv) applyFiring(V.cur, fv.vec, fv.measured); }
+  } catch (e) { /* circuit paths optional — neurons still render */ }
+}
+
+// ---- firing vector per condition (same source as the 2D maps) ---------------
+function fireVec(cond){
+  const hooks = window.__ct3dHooks;
+  if (hooks && hooks.fireVecFor && V.rows){
+    const fv = hooks.fireVecFor(V.rows, cond);
+    if (fv) return fv;
+  }
+  return null;
+}
+
+// ---- apply firing: light neurons + draw real firing paths -------------------
+const _active = [];
+function applyFiring(cond, fv, measured){
+  if (!V.posGeo) return;
+  const colA = V.posGeo.attributes.color;
+  const arr = colA.array, n = V.N;
+  _active.length = 0;
+  for (let i = 0; i < n; i++){
+    const v = fv ? fv[i] : 0;
+    if (v){
+      _active.push(i);
+      const c = jet(0.15 + 0.85 * (v / 255));
+      const I = 0.55 + 0.45 * (v / 255);
+      arr[i*3] = c[0] * I; arr[i*3+1] = c[1] * I; arr[i*3+2] = c[2] * I;
+    } else {
+      arr[i*3] = 0.03; arr[i*3+1] = 0.055; arr[i*3+2] = 0.10;   // resting dim blue
+    }
+  }
+  colA.needsUpdate = true;
+
+  // firing paths: real synapses (strongest first) whose BOTH ends fired,
+  // colored by sign — green excitatory, red inhibitory
+  let segs = 0;
+  if (V.edges){
+    const { s, t, sg } = V.edges;
+    // skip synapses whose endpoint lies outside the brain volume (a few FAFB
+    // neurons sample into the neck/VNC — their long paths read as glitches)
+    const BC = [0, -4, 7], BR2 = 420 * 420;
+    const inBrain = (i) => {
+      const x = V.POS[i*3]*0.1 - BC[0], y = V.POS[i*3+1]*0.1 - BC[1], z = V.POS[i*3+2]*0.1 - BC[2];
+      return x*x + y*y + z*z <= BR2;
+    };
+    const cap = 4000;
+    const lp = new Float32Array(cap * 6), lc = new Float32Array(cap * 6);
+    for (let k = 0; k < V.edges.n && segs < cap; k++){
+      const a = s[k], b = t[k];
+      if (!fv || !fv[a] || !fv[b]) continue;
+      if (!inBrain(a) || !inBrain(b)) continue;
+      const inh = sg[k] < 0;
+      const r = inh ? 0.92 : 0.20, g2 = inh ? 0.34 : 0.85, b2 = inh ? 0.38 : 0.45;
+      lp[segs*6]   = V.POS[a*3]*0.1; lp[segs*6+1] = V.POS[a*3+1]*0.1; lp[segs*6+2] = V.POS[a*3+2]*0.1;
+      lp[segs*6+3] = V.POS[b*3]*0.1; lp[segs*6+4] = V.POS[b*3+1]*0.1; lp[segs*6+5] = V.POS[b*3+2]*0.1;
+      lc[segs*6] = r; lc[segs*6+1] = g2; lc[segs*6+2] = b2;
+      lc[segs*6+3] = r; lc[segs*6+4] = g2; lc[segs*6+5] = b2;
+      segs++;
+    }
+    if (!V.lines){
+      const lg = new THREE.BufferGeometry();
+      lg.setAttribute("position", new THREE.BufferAttribute(lp, 3));
+      lg.setAttribute("color", new THREE.BufferAttribute(lc, 3));
+      const lm = new THREE.LineBasicMaterial({ vertexColors:true, transparent:true, opacity:0.7,
+        depthWrite:false, blending:THREE.AdditiveBlending });
+      V.lines = new THREE.LineSegments(lg, lm); V.lines.renderOrder = 2;
+      V.linesGeo = lg; V.scene.add(V.lines);
+    } else {
+      V.linesGeo.attributes.position.array.set(lp.subarray(0, segs * 6));
+      V.linesGeo.attributes.color.array.set(lc.subarray(0, segs * 6));
+      V.linesGeo.setDrawRange(0, segs * 2);
+      V.linesGeo.attributes.position.needsUpdate = true;
+      V.linesGeo.attributes.color.needsUpdate = true;
+    }
+  }
+  if (!cond){
+    legend.innerHTML = "<b style='color:#c9d1d9'>" + (V.label || "") + "</b>" +
+      " — " + n.toLocaleString() + " neurons at real FAFB positions (resting). " +
+      "Run a fly-brain experiment to see firing.";
+    return;
+  }
+  const pct = ((100 * _active.length) / n).toFixed(1);
+  legend.innerHTML =
+    "<b style='color:#c9d1d9'>" + (V.label || "") + "</b> · condition <b style='color:#58a6ff'>" + cond + "</b>" +
+    (measured ? " — measured per-neuron firing" : " — region-mean firing over real positions") +
+    " · <b>" + _active.length.toLocaleString() + "</b> neurons fired (" + pct + "% of " + n.toLocaleString() + ")" +
+    " · <b style='color:#35d07a'>" + segs.toLocaleString() + "</b> firing paths (real synapses; green excitatory, red inhibitory)" +
+    " · drag to orbit · wheel to zoom";
+}
+
+// ---- condition chips ---------------------------------------------------------
+function buildChips(){
+  chipsEl.innerHTML = "";
+  const rows = V.rows || [];
+  V.conds = [];
+  for (const r of rows){
+    const c = r.condition || "run";
+    if (!V.conds.includes(c) && (r.fireVecMean || r.layerRates)) V.conds.push(c);
+  }
+  if (!V.conds.length){
+    const s = document.createElement("span");
+    s.style.cssText = "color:#8b98a5; font:12px ui-sans-serif,system-ui";
+    s.textContent = (V.label || "this experiment") +
+      " has no fly-brain firing (physics-only run) — the 3D anatomy view shows E2–E5 runs";
+    chipsEl.appendChild(s);
+    applyFiring(null, null, false);
+    return;
+  }
+  for (const c of V.conds){
+    const b = document.createElement("button");
+    b.textContent = c;
+    b.style.cssText = "background:#161b22; color:#c9d1d9; border:1px solid #30363d; border-radius:14px;" +
+      "padding:4px 14px; font:12px ui-sans-serif,system-ui; cursor:pointer";
+    b.onclick = () => setCond(c);
+    b.dataset.cond = c;
+    chipsEl.appendChild(b);
+  }
+  setCond(V.conds[V.conds.length - 1]);     // latest condition by default
+}
+function setCond(c){
+  V.cur = c;
+  for (const b of chipsEl.querySelectorAll("button")){
+    const on = b.dataset.cond === c;
+    b.style.borderColor = on ? "#58a6ff" : "#30363d";
+    b.style.color = on ? "#58a6ff" : "#c9d1d9";
+    b.style.boxShadow = on ? "0 0 0 1px #58a6ff inset" : "none";
+  }
+  const fv = fireVec(c);
+  if (fv) applyFiring(c, fv.vec, fv.measured);
+}
+
+// ---- public hook -------------------------------------------------------------
+function showRun(rows, label){
+  V.rows = rows || []; V.label = label || "";
+  if (V.ready) buildChips();
+}
+window.__ct3dBrain = { showRun, setCond };
+
+// ---- boot ---------------------------------------------------------------------
+(async () => {
+  try {
+    ensureView();
+    await loadPositions();
+    V.scene.add(V.pts);
+    if (loadEl) loadEl.remove();
+    loadCircuit();
+    if (!V.rows && window.__ct3dRun) showRun(window.__ct3dRun.rows, window.__ct3dRun.label);
+    if (V.rows) buildChips();
+    else {
+      applyFiring(null, null, false);
+      legend.textContent = "Real FAFB neuron anatomy loaded — the cloud is the run's " +
+        "neuron set. Run any fly-brain experiment (E2–E5) to see it fire.";
+    }
+  } catch (e) {
+    if (loadEl) loadEl.textContent = "3D anatomy unavailable (" + e.message + ") — 2D maps below still work";
+  }
+})();
+// iframe-guard: when embedded by a tool preview, pause the render loop
+// (keeps tool screenshots cheap); one click inside resumes it.
+(function () {
+  try {
+    if (window.parent === window) return;      // top-level: never pause
+    window.__ct3dPaused = true;
+    window.addEventListener("pointerdown", function () {
+      window.__ct3dPaused = false;
+      var h = document.getElementById("ct3dPauseHint");
+      if (h) h.remove();
+    }, { once: true });
+    var hint = document.createElement("div");
+    hint.id = "ct3dPauseHint";
+    hint.textContent = "paused (preview) — click to run";
+    hint.style.cssText = "position:absolute;top:6px;left:8px;z-index:9;background:#161b22;" +
+      "color:#58a6ff;border:1px solid #30363d;border-radius:6px;padding:2px 8px;" +
+      "font:11px ui-sans-serif,system-ui;cursor:pointer";
+    var m = document.getElementById("ct3dMount");
+    if (m) m.appendChild(hint);
+  } catch (e) { /* never block the page */ }
+})();
+</script>
+
 </body>
 </html>

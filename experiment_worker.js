@@ -46,6 +46,49 @@ try {
   postMessage({ type: "error", expId: null, message: "worker init failed: " + String(err) });
 }
 
+// ------------------------------------------------ E9 fly-brain factory ----
+// E9's demon_neural/demon_frozen variants need a real neural controller. We
+// reuse the EXACT E4 connectome machinery (LIF over the FAFB circuit, CSR
+// spike propagation, eligibility traces, dopamine-gated applyLearning) via a
+// small adapter — no second brain implementation. The circuit JSON arrives
+// with the run message (window.__expCircuit on the page); if it is missing we
+// fall back to the classical-only variant set (core drops the neural rows).
+let E9_CIRCUIT = null;
+function e9BrainFactory(seedIdx) {
+  if (!E9_CIRCUIT) throw new Error("e9 brain requested but no circuit loaded");
+  // plasticity "full": every excitatory synapse is eligible; dopamine gates
+  // updates through receiveFeedback({reward}). resetForTrial() clears state,
+  // NOT weights — learned weights persist across trials inside the controller.
+  // One distinct brain draw per seed index so cross-seed CIs reflect
+  // seed-to-seed variance, not a shared trajectory.
+  return CTRL.connectomeController(E9_CIRCUIT, {
+    shuffle: false, rng: makeRng(9176 + (seedIdx || 0) * 37), seed: 1,
+    opticDrive: 0,              // no visual field in the pressure apparatus
+    motorDrive: 0.6,            // tonic motor-pool drive tuned so the pool can
+                                // cross threshold on strong sensory evidence
+    plasticity: "full",
+    // ---- E9 credit assignment upgrades (opt-in; default paths untouched) --
+    // Per-crossing eligibility windows: fast/mid/slow traces so dopamine that
+    // arrives seconds after a gate decision still lands on the synapses that
+    // caused it (the single 0.985 trace forgets a 3 s-old decision).
+    eligibility: [{ tau: 0.90, w: 0.45 }, { tau: 0.985, w: 0.35 }, { tau: 0.9995, w: 0.20 }],
+    // Trained policy-gradient readout on the motor population: the core
+    // samples P(open) from a REINFORCE-trained softmax over pool rates and
+    // routes each decision's credit window into it via pgReward.
+    policyGradient: true,
+    pgRng: makeRng(424243 + (seedIdx || 0) * 977),
+  });
+}
+function makeRng(seed) {        // local PRNG for the brain factory (mulberry32)
+  let a = seed >>> 0;
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 // ---------------------------------------------------------------- registry
 const EXPERIMENTS = {
   e1: { label: "E1 · Classical Maxwell Demon",
@@ -98,6 +141,29 @@ const EXPERIMENTS = {
           demon_mem4: (rng, env, cfg) => CTRL.classicalDemon(rng, env, cfg, { memSize: 4 }),
         }),
         seeds: 2, train: 60, test: 12, episode: 12 },
+  e9: { label: "E9 · Pressure Demon",
+        needsCircuit: false,
+        apparatus: "pressureDemonCore",          // CORE function name
+        apparatusEnv: "pressure",                // 3D environment id
+        controllers: () => ({}),
+        physics: () => ({ nParticles: 260, noise: 0 }),
+        // multi-seed by default: learning curves aggregate across seeds with
+        // 95% CIs (CORE.apparatusCurve); override via run opts.seeds
+        seeds: 3, train: 12, test: 12, episode: 20 },
+  e10: { label: "E10 · Smoluchowski Trapdoor",
+        needsCircuit: false,
+        apparatus: "smoluchowskiCore",
+        apparatusEnv: "trapdoor",
+        controllers: () => ({}),
+        physics: () => ({ nParticles: 220, noise: 0 }),
+        seeds: 1, train: 8, test: 8, episode: 16 },
+  e11: { label: "E11 · Feynman Ratchet & Pawl",
+        needsCircuit: false,
+        apparatus: "feynmanRatchetCore",
+        apparatusEnv: "ratchet",
+        controllers: () => ({}),
+        physics: () => ({ nParticles: 0, noise: 0 }),
+        seeds: 1, train: 10, test: 10, episode: 12 },
   e5: { label: "E5 · Full Comparator Study",
         needsCircuit: true,
         controllers: () => ({
@@ -115,9 +181,73 @@ const EXPERIMENTS = {
 // ------------------------------------------------------- message protocol
 self.onmessage = (ev) => {
   const m = ev.data;
-  if (m.type === "run") runExperiment(m.expId, m.circuit, m.opts || {});
+  if (m.type === "run") {
+    E9_CIRCUIT = m.circuit || null;   // real connectome for the E9 fly brain
+    runExperiment(m.expId, m.circuit, m.opts || {});
+  }
+  else if (m.type === "run_custom") {
+    try { registerCustom(m); runExperiment("chat", m.circuit, m.opts || {}); }
+    catch (err) { postMessage({ type: "error", expId: "chat",
+                                message: "custom spec: " + String(err && err.message || err) }); }
+  }
   else if (m.type === "ping") postMessage({ type: "pong" });
 };
+
+// ------------------------------------------------- chat-designed experiments
+// The lab page's Chat card lets an LLM (GPT API / local Ollama / LM Studio)
+// design an experiment; the design arrives as `spec`, gets registered as the
+// pseudo-experiment "chat", and then runs through the exact same pipeline as
+// E1-E8 (same rows, curve, provenance and plots broadcasts).
+const CHAT_FACTORIES = {
+  classical_demon: (rng, env, cfg) => CTRL.classicalDemon(rng, env, cfg),
+  ann:             (rng, env, cfg) => CTRL.annController(rng, env, cfg),
+  drosophila:      (rng, env, cfg) => CTRL.drosophilaController(rng, env, cfg),
+  never_gate:      (rng, env, cfg) => CTRL.neverGateController(rng, env, cfg),
+  random:          (rng, env, cfg) => CTRL.randomController(rng, env, cfg),
+};
+const CHAT_ALIASES = {
+  classical_demon: "classical_demon", classical: "classical_demon",
+  demon: "classical_demon", classic: "classical_demon", physical: "classical_demon",
+  ann: "ann", mlp: "ann", neural: "ann", network: "ann",
+  drosophila: "drosophila", fly: "drosophila", fly_brain: "drosophila",
+  mb: "drosophila", mushroom: "drosophila", mushroom_body: "drosophila",
+  never_gate: "never_gate", nevergate: "never_gate", never: "never_gate",
+  random: "random", control: "random", baseline: "random",
+};
+function registerCustom(m) {
+  const s = m.spec || {};
+  if (!s || typeof s !== "object") throw new Error("spec missing");
+  const name = String(s.name || "Chat experiment").slice(0, 60);
+  const conds = Array.isArray(s.conditions) ? s.conditions : [];
+  const ids = [];
+  for (const c of conds) {
+    const k = CHAT_ALIASES[String(c).toLowerCase().trim()];
+    if (k && !ids.includes(k)) ids.push(k);
+  }
+  if (!ids.length) ids.push("classical_demon");
+  if (ids.length > 4) ids.length = 4;
+  const nP = Math.max(40, Math.min(640, Math.round(Number(s.nParticles) || 320)));
+  const nN = Math.max(0, Math.min(0.4, Number(s.noise) || 0.12));
+  const ep = Math.max(4, Math.min(12, Math.round(Number(s.episodeSeconds) || 12)));
+  const tr = Math.max(8, Math.min(60, Math.round(Number(s.trainTrials) || 40)));
+  const te = Math.max(4, Math.min(12, Math.round(Number(s.testTrials) || 8)));
+  const controllers = () => {
+    const out = {};
+    ids.forEach((k, i) => {
+      const key = k + "_" + (i + 1);
+      out[key] = (rng, env, cfg) => CHAT_FACTORIES[k](rng, env, cfg);
+    });
+    return out;
+  };
+  EXPERIMENTS.chat = {
+    label: "\uD83D\uDCAC " + name,
+    needsCircuit: false,
+    controllers,
+    physics: () => ({ nParticles: nP, noise: nN }),
+    seeds: 1, train: tr, test: te, episode: ep,
+    design: s,                    // echoed into provenance for the paper trail
+  };
+}
 
 function runExperiment(expId, circuit, opts) {
   const spec = EXPERIMENTS[expId];
@@ -134,10 +264,146 @@ function runExperiment(expId, circuit, opts) {
   // per-condition accumulation of full trial rows (streamed via onTrialData)
   const trialRows = {};     // key -> [row, ...]
   let lastEmit = 0;
+  let curveBuilder = buildCurve;   // apparatus branch swaps in the generic one
+
+  // ---- apparatus experiments (E9/E10/E11): self-contained cores that stream
+  // live 3D state + one metrics row per episode. They bypass runBenchmark
+  // (no _raw seeds / per-neuron vectors) and reuse everything else: rows ->
+  // curve -> sparklines, provenance, plots broadcast.
+  if (spec.apparatus) {
+    const coreFn = CORE[spec.apparatus];
+    const nSeeds = Math.max(1, opts.seeds || spec.seeds || 1);
+    const nTrials = train + test;
+    curveBuilder = () => buildApparatusCurve(4);
+    try {
+      let lastAppPost = 0, lastAppSeq = 0;   // (patch 17) app_state replay-stream gate
+      for (let s = 0; s < nSeeds; s++) {
+        const seed = (opts.seed !== undefined ? opts.seed : 1) + s * 101;
+        coreFn({
+          seed,
+          seedTag: s + 1,           // rows carry which batch seed produced them
+          trials: nTrials,
+          trainTrials: train,
+          episodeSeconds: episode,
+          nParticles: (spec.physics && spec.physics(0, 1) || {}).nParticles || 260,
+          // fly-brain conditions are added only when a real circuit arrived;
+          // one distinct brain draw per seed (cross-seed CI over brains)
+          brainFactory: (expId === "e9" && E9_CIRCUIT) ? (sd) => e9BrainFactory(sd) : undefined,
+          onTrialData: (cond, phase, tr) => {
+            pushRow(cond, phase, tr);
+            emit(expId, phase, (tr.trial || 0) + 1, nTrials * nSeeds, s + 1, false);
+          },
+          // 3D replay stream for the first seed; later seeds stream every
+          // other episode so the stage stays live without tripling batch time.
+          // (patch 17) full-speed streaming flooded the main thread with ~460
+          // structured-clone app_state messages/sec and froze the fly (8fps).
+          // Time-gate to ~30Hz - still above the 24fps replay pump on the page.
+          onState: (st) => {
+            if (s === 0 || ((st.trial | 0) & 1) === 0) {
+              const now = Date.now();
+              if (now - lastAppPost >= 33) {
+                lastAppPost = now;
+                st.__seq = (++lastAppSeq);
+                postMessage({ type: "app_state", expId, state: st });
+              }
+            }
+          },
+        });
+      }
+      const curve = buildApparatusCurve(4);
+      // FIX (ReferenceError: res is not defined): the apparatus branch never
+      // had a `res` — cores stream rows via onTrialData instead of returning
+      // a result object. Build the per-condition summary from those rows;
+      // apparatus panels derive their statistics from the rows themselves.
+      // Brain outcome reduction (same contract as the runBenchmark branch):
+      // keep per-trial fireVec only for the late-train / late-test / early-train
+      // windows of the FIRST seed, emit each as a mean b64 vector on one row
+      // per phase (fireVecMean / fireVecEarly), and drop the heavy per-trial
+      // vectors from all other rows. E10/E11 have no brain — rows without
+      // fireVec pass through untouched.
+      const meanVec = (vecs, n) => {
+        if (!vecs.length) return null;
+        const acc = new Float64Array(n);
+        for (const v of vecs) {
+          const bin = atob(v.vec); const bytes = new Uint8Array(bin.length);
+          for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+          for (let i = 0; i < n; i++) acc[i] += bytes[i];
+        }
+        const out = new Uint8Array(n);
+        for (let i = 0; i < n; i++) out[i] = Math.round(acc[i] / vecs.length);
+        let b64 = "";
+        const CH = 3 * 4096;   // multiple of 3 so concatenated base64 stays valid
+        for (let o = 0; o < n; o += CH)
+          b64 += btoa(String.fromCharCode.apply(null, out.subarray(o, Math.min(n, o + CH))));
+        return b64;
+      };
+      const conditions = {};
+      const flatRows = [];
+      const firstSeed = {};
+      for (const r of Object.values(trialRows).flat())
+        if (r.fireVec && firstSeed[r.condition] === undefined) firstSeed[r.condition] = r.seed;
+      for (const [key, rows] of Object.entries(trialRows)) {
+        conditions[key] = { episodes: rows.length };
+        const f0 = firstSeed[key];
+        const lateTrain = rows.filter(r => r.fireVec && r.seed === f0 && r.phase === "train").slice(-8);
+        const earlyTrain = rows.filter(r => r.fireVec && r.seed === f0 && r.phase === "train").slice(0, 8);
+        const lateTest = rows.filter(r => r.fireVec && r.seed === f0 && r.phase === "test").slice(-4);
+        let nVec = 0, layout = null;
+        for (const fv of [...lateTrain, ...lateTest, ...earlyTrain])
+          if (fv && fv.fireVec && fv.fireVec.n) { nVec = fv.fireVec.n; layout = fv.fireVec.layout || null; break; }
+        const emitted = { train: false, test: false, early: false };
+        for (const r of rows) {
+          const row = Object.assign({}, r);
+          const fv = row.fireVec; delete row.fireVec;
+          if (nVec && r.seed === f0 && fv) {
+            const ph = row.phase === "test" ? "test" : "train";
+            if (lateTrain.includes(r) && !emitted.train) {
+              row.fireVecMean = { phase: "train", vec: meanVec(lateTrain.map(x => x.fireVec), nVec), n: nVec, layout, count: lateTrain.length };
+              emitted.train = true;
+            } else if (lateTest.includes(r) && !emitted.test) {
+              row.fireVecMean = { phase: "test", vec: meanVec(lateTest.map(x => x.fireVec), nVec), n: nVec, layout, count: lateTest.length };
+              emitted.test = true;
+            }
+            if (earlyTrain.includes(r) && !emitted.early) {
+              row.fireVecEarly = { phase: "train", vec: meanVec(earlyTrain.map(x => x.fireVec), nVec), n: nVec, layout, count: earlyTrain.length };
+              emitted.early = true;
+            }
+          }
+          flatRows.push(row);
+        }
+      }
+      const prov = {
+        experiment: expId, label: spec.label,
+        seeds: nSeeds, seedBase: opts.seed !== undefined ? opts.seed : 1,
+        trainTrials: train, testTrials: test,
+        episodeSeconds: episode,
+        nParticles: (spec.physics && (spec.physics(0, 1) || {}).nParticles) || 260,
+        noise: 0, dt: 1 / 60, tKelvin: 300, simToJoule: 1e-21,
+        apparatus: spec.apparatusEnv,
+        software: "Fly-Demon Lab v2 experiment list",
+        startedISO: new Date(t0).toISOString(),
+        elapsedSeconds: (Date.now() - t0) / 1000,
+      };
+      postMessage({ type: "done", expId, summary: { conditions, curve },
+                    rows: flatRows, provenance: prov, apparatus: spec.apparatusEnv });
+    } catch (err) {
+      postMessage({ type: "error", expId, message: String(err && err.stack || err) });
+    }
+    return;
+  }
 
   function pushRow(key, phase, tr) {
     const row = Object.assign({ condition: key, phase }, tr);
     (trialRows[key] = trialRows[key] || []).push(row);
+  }
+
+  // Apparatus curve: delegate to the pure CORE.apparatusCurve aggregator —
+  // cross-seed block means with 95% CIs, train/test block continuity, and
+  // agree/energyJ aliases (rows already carry their seed tag).
+  function buildApparatusCurve(B) {
+    let all = [];
+    for (const rows of Object.values(trialRows)) all = all.concat(rows);
+    return CORE.apparatusCurve(all, B);
   }
 
   function buildCurve() {
@@ -152,10 +418,12 @@ function runExperiment(expId, circuit, opts) {
           const vals = seg.map(x => x[f]).filter(v => v !== null && v !== undefined && Number.isFinite(v));
           return vals.length ? vals.reduce((a, c) => a + c, 0) / vals.length : null;
         };
+        const eJ = avg("energyJ");   // E1-E8 extractable work; E10/E11 stream
+        const energyJ = eJ !== null ? eJ : (avg("workJ") !== null ? avg("workJ") : avg("netWorkJ"));
         curve.push({ cond: key, block: b, phase: seg[0].phase,
                      agree: avg("demonAgree"), goodBadRatio: avg("goodBadRatio"),
                      sortEntropy: avg("sortEntropy"), miNeural: avg("miNeural"),
-                     energyJ: avg("energyJ"), dT: avg("dTfinal"),
+                     energyJ, dT: avg("dTfinal"),
                      openFraction: avg("openFraction") });
       }
       // live headline: mean agreement over the last 10 rows
@@ -169,7 +437,8 @@ function runExperiment(expId, circuit, opts) {
     const now = Date.now();
     if (!force && now - lastEmit < 400) return;   // throttle UI chatter
     lastEmit = now;
-    const { curve, live } = buildCurve();
+    const built = curveBuilder();
+    const curve = built.curve || built, live = built.live || {};
     postMessage({ type: "progress", expId, phase, trial, nTrials, seedIdx,
                   nSeeds, curve, live });
   }
@@ -201,7 +470,11 @@ function runExperiment(expId, circuit, opts) {
     const meanVec = (vecs, n) => {
       if (!vecs.length) return null;
       const acc = new Float64Array(n);
-      for (const v of vecs) { const b = b64toBytes(v); for (let i = 0; i < n; i++) acc[i] += b[i]; }
+      for (const v of vecs) {
+        // accept either a b64 string or a fireVec object {vec,...}
+        const b64 = typeof v === "string" ? v : v.vec;
+        const b = b64toBytes(b64); for (let i = 0; i < n; i++) acc[i] += b[i];
+      }
       const out = new Uint8Array(n);
       for (let i = 0; i < n; i++) out[i] = Math.round(acc[i] / vecs.length);
       let b64 = "";
@@ -227,8 +500,11 @@ function runExperiment(expId, circuit, opts) {
                       early: pickEarly(trainTr, 8) };
         let emitted = { train: false, test: false, early: false };
         let meta = null;
-        for (const fv of [...fvs.train, ...fvs.test, ...fvs.early]) {
-          if (fv && fv.n) { meta = { n: fv.n, layout: fv.layout || null }; break; }
+        // FIX: fv here is the TRIAL row — the vector lives at fv.fireVec.
+        // The old code read fv.n, so meta stayed null and fireVecMean was
+        // never emitted (anatomy cards silently fell back to region means).
+        for (const tr of [...fvs.train, ...fvs.test, ...fvs.early]) {
+          if (tr && tr.fireVec && tr.fireVec.n) { meta = { n: tr.fireVec.n, layout: tr.fireVec.layout || null }; break; }
         }
         for (const tr of trs) {
           const row = Object.assign({ condition: key }, tr);
@@ -237,7 +513,7 @@ function runExperiment(expId, circuit, opts) {
           if (!emitted[ph] && meta) {
             const vecs = fvs[ph];
             if (vecs.length) {
-              row.fireVecMean = { phase: ph, vec: meanVec(vecs, meta.n),
+              row.fireVecMean = { phase: ph, vec: meanVec(vecs.map(t2 => t2.fireVec), meta.n),
                                   n: meta.n, layout: meta.layout,
                                   count: vecs.length };
               emitted[ph] = true;
@@ -245,11 +521,11 @@ function runExperiment(expId, circuit, opts) {
           }
           // one row carries the early-train mean alongside the late-train one
           if (!emitted.early && meta && fvs.early.length && !row.fireVecMean) {
-            row.fireVecEarly = { phase: "train", vec: meanVec(fvs.early, meta.n),
+            row.fireVecEarly = { phase: "train", vec: meanVec(fvs.early.map(t2 => t2.fireVec), meta.n),
                                  n: meta.n, layout: meta.layout, count: fvs.early.length };
             emitted.early = true;
           } else if (!emitted.early && meta && fvs.early.length) {
-            row.fireVecEarly = { phase: "train", vec: meanVec(fvs.early, meta.n),
+            row.fireVecEarly = { phase: "train", vec: meanVec(fvs.early.map(t2 => t2.fireVec), meta.n),
                                  n: meta.n, layout: meta.layout, count: fvs.early.length };
             emitted.early = true;
           }
@@ -263,9 +539,12 @@ function runExperiment(expId, circuit, opts) {
     const prov = {
       experiment: expId, label: spec.label,
       seeds: nSeeds, trainTrials: train, testTrials: test,
-      episodeSeconds: episode, nParticles: 320, noise: 0.12, doorHeight: 64,
+      episodeSeconds: episode, doorHeight: 64,
+      nParticles: (spec.physics && (spec.physics(0, nSeeds) || {}).nParticles) || 320,
+      noise: (spec.physics && (spec.physics(0, nSeeds) || {}).noise) || 0.12,
       dt: 1 / 60, tKelvin: 300, simToJoule: 1e-21,
       software: "Fly-Demon Lab v2 experiment list",
+      chatDesign: spec.design || null,
       startedISO: new Date(t0).toISOString(),
       elapsedSeconds: (Date.now() - t0) / 1000,
     };

@@ -208,60 +208,119 @@ function annController(rng, env, cfg) {
     summary() { return { demonAgree: decisions ? agreeCount / decisions : 0 }; },
     neuralActivity() { return hid; },
     particleSample(env2) { return env2.particles.slice(0, 16); },
+    fireVec() {
+      // Real per-neuron activity snapshot: 16 hidden (tanh, [-1,1]) + 2 output
+      // (softmax, [0,1]) activations from the LAST forward pass, Uint8-quantized
+      // with the same sqrt scaling the connectome controller uses. Feeds the
+      // Brain-outcome per-neuron cards for E2/E5-ann with measured data.
+      const q = new Uint8Array(NHID + NOUT);
+      for (let h = 0; h < NHID; h++)
+        q[h] = Math.min(255, Math.round(Math.sqrt(Math.abs(hid[h])) * 16));
+      for (let o = 0; o < NOUT; o++)
+        q[NHID + o] = Math.min(255, Math.round(Math.sqrt(out[o]) * 16));
+      let b64 = "";
+      for (let i = 0; i < q.length; i += 3)
+        b64 += btoa(String.fromCharCode(q[i], q[i + 1] || 0, q[i + 2] || 0));
+      return { vec: b64, n: q.length, total: hidRateSum + outRateSum };
+    },
   };
 }
 
 // --------------------------------------------------- 4. Drosophila-inspired
 /**
  * Simplified mushroom-body architecture (PDF Experiment 3):
- *   sensory (7) -> projection neurons (sparse) -> Kenyon-like population
- *   -> MB output -> dopamine-gated decision -> motor (door).
- * Dopamine implements the classic MB valence rule: reward depresses
- * active KC->output weights (approach), punishment potentiates them.
+ *   sensory (7) + visual field (8 bins) -> projection neurons -> Kenyon-like
+ *   population -> MBON output pool (16, opponent approach/avoid channels) ->
+ *   dopamine-gated decision -> motor (door).
+ * Two reward-gated plasticity sites: KC->MBON synapses (wMB; winner-take-all
+ * LTP on the MBON that won the last race, contrast LTD on the losers) and
+ * visual-bin->PN weights (wPNVis; conjunctive LTP). KC drive gains (wKC) and
+ * sensor->PN wiring (wPN) are fixed.
  */
 function drosophilaController(rng, env, cfg) {
-  const NPN = 32, NKC = 200;
+  const NPN = 32, NKC = 200, NMBON = 16;
   const KC_ACTIVE = 12;                       // sparse winnner-take-all
-  const wPN = new Float32Array(7 * NPN);
-  const wKC = new Float32Array(NKC);          // KC -> MB output (single output)
+  const wPN = new Float32Array(7 * NPN);      // sensor -> PN (fixed wiring)
+  const wPNVis = new Float32Array(8 * NPN);   // visual bin -> PN (LEARNED, reward-gated)
+  const wKC = new Float32Array(NKC);          // KC drive gain (fixed; not plastic)
+  const wMB = new Float32Array(NMBON * NKC);  // KC -> MBON synapses (LEARNED, reward-gated)
   for (let i = 0; i < wPN.length; i++) wPN[i] = rng();
+  for (let i = 0; i < wPNVis.length; i++) wPNVis[i] = rng();
   for (let i = 0; i < NKC; i++) wKC[i] = 0.5 + rng() * 0.5;
+  for (let i = 0; i < wMB.length; i++) wMB[i] = 0.05 + rng() * 0.15;
   const kcThr = new Float32Array(NKC);
   for (let i = 0; i < NKC; i++) kcThr[i] = 0.3 + rng() * 0.4;
 
-  const kcAct = new Float32Array(NKC);
+  const pnAct = new Float32Array(NPN);        // PN rates (this step)
+  const kcAct = new Float32Array(NKC);        // binary KC spikes (this step)
+  const mb = new Float32Array(NMBON);         // MBON drives (this step)
+  let mbWinner = 0, lastVis = null;           // last race winner / visual field
+  let chOpen = 0, latchOpen = false;          // opponent channels + hysteresis latch
+  let bestOpenM = 0, bestCloseM = 0;          // best MBON per channel (credit)
   let mbOut = 0, baseline = 0.5, learning = true;
   let agreeCount = 0, decisions = 0;
   const da = { v: 0 };
-  // per-trial spike-rate trace for the brain-outcome heatmap: [PN, KC, MBout]
   const layerSteps = { pn: 0, kc: 0, mb: 0 };
   const layerSums = { pn: 0, kc: 0, mb: 0 };
 
   function forward(env2) {
     const s = env2.readSensors();
     const v = env2.readVisualField();
+    lastVis = v;
     // PN response
     for (let p = 0; p < NPN; p++) {
       let a = 0;
       for (let i = 0; i < 7; i++) a += s[i] * wPN[i * NPN + p];
-      for (let i = 0; i < 8; i++) a += v[i] * 0.5 * wPN[(i % 7) * NPN + p];
-      kcAct[p] = a / 7;                       // reuse first NPN slots
-      if (kcAct[p] > 0.5) layerSums.pn++;     // PN "spike" (thresholded rate)
+      for (let i = 0; i < 8; i++) a += v[i] * 1.0 * wPNVis[i * NPN + p]; // learned visual-PN weights
+      pnAct[p] = a / 7;
+      if (pnAct[p] > 0.5) layerSums.pn++;     // PN "spike" (thresholded rate)
     }
     layerSteps.pn++;
     // KC expansion + sparsification
     for (let k = 0; k < NKC; k++) {
       const p = k % NPN;
-      const drive = kcAct[p] * wKC[k] + (rng() - 0.5) * 0.05;
+      const drive = pnAct[p] * wKC[k] + (rng() - 0.5) * 0.05;
       kcAct[k] = drive > kcThr[k] ? 1 : 0;    // binary KC spike
       if (kcAct[k]) layerSums.kc++;
     }
     layerSteps.kc++;
-    let active = 0;
-    for (let k = 0; k < NKC; k++) if (kcAct[k]) active++;
-    // guarantee sparsity: keep only top-KC_ACTIVE (approximation: threshold)
-    mbOut = active / NKC;
-    if (mbOut > 0.06) layerSums.mb++;          // MB output bin fired
+    // ---- MBON output layer: sparse KC code drives learned KC->MBON synapses.
+    // Winner-take-all race decides the readout: mbOut is the winning MBON's
+    // drive normalized by the KC population — the scale the door comparator's
+    // +0.01 margin was calibrated on (the old active/NKC rate code). Rest
+    // bias + noise keep every MBON winnable before learning specializes it.
+    for (let m = 0; m < NMBON; m++) mb[m] = 0.05 + rng() * 0.10;
+    let nAct = 0;
+    for (let k = 0; k < NKC; k++) {
+      if (!kcAct[k]) continue;
+      nAct++;
+      const w = wKC[k];
+      for (let m = 0; m < NMBON; m++) mb[m] += wMB[k * NMBON + m] * w;
+    }
+    if (nAct > 0) { const inv = 1 / nAct; for (let m = 0; m < NMBON; m++) mb[m] *= inv; }
+    let mbMax = 0;
+    for (let m = 0; m < NMBON; m++) if (mb[m] > mbMax) mbMax = mb[m];
+    // Opponent motor channels (MBON 0-7 = approach/open, 8-15 = avoid/close),
+    // the classic MBON approach/avoid compartment split: channel drive is the
+    // summed drive of its 8 MBONs and the stronger channel holds the door.
+    // Dopamine LTPs the acting channel's best MBON on good outcomes and the
+    // opponent's best on bad ones (contrast), so preference can hold the door
+    // open OR closed per context and punishment prepares a policy switch.
+    let dO = 0, dC = 0, bO = 0, mO = 0, bC = 0, mC = 0;
+    for (let m = 0; m < NMBON; m++) {
+      if (m < NMBON / 2) { dO += mb[m]; if (mb[m] > bO) { bO = mb[m]; mO = m; } }
+      else { dC += mb[m]; if (mb[m] > bC) { bC = mb[m]; mC = m; } }
+    }
+    bestOpenM = mO; bestCloseM = mC;
+    chOpen = chOpen * 0.95 + (dO - dC) * 0.05;         // smoothed decision var
+    // Hysteresis latch: commit to a channel and hold it until the drive
+    // difference clearly crosses zero — without this, rest noise flips the
+    // credited channel several times a second and reward credit cancels.
+    if (chOpen > 0.02) latchOpen = true;
+    else if (chOpen < -0.02) latchOpen = false;
+    mbWinner = latchOpen ? mO : mC;                    // credit the acting channel
+    mbOut = 0.05 * (dO - dC);                          // dashboard scale (rate era)
+    if (mbMax > 0.15) layerSums.mb++;           // a MBON fired above rest bias (0.05-0.15)
     layerSteps.mb++;
     return mbOut;
   }
@@ -270,8 +329,8 @@ function drosophilaController(rng, env, cfg) {
     name: "drosophila",
     observe(env2) { forward(env2); },
     step(dt, env2) {
-      baseline += (mbOut - baseline) * clamp(dt * 0.5, 0, 1);
-      const open = mbOut > baseline + 0.01;
+      baseline += (mbOut - baseline) * clamp(dt * 0.5, 0, 1); // activity stat (EMA)
+      const open = latchOpen;                   // opponent-channel decision (latched)
       env2.door.target = open ? 1 : 0;
       decisions++;
       if (open === (demonDecisionFor(env2, {}) === 1)) agreeCount++;
@@ -281,10 +340,37 @@ function drosophilaController(rng, env, cfg) {
       if (!learning) return;
       const r = fb.good ? 1 : -1;
       da.v = clamp(da.v + 0.6 * r, -1.5, 3);
-      // MB rule: reward -> depress active KC weights; punish -> potentiate
-      for (let k = 0; k < NKC; k++) {
-        if (kcAct[k]) {
-          wKC[k] = clamp(wKC[k] - 0.02 * da.v, 0.05, 2.0);
+      // Dopamine-gated plasticity, two sites:
+      //  1) KC->MBON (wMB): the MBON that won the last race gets LTP on its
+      //     active-KC synapses (reward) or LTD (punishment); every loser
+      //     gets the opposite sign on the same active set (race contrast).
+      //  2) visual bin -> PN (wPNVis): conjunctive LTP where the last
+      //     visual field and the spiking PN crowd overlapped.
+      if (da.v !== 0 && lastVis) {
+        // Rates are small on purpose: one feedback step must move a synapse
+        // well below the channel-drive scale so preferences accumulate over
+        // dozens of outcomes instead of saturating after the first reward.
+        // Acting channel's best MBON: LTP with dopamine sign (reward strength-
+        // ens this context-action, punishment weakens it). On PUNISHMENT the
+        // opposing channel's best MBON also grows (contrast term) — how the
+        // policy prepares a switch. Reward never decays the opponent: wMB
+        // synapses are shared across contexts, and reward-side opponent decay
+        // would melt the alternative channel's synapses to the zero floor,
+        // permanently killing it (observed as an always-closed policy).
+        const oppBest = latchOpen ? bestCloseM : bestOpenM;
+        for (let k = 0; k < NKC; k++) {
+          if (!kcAct[k]) continue;
+          const w = wKC[k];
+          const ik = k * NMBON;
+          wMB[ik + mbWinner] = clamp(wMB[ik + mbWinner] + 0.02 * da.v * w, 0, 0.3);
+          if (da.v < 0)
+            wMB[ik + oppBest] = clamp(wMB[ik + oppBest] + 0.02 * (-da.v) * w, 0, 0.3);
+        }
+        for (let b = 0; b < 8; b++) {
+          if (!(lastVis[b] > 0.05)) continue;
+          for (let p = 0; p < NPN; p++) {
+            if (pnAct[p] > 0.5) wPNVis[b * NPN + p] = clamp(wPNVis[b * NPN + p] + 0.02 * da.v, 0, 1.5);
+          }
         }
       }
     },
@@ -299,23 +385,26 @@ function drosophilaController(rng, env, cfg) {
                "MB output": layerSteps.mb ? layerSums.mb / layerSteps.mb : 0 };
     },
     fireVec() {
-      // kcAct holds PN rates in its first NPN slots and KC spikes after;
-      // counts are cumulative for the trial via layerSums-style accumulation,
-      // so we snapshot current activity quantized like the connectome ctrl.
-      const q = new Uint8Array(NPN + NKC);
+      // Snapshot of the last step's activity: PN rates, binary KC spikes
+      // and MBON drives, quantized like the connectome controller.
+      const q = new Uint8Array(NPN + NKC + NMBON);
       for (let i = 0; i < NPN; i++) {
-        const v = Math.max(0, kcAct[i]) * 8;    // PN rate proxy
+        const v = Math.max(0, pnAct[i]) * 8;    // PN rate
         q[i] = Math.min(255, Math.ceil(Math.sqrt(v) * 16));
       }
       for (let k = 0; k < NKC; k++) {
         const c = kcAct[k] > 0.5 ? 4 : 0;       // binary KC spike
         q[NPN + k] = c;
       }
+      for (let m = 0; m < NMBON; m++) {
+        const v = Math.max(0, mb[m] - 0.05) * 8; // MBON drive above rest bias
+        q[NPN + NKC + m] = Math.min(255, Math.ceil(Math.sqrt(v) * 16));
+      }
       let b64 = "";
       const CH = 3 * 4096;   // multiple of 3 so concatenated base64 stays valid
       for (let o = 0; o < q.length; o += CH)
         b64 += btoa(String.fromCharCode.apply(null, q.subarray(o, Math.min(q.length, o + CH))));
-      return { vec: b64, n: q.length, layout: { pn: NPN, kc: NKC } };
+      return { vec: b64, n: q.length, layout: { pn: NPN, kc: NKC, mbon: NMBON } };
     },
     neuralActivity() { return kcAct; },
     particleSample(env2) { return env2.particles.slice(0, NKC); },
@@ -362,7 +451,6 @@ function connectomeController(circuit, opts) {
   const src = new Int32Array(NE), dst = new Int32Array(NE);
   const W = new Float32Array(NE), W0 = new Float32Array(NE);
   const isExc = new Uint8Array(NE), plastic = new Uint8Array(NE);
-  const E = new Float32Array(NE);
   const WS = 0.02;
   edges.forEach((e, i) => {
     src[i] = e.s; dst[i] = e.t; W0[i] = e.w;
@@ -409,6 +497,10 @@ function connectomeController(circuit, opts) {
   const csrEdge = order;                     // csr k -> original edge index
   const edgeTraceK = new Int32Array(NE);     // original edge index -> csr k
   for (let k = 0; k < NE; k++) edgeTraceK[csrEdge[k]] = k;
+  // bit-exact initial weight snapshot (weightDrift baseline: comparing against
+  // a recomputed W0*sign*WS in f64 would report a ~5e-3 false floor from
+  // Float32 storage rounding)
+  const W_INIT = Float32Array.from(W);
 
   const V = new Float32Array(N), spikes = new Uint8Array(N), refac = new Uint8Array(N);
   const trialSpikeCount = new Uint32Array(N);   // cumulative per trial (MI)
@@ -454,6 +546,31 @@ function connectomeController(circuit, opts) {
   }
 
   let opticPhase = 0;
+  // ---- trained policy-gradient readout (E9 credit assignment) -------------
+  // A linear softmax readout on the motor population — one weight per motor
+  // neuron — trained BY REINFORCE on the dopaminergic reward: Δr w_i ∝ r·(a
+  // − π). It closes the gap the rate-code readout cannot: that readout only
+  // re-routes fixed connectome activity, while these weights form a direct,
+  // low-variance sensor→action association trained by the same reward
+  // channel. Learning stops entirely when learning=false (frozen control).
+  let pg = null, phi = null, pgR = 0;     // readout state (factory scope:
+  if (opts.policyGradient) {               // brainTick updates it every tick)
+    const WPG = new Float32Array(m1 - m0);        // readout weights, zero-init
+    const RNG = opts.pgRng || makeRng(opts.seed !== undefined ? opts.seed * 2654435761 % 4294967291 : 7);
+    const TAU = 1;                                // softmax temperature
+    pg = {
+      WPG, get W() { return WPG; },
+      probs: 0.5,                        // cached P(open), updated every step
+      action: 0,                         // cached Bernoulli sample
+      RNG, TAU,
+    };
+  }
+  function pgProbs(W, phi, tau) {                  // P(open) — 2-action softmax
+    let z = 0;
+    for (let i = 0; i < W.length; i++) z += W[i] * phi[i];
+    const e = Math.exp(clamp(z / tau, -20, 20));
+    return e / (e + 1);                            // = 1 / (1 + e^(-z))
+  }
   function brainTick(rng, sens, visual, motorDrive, opticScale) {
     injectLayerChannels(0, sens, 12, rng);
     if (opticLists.length) {
@@ -494,13 +611,44 @@ function connectomeController(circuit, opts) {
       }
     }
     da.v *= 0.985;
+    // policy-gradient sampling (end of brainTick): P(open | motor population)
+    // via the softmax readout; the Bernoulli action is drawn from the brain's
+    // OWN rng so a seed fully determines the trajectory. The core consumes
+    // both the probability (telemetry/rows) and the action (valve command).
+    if (pg) {
+      // REINFORCE: apply credit accrued since the last SAMPLE, using that
+      // sample's cached (action, P, features) — exact one-step REINFORCE, not
+      // a same-tick approximation. Learning stops when frozen (learning=false).
+      if (pgR !== 0 && pg.pend && learning) {
+        const ga = 0.08 * pgR * (pg.pend.a - pg.pend.p);
+        for (let i = 0; i < pg.WPG.length; i++)
+          pg.WPG[i] = clamp(pg.WPG[i] + ga * pg.pend.phi[i], -2, 2);
+        pgR = 0;
+      }
+      phi = new Float32Array(m1 - m0);           // readout features: this
+      for (let i = m0; i < m1; i++) phi[i - m0] = spikes[i];   // tick's pool spikes
+      pg.probs = pgProbs(pg.WPG, phi, pg.TAU);
+      pg.action = pg.RNG() < pg.probs ? 1 : 0;
+      pg.pend = { a: pg.action, p: pg.probs, phi };
+    }
   }
 
-  // ---- lazy eligibility traces --------------------------------------
+  // ---- eligibility traces ---------------------------------------------
   // E0 decays globally; explicit traces live only where they were last
   // touched. tickCount counts calls to updateTraces; a trace's effective
-  // value is E0 * 0.985^(tickCount - lastTouchTick[k]) below the floor.
-  const E0 = 1;                       // cap (was the E[i] cap)
+  // value is E0 * tau^(tickCount - lastTouchTick[k]) below the floor.
+  //
+  // WINDOWS: per-crossing eligibility windows (E9 credit assignment).
+  // Default [{tau: DECAY, w: 1}] reproduces the original single exponential
+  // trace byte-for-byte. opts.eligibility = [{tau, w}, ...] stamps EVERY
+  // co-active synapse into ALL windows at once; window i keeps its own
+  // lazily-decayed sum, so effective eligibility at age a is Σ w_i tau_i^a.
+  // Fast windows dominate immediate credit; slow windows keep credit alive
+  // across the multi-second delay between a gate decision and the pressure
+  // difference / spring work it eventually causes (the E9 credit gap: the
+  // old single 0.985 trace retains only 6.7% after 3 s, the slow window
+  // retains 41%).
+  const E0 = 1;                       // per-window cap (was the E[i] cap)
   let tickCount = 0;
   const lastTouchTick = new Float64Array(NE).fill(-1e9);
   const activeTraces = [];            // csr k values with live (touched) traces
@@ -508,7 +656,17 @@ function connectomeController(circuit, opts) {
   const TRACE_FLOOR = 0.01;
   const DECAY = 0.985;
   const INC = 0.15;
-  const POW = [1]; for (let i = 1; i <= 8; i++) POW.push(POW[i - 1] * DECAY);
+  const WINDOWS = Array.isArray(opts.eligibility) && opts.eligibility.length
+    ? opts.eligibility.map(x => ({ tau: x.tau !== undefined ? x.tau : 0.995,
+                                   w: x.w !== undefined ? x.w : 1 }))
+    : [{ tau: DECAY, w: 1 }];
+  { const wSum = WINDOWS.reduce((a, x) => a + x.w, 0);
+    for (const x of WINDOWS) x.w /= wSum; }        // age-0 amplitude stays INC
+  const EW = WINDOWS.map(() => new Float32Array(NE));  // one lazy trace per window
+  const E = EW[0];                    // window 0 — THE trace in default mode
+  const WPOWS = WINDOWS.map(x => {    // small pow tables (shared shape with POW)
+    const P = [1]; for (let i = 1; i <= 8; i++) P.push(P[i - 1] * x.tau); return P;
+  });
 
   function updateTraces() {
     tickCount++;
@@ -516,15 +674,23 @@ function connectomeController(circuit, opts) {
     for (let ci = 0; ci < coActiveN; ci++) {
       const k = coActive[ci];
       const ek = csrEdge[k];
-      const prev = lastTouchTick[ek] < 0 ? 0 : E[ek] * POW[Math.min(8, tickCount - lastTouchTick[ek])];
-      E[ek] = prev < E0 ? prev + INC : E0;
+      const age = tickCount - lastTouchTick[ek];
+      if (lastTouchTick[ek] < 0) {
+        for (let wi = 0; wi < WINDOWS.length; wi++) EW[wi][ek] = INC * WINDOWS[wi].w;
+      } else {
+        for (let wi = 0; wi < WINDOWS.length; wi++) {
+          const p = age <= 8 ? WPOWS[wi][age] : Math.pow(WINDOWS[wi].tau, age);
+          const v = EW[wi][ek] * p + INC * WINDOWS[wi].w;
+          EW[wi][ek] = v < E0 ? v : E0;
+        }
+      }
       lastTouchTick[ek] = tickCount;
       if (!inActive[ek]) { inActive[ek] = 1; activeTraces.push(ek); }
     }
     // bounded active list: cap size, evicting the oldest entries first
     if (activeTraces.length > 40000) {
       const drop = activeTraces.splice(0, activeTraces.length - 40000);
-      for (const ek of drop) { E[ek] = 0; lastTouchTick[ek] = -1e9; inActive[ek] = 0; }
+      for (const ek of drop) { for (const A of EW) A[ek] = 0; lastTouchTick[ek] = -1e9; inActive[ek] = 0; }
     }
   }
 
@@ -534,7 +700,11 @@ function connectomeController(circuit, opts) {
     for (let idx = 0; idx < activeTraces.length; idx++) {
       const ek = activeTraces[idx];
       const age = tickCount - lastTouchTick[ek];
-      const e = age <= 8 ? E[ek] * POW[age] : E[ek] * Math.pow(DECAY, age);
+      let e = 0;
+      for (let wi = 0; wi < WINDOWS.length; wi++) {
+        const p = age <= 8 ? WPOWS[wi][age] : Math.pow(WINDOWS[wi].tau, age);
+        e += EW[wi][ek] * p;
+      }
       if (e < TRACE_FLOOR) continue;
       const i = ek;
       if (!plastic[i] || !isExc[i]) continue;
@@ -570,21 +740,61 @@ function connectomeController(circuit, opts) {
       if (learning) { applyLearning(0.004); if ((decisions & 255) === 0) syncWeights(); }
     },
     receiveFeedback(fb) {
-      const q = fb.dir * (fb.T2 - fb.v2) / Math.max(fb.T2, 1);
-      da.v = clamp(da.v + q * 0.6, -1.5, 3);
+      // Legacy E1-E8 crossing feedback ({dir, T2, v2, ...}): original q
+      // formula, byte-for-byte behavior — E1-E8 results are unaffected.
+      if (fb.dir !== undefined && fb.T2 !== undefined) {
+        const q = fb.dir * (fb.T2 - fb.v2) / Math.max(fb.T2, 1);
+        da.v = clamp(da.v + q * 0.6, -1.5, 3);
+        return;
+      }
+      // E9 reward pathway (additive): an explicit scalar reward -> dopamine
+      // teaching signal. Dopamine gates applyLearning, so this causally
+      // shapes weights through the same eligibility-trace machinery as E4.
+      if (fb.reward !== undefined && fb.reward !== 0) {
+        da.v = clamp(da.v + fb.reward * 0.6, -1.5, 3);
+      }
     },
-    setLearning(on) { learning = on; if (!on) { E.fill(0); da.v = 0; } },
-    resetForTrial() { V.fill(0); spikes.fill(0); refac.fill(0); E.fill(0); da.v = 0;
+    setLearning(on) { learning = on; if (!on) { for (const A of EW) A.fill(0); da.v = 0; pgR = 0; } },
+    resetForTrial() { V.fill(0); spikes.fill(0); refac.fill(0); for (const A of EW) A.fill(0); da.v = 0;
                       trialSpikeCount.fill(0); layerSpikeSums.fill(0);
                       motorRateSmooth = 0; layerRateSmooth = 0;
                       agreeCount = 0; decisions = 0;
                       activeTraces.length = 0; inActive.fill(0);
-                      lastTouchTick.fill(-1e9); },
+                      lastTouchTick.fill(-1e9);
+                      if (pg) { pgR = 0; phi = null; pg.probs = 0.5; pg.action = 0; pg.pend = null; } },
     summary() {
       let s = 0; for (let i = m0; i < m1; i++) s += spikes[i];
       return { demonAgree: decisions > 0 ? agreeCount / decisions : 0,
                motorHz: s / layers[motorLayer].length };
     },
+    // ---- E9 live telemetry (additive; used by pressureDemonCore + 3D HUD) --
+    telemetry() {
+      let s = 0; for (let i = m0; i < m1; i++) s += spikes[i];
+      return {
+        motorActivity: motorRateSmooth,          // smoothed pool rate (Hz, EMA):
+                                                 // legacy readout kept for parity
+        motorRate: s,                            // raw motor-layer spikes this
+                                                 // tick — the population decision
+                                                 // variable E9 thresholds
+        sensoryActivity: this._sens || null,     // last injected sensory vector
+        spikeCount: s,                           // motor-layer spikes this tick
+        dopamine: da.v,                          // current teaching signal
+      };
+    },
+    // total absolute synaptic drift from the connectome baseline (persistence
+    // metric: stays 0 under setLearning(false), grows during training)
+    weightDrift() {
+      let s = 0;
+      for (let i = 0; i < NE; i++) s += Math.abs(W[i] - W_INIT[i]);
+      return s;
+    },
+    get dopamine() { return da.v; },
+    // E9 policy-gradient readout (null unless opts.policyGradient): the core
+    // drives the valve from lastPgAction() and routes each decision's reward
+    // window into pgReward, closing the loop Δw_i ∝ r·(a − P_open).
+    policyProb() { return pg ? pg.probs : null; },
+    lastPgAction() { return pg ? pg.action : null; },
+    set pgReward(v) { if (pg) pgR = v; },
     fireVec() {
       // Uint8-quantized per-neuron spike counts (log scale preserves the
       // dynamic range: 255 = 256+ spikes in the trial, 1 = 1 spike)
