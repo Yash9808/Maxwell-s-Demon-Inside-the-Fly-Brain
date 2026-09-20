@@ -89,6 +89,24 @@ function makeRng(seed) {        // local PRNG for the brain factory (mulberry32)
   };
 }
 
+// Apparatus brains (E10/E11) use the SAME connectome controller and credit
+// upgrades as E9 — the only difference is what the actuators mean:
+//   E10: action 1 = RELEASE the trapdoor flap (sorting window open)
+//   E11: action 1 = DROP the pawl (engage the ratchet)
+function apparatusBrainFactory(expId, seedIdx) {
+  if (!E9_CIRCUIT) throw new Error(expId + " brain requested but no circuit loaded");
+  return CTRL.connectomeController(E9_CIRCUIT, {
+    shuffle: false, rng: makeRng(9176 + (seedIdx || 0) * 37), seed: 1,
+    opticDrive: 0,
+    motorDrive: 0.6,
+    plasticity: "full",
+    // same credit-assignment upgrades as e9BrainFactory (windows + PG readout)
+    eligibility: [{ tau: 0.90, w: 0.45 }, { tau: 0.985, w: 0.35 }, { tau: 0.9995, w: 0.20 }],
+    policyGradient: true,
+    pgRng: makeRng(424243 + (seedIdx || 0) * 977),
+  });
+}
+
 // ---------------------------------------------------------------- registry
 const EXPERIMENTS = {
   e1: { label: "E1 · Classical Maxwell Demon",
@@ -151,14 +169,14 @@ const EXPERIMENTS = {
         // 95% CIs (CORE.apparatusCurve); override via run opts.seeds
         seeds: 3, train: 12, test: 12, episode: 20 },
   e10: { label: "E10 · Smoluchowski Trapdoor",
-        needsCircuit: false,
+        needsCircuit: true,
         apparatus: "smoluchowskiCore",
         apparatusEnv: "trapdoor",
         controllers: () => ({}),
         physics: () => ({ nParticles: 220, noise: 0 }),
         seeds: 1, train: 8, test: 8, episode: 16 },
   e11: { label: "E11 · Feynman Ratchet & Pawl",
-        needsCircuit: false,
+        needsCircuit: true,
         apparatus: "feynmanRatchetCore",
         apparatusEnv: "ratchet",
         controllers: () => ({}),
@@ -288,7 +306,10 @@ function runExperiment(expId, circuit, opts) {
           nParticles: (spec.physics && spec.physics(0, 1) || {}).nParticles || 260,
           // fly-brain conditions are added only when a real circuit arrived;
           // one distinct brain draw per seed (cross-seed CI over brains)
-          brainFactory: (expId === "e9" && E9_CIRCUIT) ? (sd) => e9BrainFactory(sd) : undefined,
+          brainFactory: (expId === "e9" && E9_CIRCUIT) ? (sd) => e9BrainFactory(sd)
+            : (expId === "e10" && E9_CIRCUIT) ? (sd) => apparatusBrainFactory("e10", sd)
+            : (expId === "e11" && E9_CIRCUIT) ? (sd) => apparatusBrainFactory("e11", sd)
+            : undefined,
           onTrialData: (cond, phase, tr) => {
             pushRow(cond, phase, tr);
             emit(expId, phase, (tr.trial || 0) + 1, nTrials * nSeeds, s + 1, false);

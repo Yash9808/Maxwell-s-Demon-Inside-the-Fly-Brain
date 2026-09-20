@@ -593,6 +593,8 @@
   function appRestore() {
     const h = document.getElementById("appHud");
     if (h) h.remove();
+    const eh = document.getElementById("e9hud");
+    if (eh) eh.remove();
     appGuestsRestore();
     for (const k in appStages) if (appStages[k].built) appStages[k].built.grp.visible = false;
     if (!__camSave.active) return;
@@ -732,7 +734,11 @@
     if (!el) { const d = document.createElement("div"); d.id = "e9hud";
                d.className = "e9hud"; document.body.appendChild(d); el = d; }
     const f1 = (x, d) => Number.isFinite(x) ? x.toFixed(d) : "—";
-    if (!s) { el.innerHTML = e9BatchHudHtml(E9_BATCH.last); return; }  // batch-only view
+    // E10/E11 dispatch to their scientific HUDs (same real worker telemetry
+    // contract as the E9 block below); pressure falls through to the E9 HUD.
+    if (s && s.kind === "trapdoor") return e10HudUpdate(s);
+    if (s && s.kind === "ratchet") return e11HudUpdate(s);
+    if (!s) { el.innerHTML = E9_BATCH.last ? e9BatchHudHtml(E9_BATCH.last) : ""; return; }  // batch-only view
     const e = f1(s.extractionRate, 3), n = f1(s.netWorkJ, 1);
     const cls = e > 0 ? "agree" : (e < 0 ? "disagree" : "k");
     el.innerHTML =
@@ -756,6 +762,60 @@
       Math.round(100 * (s.demonAgree || 0)) + '%</b>' +
       (E9_BATCH.last ? e9BatchHudHtml(E9_BATCH.last) : "");
   }
+  // ---- E10 scientific HUD: real worker telemetry for the trapdoor stage ----
+  // Every number is the value the simulation computed (worker app_state).
+  function e10HudUpdate(s) {
+    let el = document.getElementById("e9hud");
+    if (!s) { if (el) el.innerHTML = ""; return; }
+    if (!el) { const d = document.createElement("div"); d.id = "e9hud";
+               d.className = "e9hud"; document.body.appendChild(d); el = d; }
+    const f1 = (x, d) => Number.isFinite(x) ? x.toFixed(d) : "—";
+    const cls = s.demonAgree > 0.5 ? "agree" : "k";
+    el.innerHTML =
+      '<h4>FLY BRAIN (GATEKEEPER)</h4>' +
+      'sense [' + (s.sensors || []).map(x => f1(x, 1)).join(" ") + ']<br>' +
+      'motor <b>' + f1(s.motorActivity, 2) + '</b> · DA <b>' + f1(s.dopamine, 2) +
+      '</b> · rew <b>' + f1(s.reward, 1) + '</b>' +
+      '<h4>GATE ACTION</h4>' +
+      'neural <b>' + (s.action ? "RELEASE" : "HOLD") + '</b> · ref <b>' +
+      (s.classical ? "RELEASE" : "HOLD") + '</b> · <span class="' + cls + '">' +
+      Math.round(100 * (s.demonAgree || 0)) + '% agree</span>' +
+      '<h4>SORTING ENGINE</h4>' +
+      'n_L <b>' + (s.nl | 0) + '</b> · n_R <b>' + (s.nr | 0) +
+      '</b> · L→R <b>' + (s.crossLR | 0) + '</b> · R→L <b>' + (s.crossRL | 0) + '</b><br>' +
+      'flap <b>' + f1((s.door || 0) * 57.3, 0) + '°</b> · T_L ' + (s.tl || 0).toFixed(0) +
+      ' · T_R ' + (s.tr || 0).toFixed(0) +
+      '<h4>LEARNING</h4>' +
+      'trial <b>' + ((s.trial || 0) + 1) + '</b>/<span class="' + (s.phase === "test" ? "ph-test" : "ph-train") + '">' +
+      (s.phase || "train") + '</span> · seed <b>' + (s.seed || 1) + '</b>';
+  }
+  // ---- E11 scientific HUD: real worker telemetry for the ratchet stage ------
+  function e11HudUpdate(s) {
+    let el = document.getElementById("e9hud");
+    if (!s) { if (el) el.innerHTML = ""; return; }
+    if (!el) { const d = document.createElement("div"); d.id = "e9hud";
+               d.className = "e9hud"; document.body.appendChild(d); el = d; }
+    const f1 = (x, d) => Number.isFinite(x) ? x.toFixed(d) : "—";
+    const cls = s.demonAgree > 0.5 ? "agree" : "k";
+    const wJ = (s.angSnap || 0) * (s.load || 0) * 1e-21;
+    el.innerHTML =
+      '<h4>FLY BRAIN (PAWL OPERATOR)</h4>' +
+      'sense [' + (s.sensors || []).map(x => f1(x, 1)).join(" ") + ']<br>' +
+      'motor <b>' + f1(s.motorActivity, 2) + '</b> · DA <b>' + f1(s.dopamine, 2) +
+      '</b> · rew <b>' + f1(s.reward, 1) + '</b>' +
+      '<h4>PAWL ACTION</h4>' +
+      'neural <b>' + (s.action ? "ENGAGE" : "LIFT") + '</b> · ref <b>' +
+      (s.classical ? "ENGAGE" : "LIFT") + '</b> · <span class="' + cls + '">' +
+      Math.round(100 * (s.demonAgree || 0)) + '% agree</span>' +
+      '<h4>RATCHET ENGINE</h4>' +
+      'fwd <b>' + (s.fwd | 0) + '</b> · rev <b>' + (s.rev | 0) +
+      '</b> · θ <b>' + f1(s.angSnap || 0, 2) + '</b> rad<br>' +
+      'W(signed) <b>' + wJ.toExponential(2) + '</b> J · Th ' + f1(s.th, 1) +
+      ' · Tc ' + f1(s.tc, 1) + ' · τ ' + f1(s.load, 3) +
+      '<h4>LEARNING</h4>' +
+      'trial <b>' + ((s.trial || 0) + 1) + '</b>/<span class="' + (s.phase === "test" ? "ph-test" : "ph-train") + '">' +
+      (s.phase || "train") + '</span> · seed <b>' + (s.seed || 1) + '</b>';
+  }
   function appPump() {
     const st = appStages[appPlay.active];
     if (!st || !st.built) { appPlay.raf = 0; appHud().remove(); return; }
@@ -770,9 +830,11 @@
       " · <b>" + (cur ? cur.state.cond : "") + "</b> · t=" +
       (cur ? cur.state.t.toFixed(1) : "0") + "s · ESC = exit";
     if (hudTxt !== appPlay.lastHud) { appHud().innerHTML = hudTxt; appPlay.lastHud = hudTxt; }
-    if (appPlay.active === "pressure") {
+    if (appPlay.active === "pressure" || appPlay.active === "trapdoor" ||
+        appPlay.active === "ratchet") {
       // (patch 16b) the HUD block is ~5KB of innerHTML; rewriting it every
       // replay tick stalled the main thread. Refresh at ~5Hz instead.
+      // E10/E11 use the same e9hud element via the kind dispatch inside.
       const nowMs = performance.now();
       if (nowMs - (appPlay.lastHudMs || 0) >= 200) {
         appPlay.lastHudMs = nowMs;
@@ -897,9 +959,12 @@
     // uses) and flash the thought bubble
     if (st) {
       THOUGHT.cond = st.cond || THOUGHT.cond;
-      // E9: keep the latest live state - the thought bubble renders the REAL
-      // worker telemetry (sensors/motor/dopamine/reward) from this object.
+      // E9/E10/E11: keep the latest live state - the thought bubble renders
+      // the REAL worker telemetry (sensors/motor/dopamine/reward) from this
+      // object, per experiment.
       if (st.kind === "pressure") G.e9 = st;
+      if (st.kind === "trapdoor") G.e10 = st;
+      if (st.kind === "ratchet") G.e11 = st;
       let evHit = false;
       if (st.kind === "pressure" && G._pv !== undefined && ((G._pv < 0.5) !== (st.valve < 0.5))) evHit = true;
       if (st.kind === "pressure") G._pv = st.valve;
@@ -994,6 +1059,35 @@
       mix("sensory drive", sen.reduce((a, x) => a + x, 0) / 8);
       mix("fast @ valve (ch0)", sen[0]);
       mix("valve aperture (ch6)", sen[6]);
+      mix("dopamine", Math.min(1, Math.max(0, (s.dopamine || 0)) / 2));
+      return ema;
+    }
+    // E10: the bubble shows the REAL worker-side gatekeeper telemetry —
+    // same sensors the hold/release decision reads, same dopamine.
+    if (APP_GUESTS.active === "trapdoor" && APP_GUESTS.e10) {
+      THOUGHT.last = now;
+      const s = APP_GUESTS.e10;
+      const sen = s.sensors || [0,0,0,0,0,0,0,0];
+      const ema = THOUGHT.ema || (THOUGHT.ema = {});
+      const mix = (k, v) => { ema[k] = (ema[k] || 0) * 0.7 + v * 0.3; };
+      mix("motor pool", Math.min(1, (s.motorActivity || 0) / 3));
+      mix("sensory drive", sen.reduce((a, x) => a + x, 0) / 8);
+      mix("fast @ flap (ch0)", sen[0]);
+      mix("hold pin (ch6)", sen[6]);
+      mix("dopamine", Math.min(1, Math.max(0, (s.dopamine || 0)) / 2));
+      return ema;
+    }
+    // E11: same contract for the pawl operator.
+    if (APP_GUESTS.active === "ratchet" && APP_GUESTS.e11) {
+      THOUGHT.last = now;
+      const s = APP_GUESTS.e11;
+      const sen = s.sensors || [0,0,0,0,0,0,0,0];
+      const ema = THOUGHT.ema || (THOUGHT.ema = {});
+      const mix = (k, v) => { ema[k] = (ema[k] || 0) * 0.7 + v * 0.3; };
+      mix("motor pool", Math.min(1, (s.motorActivity || 0) / 3));
+      mix("sensory drive", sen.reduce((a, x) => a + x, 0) / 8);
+      mix("hop imbalance (ch7)", sen[7]);
+      mix("pawl lift (act)", s.lift ? 1 : 0);
       mix("dopamine", Math.min(1, Math.max(0, (s.dopamine || 0)) / 2));
       return ema;
     }

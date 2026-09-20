@@ -1023,9 +1023,83 @@ function makeSim(circuit){
     plastic[i]= e.sign>0?1:0; });
   const WS = 0.02;
   for (let i=0;i<NE;i++) W[i]*=WS;
-  return { circuit, layers, N, NE, layerStart, V, spikes, refac,
+  const s = { circuit, layers, N, NE, layerStart, V, spikes, refac,
            src, dst, W, W0, isExc, plastic, E, WS,
-           DA:{v:0}, motorRateSmooth:0, motorBase:0 };
+           DA:{v:0}, motorRateSmooth:0, motorBase:0,
+           _bw:null, _bwReady:false, _bwBroken:false, _bwNext:0, _bwLast:null,
+           _bwAvail:null, _bwWAvail:null };
+  s._bwStart = ()=>{ try {
+      if (s._bw) { try { s._bw.terminate(); } catch(e){} s._bw = null; }
+      const w = new Worker("brain_worker.js");
+      const off = [0]; for (const l of layers) off.push(off[off.length-1] + l.length);
+      const memb = new Int32Array(off[off.length-1]);
+      layers.forEach((l,li)=> memb.set(l, off[li]));
+      const w0 = new Float32Array(NE), sign = new Uint8Array(NE);
+      for (let i=0;i<NE;i++){ w0[i]=W0[i]; sign[i]=isExc[i]; }
+      let opticChan = null;
+      const oLayer = circuit.optic_layer ?? -1;
+      if (oLayer >= 0 && layers[oLayer] && circuit.optic_channels){
+        const optic = layers[oLayer], om = circuit.optic_channels;
+        opticChan = new Uint8Array(optic.length);
+        for (let k=0;k<optic.length;k++){
+          const f = om[String(optic[k])];
+          opticChan[k] = f ? Math.min(7, (f[0]*4|0) + ((f[1]*2|0)*4)) : (k % 8);
+        }
+      }
+      const stimLayers = [0,1].filter(li => li < layers.length);
+      w.postMessage({ type:"init", N, NE, members:memb, layerOff:off,
+        src:s.src, dst:s.dst, w0, sign, opticChan, opticLayer:oLayer,
+        stimLayers }, [memb.buffer, w0.buffer, sign.buffer]);
+      w.onmessage = (ev)=>{
+        const m = ev.data;
+        if (m.type==="state"){
+          s._bwTicks = (s._bwTicks || 0) + 1;    // (patch 20) perf HUD readout
+          s._bwLastSeen = Date.now();            // (patch 20b) watchdog heartbeat
+          const ret = s._bwAvail;
+          if (ret && ret.buffer) { try { const rb = ret.buffer; w.postMessage({ type:"buffers", spikes:rb }, [rb]); } catch(e){} }
+          let replaying = false;
+          try { replaying = RP.playing || RP.pos >= 0; } catch(e){}
+          if (!replaying){
+            s.spikes = m.spikes;               // mirrored bitmap (worker-owned)
+            s.DA.v = m.dav; s.motorRateSmooth = m.mrs; s.motorBase = m.mb;
+            s._bwAvail = m.spikes;
+          } else {
+            // trial replay owns the bitmap: hand the fresh frame straight back
+            try { const rb2 = m.spikes.buffer || m.spikes; w.postMessage({ type:"buffers", spikes:rb2 }, [rb2]); } catch(e){}
+            s._bwAvail = null;   // replay owns s.spikes; mirror ref would go stale
+          }
+          if (m.W){
+            const oldW = s._bwWAvail;
+            if (!replaying) s.W = m.W;
+            s._bwWAvail = m.W;
+            if (oldW && oldW.buffer) { try { const wb2 = oldW.buffer; w.postMessage({ type:"buffers", W:wb2 }, [wb2]); } catch(e){} }
+          }
+        } else if (m.type==="ready"){
+          s._bwReady = true;
+          msg("brain sim in worker \u2014 " + s.N.toLocaleString() + " neurons off the render thread");
+        } else if (m.type==="error"){
+          console.error("[brain_worker]", m.message);
+          msg("worker brain failed \u2014 falling back to main-thread sim");
+          s._bwReady = false; s._bwBroken = true;
+        }
+      };
+      w.onerror = (e)=>{ console.error("[brain_worker]", e.message||e);
+        s._bwReady = false; s._bwBroken = true; };
+      s._bw = w;
+    } catch(e) { s._bwBroken = true; }
+  };
+  s._bwStart();
+  // (patch 20b) watchdog: restart a silent worker once, then fall back for good.
+  s._bwLastSeen = Date.now();
+  s._bwWatch = setInterval(()=>{
+    if (s._bwBroken || document.hidden) return;
+    if (Date.now() - s._bwLastSeen < 5000) return;
+    console.warn("[brain_worker] silent >5s - restarting worker");
+    msg("brain worker stalled - restarting");
+    s._bwTicks = 0;
+    s._bwStart();
+  }, 5000);
+  return s;
 }
 let sim = null;
 
@@ -1042,6 +1116,23 @@ function injectLayerChannels(layerIndex, values, gain){
 
 function brainTick(s, visual, motorDrive, exAmp){
   if (!sim || !sim.layers) return;   // boot race: frame loop can start before sim exists
+  // (patch 19) worker path: ship a cheap input packet (~30Hz); the 563k-edge
+  // connectome tick + plasticity run in brain_worker.js. Falls through to the
+  // legacy in-frame body below if the worker is unavailable.
+  if (sim._bw && sim._bwReady && !sim._bwBroken){
+    const nowT = performance.now();
+    if (!sim._bwLast) sim._bwLast = { s:new Float32Array(7), v:new Float32Array(8), ex:0, md:0.35 };
+    const L = sim._bwLast;
+    for (let i=0;i<7;i++) L.s[i] = (s && s.length>i) ? s[i] : L.s[i];
+    for (let i=0;i<8;i++) L.v[i] = (visual && visual.length>i) ? visual[i] : L.v[i];
+    L.ex = exAmp; L.md = motorDrive;
+    if (nowT >= sim._bwNext){
+      sim._bwNext = nowT + 33;
+      sim._bw.postMessage({ type:"tick", s:L.s, visual:L.v, motorDrive:L.md,
+        exAmp:L.ex, lr: parseFloat($("lr").value)*(assist?-1:1), dt:0.016 });
+    }
+    return;
+  }
   const { layers, layerStart, V, refac, N } = sim;
   injectLayerChannels(0, s, 12);
   // STIMULUS-LOCKED firing: particle crossings pulse the real sensory
@@ -1150,6 +1241,8 @@ function doorCrossing(p, dir){
   sim.DA.v = clamp(sim.DA.v + q*0.6*rs, -1.5, 3);
   // sensory pulse into the real connectome: every crossing excites AL+optic
   sim._stimPulse = Math.min(1, (sim._stimPulse || 0) + 0.7 + Math.abs(q) * 0.5);
+  if (sim._bw && sim._bwReady && !sim._bwBroken) sim._bw.postMessage({ type:"reward",
+    dq: q*0.6*rs, stim: 0.7 + Math.abs(q)*0.5 });
   doorFlash=1; lastCrossGood = q>0;
   if (q>0) crossGood++; else crossBad++;
   // the demon notices: reaction pose decays in the animation loop
@@ -1271,19 +1364,25 @@ function frame(now){
   // (patch 18) apparatus stages own the screen during E9/E10/E11 replays
   // (default world hidden): skip its simulation entirely - camera + render
   // still run, so the replay stays smooth while the worker crunches.
-  if (!window.__appScene || !window.__appScene.__playing) {
+  { // (patch 19) the brain sim lives in brain_worker.js now: it keeps ticking
+    // even while an apparatus replay owns the screen (telemetry + plots stay
+    // warm). World visuals/actuation still pause during replays.
+    if (!sim || !sim.layers) return;   // boot race: dataset still loading
     const motorIn = MODE==="brain"?0.35:0.15;
     exSlVal = parseFloat($("exSl").value);
+    const bwLive = sim && sim._bw && sim._bwReady && !sim._bwBroken;
     if (_simParity === 0) {
       brainTick(sens, visual, motorIn, MODE==="brain"?exSlVal:0.3);
-      updateTraces();
-      if (!sim || !sim.layers) return;   // boot race: sim not constructed yet
-      sim.motorRateSmooth = sim.motorRateSmooth*0.85 + (motorRate()/Math.max(dt,1e-3))*0.15;
-      sim.motorBase += (sim.motorRateSmooth-sim.motorBase)*clamp(dt*0.1,0,1);
-      applyLearning(parseFloat($("lr").value) * (assist?-1:1));
+      if (!bwLive) updateTraces();
+      if (!bwLive) {
+        sim.motorRateSmooth = sim.motorRateSmooth*0.85 + (motorRate()/Math.max(dt,1e-3))*0.15;
+        sim.motorBase += (sim.motorRateSmooth-sim.motorBase)*clamp(dt*0.1,0,1);
+        applyLearning(parseFloat($("lr").value) * (assist?-1:1));
+      }
       lcPanelFrame(dt);
     }
 
+    if (!window.__appScene || !window.__appScene.__playing) {
     actuate(dt);
     epTime+=dt;
     if (epTime>EP_LEN){ epTime=0; bestDT=0; $("bestVal").textContent="0.00";
@@ -1293,6 +1392,7 @@ function frame(now){
     updateHUD(Tl, Tr, dT);
     if (typeof sciFrame==="function") sciFrame(dt);
     if (typeof expFrame === "function") expFrame(sens, visual);
+    }
   }
   tick++;
   renderer.render(scene, camera);
@@ -2132,6 +2232,69 @@ function boot(){
   applyCamera();
   $("loadOverlay").style.opacity="0";
   setTimeout(()=>{ const lo=$("loadOverlay"); if (lo) lo.remove(); }, 600);
+  // ---- perf HUD + adaptive quality (patch 20) ---------------------------
+  // Own rAF loop: inter-frame gaps reflect true pacing including worker
+  // messages, GC and done-payload bursts. DPR is the cheapest quality lever
+  // for this fill-rate-bound scene; changes are stepped and announced.
+  const perfHud = { el: document.getElementById("perf"), on: true,
+    frames: 0, sumMs: 0, hitches: 0, worst: 0,
+    lastSample: performance.now(), lastBw: 0, lastAvgGap: 0,
+    lowRun: 0, highRun: 0,
+    dpr: Math.min(devicePixelRatio || 1, 2),
+    dprMax: Math.min(devicePixelRatio || 1, 2) };
+  perfHud.el.style.cursor = "pointer";
+  perfHud.el.addEventListener("click", () => {
+    perfHud.on = !perfHud.on;
+    perfHud.el.style.opacity = perfHud.on ? "1" : "0.45";
+    if (!perfHud.on) perfHud.el.textContent = "perf off";
+  });
+  function perfApplyDpr() {
+    renderer.setPixelRatio(perfHud.dpr);
+    renderer.setSize(innerWidth, innerHeight);
+  }
+  let perfLastT = 0;
+  function perfLoop(now) {
+    requestAnimationFrame(perfLoop);
+    if (perfLastT) {
+      const gap = now - perfLastT;
+      perfHud.frames++; perfHud.sumMs += gap;
+      if (gap > 40) perfHud.hitches++;
+      if (gap > perfHud.worst) perfHud.worst = gap;
+    }
+    perfLastT = now;
+    if (now - perfHud.lastSample < 1000) return;
+    const avg = perfHud.frames ? perfHud.sumMs / perfHud.frames : 0;
+    perfHud.lastAvgGap = avg;
+    const bwTicks = (sim && sim._bwTicks) ? sim._bwTicks - perfHud.lastBw : 0;
+    if (sim) perfHud.lastBw = sim._bwTicks || 0;
+    if (perfHud.on) {
+      const heap = (performance.memory && performance.memory.usedJSHeapSize)
+        ? " \u00b7 " + (performance.memory.usedJSHeapSize / 1048576).toFixed(0) + "MB" : "";
+      perfHud.el.textContent = avg.toFixed(1) + "ms \u00b7 max "
+        + perfHud.worst.toFixed(0) + "ms \u00b7 bw " + bwTicks + "/s" + heap;
+      perfHud.el.style.color = avg > 34 ? "#ff7b72" : avg > 22 ? "#ffd23a" : "#8cff9a";
+    }
+    // adaptive resolution: degrade after 4s of >30ms average, restore after
+    // 10s of <15ms average (hysteresis prevents oscillation)
+    if (avg > 30) { perfHud.lowRun++; perfHud.highRun = 0; }
+    else if (avg < 15) { perfHud.highRun++; perfHud.lowRun = 0; }
+    else { perfHud.lowRun = 0; perfHud.highRun = 0; }
+    if (perfHud.lowRun >= 4 && perfHud.dpr > 0.75) {
+      perfHud.dpr = Math.max(0.75, perfHud.dpr - 0.25);
+      perfApplyDpr();
+      msg("perf: render resolution lowered to " + perfHud.dpr.toFixed(2) + "x to hold the frame budget", 2600);
+      perfHud.lowRun = 0;
+    } else if (perfHud.highRun >= 10 && perfHud.dpr < perfHud.dprMax) {
+      perfHud.dpr = Math.min(perfHud.dprMax, perfHud.dpr + 0.25);
+      perfApplyDpr();
+      msg("perf: render resolution restored to " + perfHud.dpr.toFixed(2) + "x", 2600);
+      perfHud.highRun = 0;
+    }
+    perfHud.frames = 0; perfHud.sumMs = 0; perfHud.hitches = 0; perfHud.worst = 0;
+    perfHud.lastSample = now;
+  }
+  window.__perfHud = perfHud;
+  requestAnimationFrame(perfLoop);
   requestAnimationFrame(frame);
   msg("♀ FAFB v783 online — the fly is on the wall, the demon is watching", 3200);
 }

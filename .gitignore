@@ -1,4 +1,5 @@
 # Local working folders and generated runtime output
+.freebuf/
 .freebuff/
 freebuf/
 __pycache__/

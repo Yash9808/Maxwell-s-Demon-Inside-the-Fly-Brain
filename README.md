@@ -460,6 +460,42 @@ Result during a full DEMON LAB session: mean frame ~11–15 ms (~60 fps badge),
 hitches >40 ms down from ~10/s to <0.3/s, worst hitch 652 ms → 87 ms, plots
 broadcast volume down ~8x, and every session still completes with all panels.
 
+**Patch 19 — the whole brain sim moved off the main thread** (`brain_worker.js`):
+the 106,765-neuron connectome tick (563k synaptic edges + dopamine-gated
+plasticity) no longer runs inside the render loop (this supersedes patch 18's
+30 Hz gate, whose only trace is the `_simParity` input cadence). The page now
+ships a cheap ~30 Hz sensor packet to the worker and receives the spike bitmap
++ plastic weights back as **zero-copy transferable buffers** (ping-pong pool,
+never re-allocated), so every existing consumer — 3D point cloud, heat maps,
+trial replay, HUD, region stats, learning panel — reads the same
+`sim.spikes` / `sim.W` unchanged. Reward (`sim.DA.v`), stimulus pulses and
+learning-rate changes are forwarded to the worker; trial replay keeps owning
+the bitmap while active (fresh worker frames are handed straight back). Measured
+on the live page: idle mean frame 46 ms → **~8 ms with zero hitches >40 ms**
+(worst 23 ms), ~10 ms mean during a running experiment, and the brain keeps
+ticking even while an apparatus replay owns the screen. If the worker can't
+start (e.g. `file://`), the page transparently falls back to the legacy
+in-frame tick.
+
+**Patch 20 — perf HUD, adaptive quality, watchdog** (plus patch 20b/20c fixes):
+a `perf` badge in the header shows avg frame interval · worst hitch this
+second · brain-worker ticks/s · JS heap (click to hide/show), driven by its own
+rAF sampler so it measures real page pacing. The same sampler drives an
+adaptive-quality controller: if the 10s mean frame exceeds ~40 ms it steps the
+renderer's pixel ratio down (1.0 → 0.85 → 0.7, with hysteresis and a toast),
+and steps back up below ~25 ms. A watchdog restarts the brain worker if it goes
+silent >5 s, then falls back to main-thread sim if still dead. Patch 20c fixed
+the real bug the badge exposed: worker buffers were returned as TypedArray
+views (not transferable), so `postMessage` threw silently and the publish pool
+starved — brain ticks had dropped to ~0.7/s while still looking smooth. With
+view→buffer returns fixed, the worker publishes at ~15 ticks/s.
+
+**10-minute soak (all 3 labs back-to-back, 11 experiments):** every session
+green, worker ticks steady ~15/s the whole way, long tasks only around
+experiment boundaries (15/296 samples, 2.6 s total), worst frame gap 250 ms
+(a single replay switch), mean gap ~35 ms in this preview surface, and heap
+sawtoothing 1026–1323 MB with no upward drift after four sessions.
+
 A second card, **"Brain outcome — learning deltas (late − early)"**, shows what
 learning *changed*: per region (and per condition for multi-arm experiments),
 the difference between the second and first half of training trials, drawn

@@ -247,11 +247,14 @@ function plot(canvasId, legendId, series, yLabel, opts = {}) {
   const g = cv.getContext("2d");
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
   g.fillStyle = th.bg; g.fillRect(0, 0, W, H);
-  if (!series.length || !series.some(s => s.pts.length)) {
+  const anyFinite = series.some(s => s.pts.some(p => Number.isFinite(p[1])));
+  if (!series.length || !anyFinite) {
     g.fillStyle = "#8b949e"; g.font = "12px system-ui";
     g.fillText(opts.emptyNote || "waiting for data…", 12, H / 2); return;
   }
-  const padL = 46, padR = 10, padT = 10, padB = 20;
+  // rotated y-axis label: reserve a left strip for it when provided
+  const hasYLab = !!(yLabel && String(yLabel).trim());
+  const padL = hasYLab ? 66 : 46, padR = 10, padT = 10, padB = 20;
   let xmin = Infinity, xmax = -Infinity, ymin = Infinity, ymax = -Infinity;
   for (const s of series) for (const [x, y] of s.pts) {
     if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
@@ -378,11 +381,22 @@ function plot(canvasId, legendId, series, yLabel, opts = {}) {
   }
   // labels
   g.fillStyle = th.fg; g.font = `${th.fs}px system-ui`;
-  g.fillText(fmt(ymin), 4, H - padB + 2);
-  g.fillText(fmt(ymax), 4, padT + 8);
+  const tickX = hasYLab ? 20 : 4;
+  g.fillText(fmt(ymin), tickX, H - padB + 2);
+  g.fillText(fmt(ymax), tickX, padT + 8);
   g.fillText(String(Math.round(xmin)), padL, H - 6);
   g.fillText(String(Math.round(xmax)), W - padR - 18, H - 6);
   g.fillText(opts.xLabel || "block", W / 2 - 14, H - 6);
+  if (hasYLab) {
+    g.save();
+    g.translate(11, padT + (H - padT - padB) / 2);
+    g.rotate(-Math.PI / 2);
+    g.textAlign = "center";
+    g.font = "11px system-ui";
+    g.globalAlpha = 0.8;
+    g.fillText(String(yLabel), 0, 0);
+    g.restore();
+  }
   // live head dot
   if (STYLE.kind !== "point") {
     for (const s of series) {
@@ -537,26 +551,30 @@ const BEHAVIOR_SPECS = {
   },
   e10: {
     demon: [
-      "No demon at all: a spring-loaded trapdoor flips open only when molecules bang into it from the left.",
+      "A spring-loaded trapdoor flips open only when molecules bang into it from the left.",
       "<b>Watch:</b> a light door gets kicked open often and passes more molecules; a heavy door rarely opens — mass gates flow, not intelligence.",
       "Either way the gas <b>relaxes to equilibrium</b>: while the door is open, molecules pass both directions — a Smoluchowski flap rectifies nothing alone.",
       "This is the null model behind E1: without measurement and decision, door mechanics alone cannot sort.",
     ],
     fly: [
-      "No fly here — this is the passive trapdoor that fooled Smoluchowski (1912).",
-      "In the 3D lab the microscopic trapdoor stage opens while E10 runs (ESC restores the default scene).",
+      "<b>Fly-brain conditions (trapdoor_neural / trapdoor_frozen):</b> the fly brain joins as GATEKEEPER — its only actuator is pinning the flap shut; molecules themselves still swing it open.",
+      "Its reward is the physical sorting outcome: sorted L→R passages pay, back-leaks cost, and each decision window is scored on NET sorted transport.",
+      "<b>Watch:</b> trapdoor_neural's reward and accuracy climb over training (weights persist); the frozen control stays flat — the learning contrast, not the raw counts.",
+      "In the 3D lab the trapdoor stage shows the gatekeeper's real sensors/motor/dopamine telemetry from the worker (ESC restores the default scene).",
     ],
   },
   e11: {
     demon: [
-      "A ratchet-and-pawl wheel between a hot vanes bath (Th) and a cold pawl bath (Tc), with an exact detailed-balance event model.",
-      "<b>Watch:</b> with Th &gt; Tc forward slips outweigh reversals and the wheel lifts the load; at Th = Tc the pawl lifts as often as it slips — net rotation ≈ 0.",
+      "A ratchet-and-pawl wheel with an explicit detailed-balance event model: forward hops must lift load + pawl (paid from the hot bath), backward hops only bounce the pawl (paid from the cold bath).",
+      "<b>Watch:</b> with Th &gt; Tc forward slips outweigh reversals and the wheel lifts the load; at Th = Tc the rates balance EXACTLY — signed work is ≤ 0, never positive.",
       "Equilibrium doing nothing <b>is the result</b> (Feynman's rectification theorem): you cannot sieve work from a single bath.",
       "A heavier load turns the gradient wheel slower — torque trades against speed exactly as in a real engine.",
     ],
     fly: [
-      "No fly here — the ratchet is the molecular-machine analogue of the demon's gate.",
-      "In the 3D lab the ratchet-engine stage opens while E11 runs (ESC restores the default scene).",
+      "<b>Fly-brain conditions (ratchet_neural / ratchet_frozen):</b> the fly brain operates the PAWL in an equilibrium bath — engage it and backward hops are blocked, lift it and the wheel slips freely.",
+      "Timing the pawl against the wheel's rattle is the only way to rectify it; that timing must be learned from the physical work reward.",
+      "<b>Watch:</b> ratchet_neural's reward and accuracy climb over training while the frozen control stays flat; work is SIGNED — backward slips pay work back.",
+      "In the 3D lab the ratchet stage shows the pawl operator's real sensors/motor/dopamine telemetry from the worker (ESC restores the default scene).",
     ],
   },
 };
@@ -582,27 +600,41 @@ const APP_SPEC = {
       { f: "sensorDecisionBits", label: "decision bits (proxy)", fmt: v => v.toFixed(0) },
       { f: "netWorkJ", label: "net work − Landauer min (J)", fmt: v => v.toExponential(2) },
     ] },
-  e10: { title: "Smoluchowski trapdoor — populations & door mechanics", panels: [
-      { f: "leftCount", label: "left count", fmt: v => v.toFixed(0) },
-      { f: "rightCount", label: "right count", fmt: v => v.toFixed(0) },
+  e10: { title: "Smoluchowski trapdoor — gatekeeper learning & door mechanics", panels: [
+      { f: "reward", label: "reward / episode", fmt: v => v.toFixed(2) },
+      { f: "decisionAccuracy", label: "decision accuracy", fmt: v => (v * 100).toFixed(0) + "%" },
+      { f: "demonAgree", label: "demon agreement", fmt: v => (v * 100).toFixed(0) + "%" },
+      { f: "holdFraction", label: "flap held shut", fmt: v => (v * 100).toFixed(0) + "%" },
+      { f: "directionalBias", label: "sorted-transport bias", fmt: v => v.toFixed(3) },
+      { f: "crossLR", label: "crossings L→R", fmt: v => v.toFixed(0) },
+      { f: "crossRL", label: "crossings R→L (leak)", fmt: v => v.toFixed(0) },
       { f: "densityDiff", label: "density diff (nL−nR)/n", fmt: v => v.toFixed(3) },
-      { f: "trapdoorAngle", label: "final door angle", fmt: v => v.toFixed(2) },
-      { f: "trapdoorFluctuation", label: "door angle RMS", fmt: v => v.toFixed(2) },
+      { f: "rewardWork", label: "transport reward", fmt: v => v.toFixed(2) },
+      { f: "rewardSelection", label: "crossing reward", fmt: v => v.toFixed(2) },
+      { f: "spikeRate", label: "motor spikes / decision", fmt: v => v.toFixed(2) },
+      { f: "dopamineMean", label: "dopamine (mean)", fmt: v => v.toFixed(3) },
+      { f: "weightDrift", label: "Σ|Δw| from baseline", fmt: v => v.toExponential(2) },
+      { f: "miNeural", label: "MI(neural, particles)", fmt: v => v.toFixed(3) },
       { f: "crossingRate", label: "crossings / s", fmt: v => v.toFixed(2) },
-      { f: "directionalBias", label: "directional bias", fmt: v => v.toFixed(3) },
       { f: "dTfinal", label: "ΔT between sides", fmt: v => v.toFixed(1) },
     ] },
-  e11: { title: "Feynman ratchet — rotation & thermodynamic accounting", panels: [
+  e11: { title: "Feynman ratchet — pawl-operator learning & thermodynamic accounting", panels: [
+      { f: "reward", label: "reward / episode", fmt: v => v.toFixed(2) },
+      { f: "decisionAccuracy", label: "decision accuracy", fmt: v => (v * 100).toFixed(0) + "%" },
+      { f: "demonAgree", label: "demon agreement", fmt: v => (v * 100).toFixed(0) + "%" },
+      { f: "liftFraction", label: "pawl lifted", fmt: v => (v * 100).toFixed(0) + "%" },
       { f: "netPerEpisode", label: "net rotation / episode (rad)", fmt: v => v.toFixed(2) },
-      { f: "angularVelocity", label: "final ω (rad/s)", fmt: v => v.toFixed(2) },
-      { f: "torque", label: "load torque", fmt: v => v.toFixed(3) },
-      { f: "forwardSteps", label: "forward slips", fmt: v => v.toFixed(0) },
-      { f: "reverseSteps", label: "reverse slips", fmt: v => v.toFixed(0) },
-      { f: "thermalFluctuation", label: "|thermal wobble|", fmt: v => v.toFixed(2) },
-      { f: "workJ", label: "work extracted (J)", fmt: v => v.toExponential(2) },
-      { f: "heatJ", label: "heat drawn (J)", fmt: v => v.toExponential(2) },
+      { f: "workJEp", label: "signed work / episode (J)", fmt: v => v.toExponential(2) },
+      { f: "forwardSteps", label: "forward hops", fmt: v => v.toFixed(0) },
+      { f: "reverseSteps", label: "backward hops", fmt: v => v.toFixed(0) },
       { f: "entropyProduction", label: "entropy Qh/Th − Qc/Tc", fmt: v => v.toFixed(2) },
       { f: "efficiency", label: "η = W/Qh", fmt: v => (v * 100).toFixed(2) + "%" },
+      { f: "spikeRate", label: "motor spikes / decision", fmt: v => v.toFixed(2) },
+      { f: "dopamineMean", label: "dopamine (mean)", fmt: v => v.toFixed(3) },
+      { f: "weightDrift", label: "Σ|Δw| from baseline", fmt: v => v.toExponential(2) },
+      { f: "thermalFluctuation", label: "|thermal wobble|", fmt: v => v.toFixed(2) },
+      { f: "heatJ", label: "heat through baths (J)", fmt: v => v.toExponential(2) },
+      { f: "angularVelocity", label: "final ω (rad/s)", fmt: v => v.toFixed(2) },
     ] },
 };
 const appNum = (c, k) => (c && c[k] && Number.isFinite(c[k].mean)) ? c[k] : { mean: 0, ci: 0 };
@@ -925,7 +957,7 @@ function render() {
           return [p.block, (v !== undefined && v !== null && v >= 0) ? Math.max(v, 1e-22) : NaN];
         }) });
     }
-    plot("cThermo", "lThermo", thermo, "J", { logY: true, xLabel: "block" });
+    plot("cThermo", "lThermo", thermo, "extractable work (J)", { logY: true, xLabel: "block" });
   }
   if (DONE) renderSummary();
 }

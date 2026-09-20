@@ -301,7 +301,11 @@ const METRICS = (() => {
     let a0f0 = 0, a0f1 = 0, a1f0 = 0, a1f1 = 0;
     for (let i = 0; i < n; i++) {
       const a = activity[i] > (thr !== undefined ? thr : 0) ? 1 : 0;
-      const f = Math.hypot(particles[i].vx, particles[i].vy, particles[i].vz) >= 120 ? 1 : 0;
+      // (guard) particleSample cycles a too-short particle list; an EMPTY list
+      // yields undefined entries (E11 ratchet has no particles) - treat them
+      // as not-fast so MI degrades to 0 instead of throwing.
+      const p = particles[i];
+      const f = p && Math.hypot(p.vx, p.vy, p.vz) >= 120 ? 1 : 0;
       if (a === 0 && f === 0) a0f0++;
       else if (a === 0 && f === 1) a0f1++;
       else if (a === 1 && f === 0) a1f0++;
@@ -1018,23 +1022,130 @@ function pressureDemonCore(cfg) {
   return { conditions, apparatus: "pressure" };
 }
 
+/** E10 sensors — 8 channels, ALL derived from live trapdoor apparatus
+ *  state (documented; no placeholders, no future information). The brain
+ *  sees the same numbers the physics computes:
+ *    0 fast-molecule approach count (left slot box, v > VFAST)   [0,1]
+ *    1 slow-molecule approach count (v < VSLOW)                  [0,1]
+ *    2 local density in the left slot box                        [0,1]
+ *    3 signed side-density contrast (nl-nr)/(nl+nr)              [-1,1]
+ *    4 flap angle / 1.1                                          [0,1]
+ *    5 flap angular velocity / 25                                [-1,1]
+ *    6 gate hold state (1 = flap pinned shut by the brain)       {0,1}
+ *    7 smoothed total crossing rate / RATE_NORM                  [0,1]  */
+const E10_SENSOR_DOC = {
+  // Speed thresholds are quantiles of the ACTUAL gas distribution. The E10
+  // gas thermalizes at per-component sigma = 86/sqrt(3) ~= 49.7 u/s
+  // (_thermoWalls SPEED0=86), so |v| is Maxwell-distributed:
+  //   p10 ~ 60, median ~ 76, p84 ~ 100 u/s (initial draw band: 60..110).
+  // The original VFAST=260 sat above the physical max -> channel fastL read
+  // 100% zeros and the brain could not see who was at the door.
+  VFAST: 100, VSLOW: 60, NLOCAL_MAX: 12, LOCAL_BOX: 90, SLOT_HALF: 60,
+  RATE_NORM: 2,
+  channels: ["fastL", "slowL", "localL", "densityContrast", "doorAngle",
+             "doorVel", "hold", "crossingRate"],
+};
+function senseE10(parts, door, sideStats, crossRateSm, doc, visitors) {
+  const d = doc || E10_SENSOR_DOC;
+  let nFast = 0, nSlow = 0, nLocal = 0;
+  for (const q of parts) {
+    if (q.x < -4 - d.LOCAL_BOX || q.x > -4) continue;
+    if (Math.abs(q.y) > d.SLOT_HALF || Math.abs(q.z) > d.SLOT_HALF) continue;
+    nLocal++;
+    const sp = Math.sqrt(q.vx * q.vx + q.vy * q.vy + q.vz * q.vz);
+    if (sp > d.VFAST) nFast++; else if (sp < d.VSLOW) nSlow++;
+  }
+  const nv = visitors ? visitors.length : 0;
+  let nFastVis = 0;
+  if (visitors) for (const q of visitors) {
+    const sp = Math.sqrt(q.vx * q.vx + q.vy * q.vy + q.vz * q.vz);
+    if (sp > d.VFAST) nFastVis++;
+  }
+  return [
+    Math.min(1, nFast / 6),
+    Math.min(1, nSlow / 6),
+    Math.min(1, nLocal / d.NLOCAL_MAX),
+    Math.max(-1, Math.min(1, (sideStats.nl - sideStats.nr) /
+                             Math.max(1, sideStats.nl + sideStats.nr))),
+    Math.min(1, door.ang / 1.1),
+    Math.max(-1, Math.min(1, door.vel / 25)),
+    door.hold > 0.5 ? 1 : 0,
+    Math.min(1, crossRateSm / d.RATE_NORM),
+    // -- learned-contrast channels (additive, opt-in via visitors) --------
+    // ch8: molecules CURRENTLY approaching (identity-tracked, rising-edge
+    //      event source — the event-locked decision fires on entry)
+    Math.min(1, nv / 6),
+    // ch9: approaching molecules that are fast — "someone who will bounce
+    //      hard is incoming" (the physically predictive signal)
+    Math.min(1, nFastVis / 3),
+  ];
+}
+
 /** E10 · Smoluchowski Trapdoor — a spring trapdoor opened only by molecule
  *  impacts from the left. Passage is genuinely gated by the door angle, so a
  *  heavier door (slower to open) passes fewer molecules; the gas still relaxes
- *  to equilibrium — no demon, no net work. */
+ *  to equilibrium — no demon, no net work.
+ *
+ *  With cfg.brainFactory the fly brain joins as GATEKEEPER. It cannot push
+ *  the flap; the only actuator it owns is door.hold — pin the flap shut, or
+ *  release it to the spring. The classical reference rule is computed every
+ *  decision for demonAgreement ONLY and never actuates the door.
+ *
+ *    environment -> senseE10() 8ch -> brain.observe/step -> hold 0|1
+ *      -> door.hold -> flap spring physics -> crossings -> nL/nR imbalance
+ *      -> physical reward -> brain.receiveFeedback -> dopamine
+ *      -> eligibility traces -> weights (persist across trials)
+ *
+ *  Reward (documented in E10_REWARD_DOC; nothing hidden in magic numbers):
+ *  sorted L->R passages pay wSelect, R->L leaks cost 1.5x wSelect, and each
+ *  decision is scored on the NET sorted transport its window achieved
+ *  (wWork); holding while a fast molecule waits costs wWrong. TRAIN runs
+ *  with plasticity on; TEST freezes the weights (demon_frozen freezes from
+ *  trial 0 as the exposure control). */
 function smoluchowskiCore(cfg) {
   cfg = cfg || {};
+  const seedTag = cfg.seedTag !== undefined ? cfg.seedTag : 1;
   const rng = makeRng(cfg.seed !== undefined ? cfg.seed : 1);
   const L = 760, H = 300, D = 300, DH = 120;
   const nP = cfg.nParticles || 220;
   const trials = cfg.trials || 20;
+  const trainTrials = Math.max(0, Math.min(trials, cfg.trainTrials !== undefined ? cfg.trainTrials : Math.floor(trials / 2)));
   const episode = cfg.episodeSeconds || 20;
   const dt = cfg.dt || 1 / 60;
   const OPEN_THRESH = 0.22;
+  // ---- reward coefficients (documented; nothing hidden in a magic number) --
+  const E10_REWARD_DOC = {
+    wWork: 0.5,        // per decision: wWork * clamp(net sorted crossings in
+                       //   the decision window / W_NORM, -1, 1)
+    wSelect: 0.3,      // per crossing: +wSelect sorted L->R,
+                       //   -1.5*wSelect R->L leak
+    wWrong: 0.15,      // per decision: -wWrong for holding while a fast L
+                       //   molecule waits at the slot (blocked opportunity)
+    W_NORM: 3,         // net sorted crossings per decision window that
+                       //   count as "full" transport reward
+    DECISION_S: 0.25,  // seconds between gate decisions
+    EVENT_S: 0.6,      // event-locked mode: decision + credit window length
+                       //   when a molecule ENTERS the approach box. Matched
+                       //   to the ~0.45 s box->slot transit so the action
+                       //   that governs the contact is the one scored.
+                       //   cfg.decisionMode: "event" (default with brain)
+                       //   | "clock" (legacy 0.25 s blind cadence)
+  };
+  const PG_CREDIT_GAMMA = 0.99;   // discounted credit window (~1.7 s at 60 Hz)
+  const RDOC = (cfg.rewardCfg && typeof cfg.rewardCfg === "object")
+    ? Object.assign({}, E10_REWARD_DOC, cfg.rewardCfg) : E10_REWARD_DOC;
+  const hasBrain = typeof cfg.brainFactory === "function";
   const variants = [
-    { key: "trapdoor_light", mass: 0.02, label: "light trapdoor" },
-    { key: "trapdoor_heavy", mass: 0.12, label: "heavy trapdoor" },
+    { key: "trapdoor_light", mass: 0.02, label: "light trapdoor", mode: "physics" },
+    { key: "trapdoor_heavy", mass: 0.12, label: "heavy trapdoor", mode: "physics" },
   ];
+  if (hasBrain) variants.push(
+    { key: "trapdoor_neural", mass: 0.02, label: "fly-brain gate (learning)", mode: "neural" },
+    { key: "trapdoor_frozen", mass: 0.02, label: "fly-brain gate (weights frozen)", mode: "frozen" });
+  if (Array.isArray(cfg.variants) && cfg.variants.length) {
+    const keep = variants.filter(v => cfg.variants.includes(v.key));
+    if (keep.length) variants.length = 0, variants.push(...keep);
+  }
   const conditions = {};
   const maxSteps = Math.round(episode / dt);
   for (let vi = 0; vi < variants.length; vi++) {
@@ -1042,17 +1153,60 @@ function smoluchowskiCore(cfg) {
     const vRng = makeRng((cfg.seed !== undefined ? cfg.seed : 1) * 31 + vi * 7919);
     const parts = [];
     for (let i = 0; i < nP; i++) parts.push(_apparatusPart(vRng, -L / 2 + 20, L / 2 - 20, H, D));
-    const door = { ang: 0, vel: 0 };
+    const door = { ang: 0, vel: 0, hold: 0, dwell: 0, flips: 0, prev: 0, classical: 0 };
     let crossLR = 0, crossRL = 0;
     const BURN = Math.round(6 / dt);     // 6 s equilibration before counting
+    let brain = null;
+    if (v.mode === "neural" || v.mode === "frozen") {
+      if (!hasBrain) throw new Error("trapdoor_neural/frozen require cfg.brainFactory");
+      // one brain per seed: cross-seed CI reflects gas + connectome draw
+      brain = cfg.brainFactory(seedTag);
+    }
     const rows = [];
+    let epRewWork = 0, epRewSel = 0, epRewPen = 0, epRewTotal = 0, epPgAcc = 0;
+    let epDecisions = 0, epAgree = 0, epWrong = 0, epHoldSteps = 0;
+    let epLtoR = 0, epRtoL = 0;
+    let epSensSum = 0, epMotorSum = 0, epSpikeSum = 0, epDaSum = 0, epDaPeak = 0, epWChange = 0;
+    let lastSens = new Array(8).fill(0), lastMotor = 0, lastPopen = 0;
+    let crossRateSm = 0;
+    let mFast = 0, mSlow = 0, mInit = 0;   // population-code fallback variables
+    // ---- event-locked decisions -----------------------------------------
+    // Identity-tracked per-molecule "in approach box" state. A decision is
+    // triggered when a molecule ENTERS the box (rising edge). The event gate
+    // ("any new arrival OR a waiting molecule present") re-scores the same
+    // contact every 0.6 s while it lingers, so the credit window (also 0.6 s)
+    // is matched to the box->slot transit and the action that governs the
+    // contact is the one scored. Legacy blind 0.25 s cadence remains
+    // available via cfg.decisionMode:"clock".
+    const eventMode = (cfg.decisionMode === "clock") ? false : true;
+    const inBox = new Uint8Array(nP);          // tracked box membership
+    const decided = new Uint8Array(nP);        // already scored this visit
+    let edgeCount = 0;                         // diagnostic: rising edges / seed
+    const VIS_BOX = 90, VIS_HALF = 60;         // box extent (u), mirror of sense
     for (let t = 0; t < trials; t++) {
-      let epL = 0, epR = 0;
+      const phase = t < trainTrials ? "train" : "test";
+      // training: plasticity on for the neural variant; test: frozen.
+      if (brain && brain.setLearning) brain.setLearning(v.mode === "neural" && phase === "train");
+      if (brain && brain.resetForTrial) brain.resetForTrial();
+      epRewWork = 0; epRewSel = 0; epRewPen = 0; epRewTotal = 0; epPgAcc = 0;
+      epDecisions = 0; epAgree = 0; epWrong = 0; epHoldSteps = 0;
+      epLtoR = 0; epRtoL = 0;
+      epSensSum = 0; epMotorSum = 0; epSpikeSum = 0; epDaSum = 0; epDaPeak = 0; epWChange = 0;
+      mFast = 0; mSlow = 0; mInit = 0;             // decision-variable reset
       const angSamples = [];
       for (let st = 0; st < maxSteps; st++) {
-        door.vel += (-26 * door.ang - 1.6 * door.vel) * dt;   // spring + hinge damping
+        const lrBefore = crossLR, rlBefore = crossRL;
+        // ---- flap physics: spring-driven while free; the brain's hold pins
+        // it shut (impacts reflect off the held flap; the hand absorbs the
+        // impulse). No other physics changed — physics variants (hold = 0
+        // forever) traverse the ORIGINAL code path bit-for-bit.
+        if (door.hold > 0.5) {
+          door.vel *= Math.exp(-6 * dt);
+          door.ang *= Math.exp(-6 * dt);
+        } else {
+          door.vel += (-26 * door.ang - 1.6 * door.vel) * dt;   // spring + hinge damping
+        }
         for (const p of parts) {
-          const wasLeft = p.x < 0;
           p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt;
           if (p.x < -L / 2) { p.x = -L / 2; p.vx = Math.abs(p.vx); }
           if (p.x > L / 2) { p.x = L / 2; p.vx = -Math.abs(p.vx); }
@@ -1061,66 +1215,245 @@ function smoluchowskiCore(cfg) {
           // center wall across the whole face; the door slot opens only in
           // [-DH/2, DH/2] x [-DH/2, DH/2] while the flap is lifted. Impacts
           // from the left kick it open; while open BOTH directions pass — a
-          // Smoluchowski flap rectifies nothing on its own.
+          // Smoluchowski flap rectifies nothing on its own. With the brain
+          // holding the flap shut, impacts from BOTH sides reflect.
           const xPrev = p.x - p.vx * dt;
           if ((p.x >= 0) !== (xPrev >= 0)) {
             const inSlot = Math.abs(p.z) < DH / 2 && Math.abs(p.y) < DH / 2;
             _thermoWalls(vRng, [p], dt);
             if (inSlot && p.vx > 0) {
-              // impact impulse: heavier door swings slower, so it needs more
-              // hits before the spring-loaded angle clears the passage
-              door.vel = Math.min(25, door.vel + 60 / (v.mass * 80));
-              if (st >= BURN && door.ang > OPEN_THRESH) { crossLR++; epL++; }
-              else { p.x = xPrev; p.vx = -p.vx; }
-            } else if (st >= BURN && inSlot && p.vx < 0 && door.ang > OPEN_THRESH) {
-              crossRL++; epR++;
+              if (door.hold > 0.5) {
+                p.x = xPrev; p.vx = -p.vx;      // brain-pinned: no swing
+              } else {
+                // impact impulse: heavier door swings slower, so it needs more
+                // hits before the spring-loaded angle clears the passage
+                door.vel = Math.min(25, door.vel + 60 / (v.mass * 80));
+                if (st >= BURN && door.ang > OPEN_THRESH) { crossLR++; epLtoR++; }
+                else { p.x = xPrev; p.vx = -p.vx; }
+              }
+            } else if (st >= BURN && inSlot && p.vx < 0 && door.ang > OPEN_THRESH && door.hold <= 0.5) {
+              crossRL++; epRtoL++;
             } else {
               p.x = xPrev; p.vx = -p.vx;
             }
           }
         }
         door.ang = Math.max(0, Math.min(1.1, door.ang + door.vel * dt));
+        if (door.hold > 0.5) epHoldSteps++;
         if ((st & 15) === 0) angSamples.push(door.ang);
+        crossRateSm += ((crossLR - lrBefore + crossRL - rlBefore) - crossRateSm) * 0.02;
+        const s = _apparatusSideStats(parts, L * H * D / 2, L * H * D / 2);
+        // ---- decision (the ONLY place door.hold is written) -------------
+        if (brain) {
+          // ---- event gating: ONE decision per visit --------------------
+          // Identity-tracked approach-box membership. A decision fires when
+          // a molecule ENTERS the box (rising edge); all occupants are then
+          // marked decided, so no re-fire while a visit lingers — the same
+          // visit can never reinforce two opposite actions. Decided flags
+          // clear on exit, so a molecule that turns around and re-enters is
+          // genuinely a new visit. The 0.6 s dwell still bounds the credit
+          // window (box->slot transit ~0.45 s), so a window's crossing
+          // rewards belong to the decision that governed that visit.
+          let visitors = 0, newEdge = false, undecided = false;
+          if (eventMode) {
+            visitors = 0; newEdge = false; undecided = false;
+            for (let pi = 0; pi < nP; pi++) {
+              const q = parts[pi];
+              const inside = q.x < -4 && q.x > -4 - VIS_BOX &&
+                             Math.abs(q.y) < VIS_HALF && Math.abs(q.z) < VIS_HALF;
+              if (inside && !inBox[pi]) { newEdge = true; edgeCount++; }
+              if (inside) {
+                visitors++; inBox[pi] = 1;
+                if (!decided[pi]) undecided = true;
+              } else { inBox[pi] = 0; decided[pi] = 0; }
+            }
+          }
+          const evFire = eventMode &&
+            ((newEdge && door.dwell <= 0) ||
+             (undecided && door.dwell <= 0));
+          door.dwell -= dt;
+          if (!eventMode ? door.dwell <= 0 : evFire) {
+            const sens = senseE10(parts, door, s, crossRateSm, E10_SENSOR_DOC,
+              eventMode ? parts.filter((q, pi) => inBox[pi]) : null);
+            brain.observe({ readSensors: () => sens,
+              readVisualField: () => new Array(8).fill(0),
+              door, particles: parts });
+            brain.step(dt * 4, { readSensors: () => sens,
+              readVisualField: () => new Array(8).fill(0),
+              door, particles: parts });
+            const tel = brain.telemetry ? brain.telemetry() : {};
+            lastMotor = tel.motorRate !== undefined ? tel.motorRate : lastMotor;
+            if (tel.sensoryActivity) lastSens = tel.sensoryActivity;
+            if (tel.spikeCount !== undefined) epSpikeSum += tel.spikeCount;
+            if (tel.dopamine !== undefined) {
+              epDaSum += tel.dopamine;
+              if (tel.dopamine > epDaPeak) epDaPeak = tel.dopamine;
+            }
+            if (brain.weightDrift) epWChange = brain.weightDrift();
+            // ---- action selection ----------------------------------------
+            // Primary: trained policy-gradient readout. The action is SAMPLED
+            // from P(hold | motor population); before the decision the brain
+            // received the rewards accrued since the last one, so REINFORCE
+            // uses a contiguous per-decision credit window
+            // (Δw ∝ r·(a − P_hold)).
+            // Fallback (no PG readout): E9's population code — the gate holds
+            // while the motor pool sits ABOVE its own slow baseline.
+            let action = 1;
+            const popenFn = brain.policyProb ? brain.policyProb() : null;
+            if (popenFn !== null && popenFn !== undefined) {
+              brain.pgReward = epPgAcc;            // credit window -> REINFORCE
+              epPgAcc = 0;
+              lastPopen = popenFn;
+              const sampled = brain.lastPgAction ? brain.lastPgAction() : null;
+              action = sampled !== null && sampled !== undefined ? sampled : 1;
+            } else {
+              if (!mInit) { mInit = 1; mSlow = lastMotor; }
+              mFast += (lastMotor - mFast) * 0.35;
+              mSlow += (lastMotor - mSlow) * 0.02;
+              action = (mFast - mSlow) > 0 ? 1 : 0;
+            }
+            const fastWaiting = sens[0] > 0.15;
+            // classical reference — demonAgreement ONLY, never actuates:
+            // release while a fast molecule waits or while the right side is
+            // not yet richer; hold to protect the accumulated sorting.
+            const refAction = (fastWaiting || s.nl <= s.nr) ? 0 : 1;
+            door.classical = refAction;
+            if (action !== door.prev) { door.flips++; door.prev = action; }
+            const wrong = action === 1 && fastWaiting;
+            if (wrong) epWrong++;
+            epDecisions++;
+            if (action === refAction) epAgree++;
+            door.hold = action;
+            door.dwell = eventMode ? RDOC.EVENT_S : RDOC.DECISION_S;
+            // one decision per visit: every occupant is now scored; nobody
+            // re-fires until they leave and a new molecule enters
+            for (let pi = 0; pi < nP; pi++) if (inBox[pi]) decided[pi] = 1;
+            epSensSum += lastSens.reduce((a, x) => a + x, 0) / (sens.length || 8);
+            epMotorSum += lastMotor;
+            if (brain.receiveFeedback) {
+              if (wrong) {
+                epRewPen -= RDOC.wWrong;
+                epRewTotal -= RDOC.wWrong;
+                brain.receiveFeedback({ reward: -RDOC.wWrong,
+                                        kind: "e10_penalty" });
+              }
+              // decision record (zero-reward: bookkeeping + reference action)
+              brain.receiveFeedback({
+                reward: 0,
+                good: fastWaiting && action === 0,
+                kind: "e10_decision", action, classicalAction: refAction, fastWaiting,
+              });
+            }
+            // ---- decision-window transport reward (physical outcome) ------
+            const netSorted = (crossLR - lrBefore) - (crossRL - rlBefore);
+            const rWork = RDOC.wWork *
+              Math.max(-1, Math.min(1, netSorted / RDOC.W_NORM));
+            epRewWork += rWork;
+            epRewTotal += rWork;
+            epPgAcc = epPgAcc * PG_CREDIT_GAMMA + rWork;
+            if (rWork !== 0 && brain.receiveFeedback)
+              brain.receiveFeedback({ reward: rWork, kind: "e10_transport",
+                                      netSorted });
+          }
+        }
+        // ---- per-step crossing reward (physical outcome only) -------------
+        if (brain && st >= BURN) {
+          const nLR = crossLR - lrBefore, nRL = crossRL - rlBefore;
+          let rSel = 0;
+          if (nLR > 0) rSel += RDOC.wSelect * nLR;          // sorted passage
+          if (nRL > 0) rSel -= 1.5 * RDOC.wSelect * nRL;    // R->L leak: back-leak
+                                                            // costs 1.5x (a leak both
+                                                            // undoes sorting AND signals
+                                                            // the gate failed to block)
+          if (rSel !== 0) {
+            epRewSel += rSel;
+            epRewTotal += rSel;
+            epPgAcc = epPgAcc * PG_CREDIT_GAMMA + rSel;
+            if (brain.receiveFeedback)
+              brain.receiveFeedback({ reward: rSel, kind: "e10_crossing",
+                                      lr: nLR, rl: nRL });
+          }
+        }
         if (cfg.onState && (st % 20) === 0) {
-          const s = _apparatusSideStats(parts, L * H * D / 2, L * H * D / 2);
           const pos = new Array(nP * 3);
           for (let i2 = 0; i2 < nP; i2++) {
             pos[i2 * 3] = Math.round(parts[i2].x); pos[i2 * 3 + 1] = Math.round(parts[i2].y);
             pos[i2 * 3 + 2] = Math.round(parts[i2].z);
           }
           cfg.onState({ kind: "trapdoor", t: (t * episode) + st / maxSteps, trials,
-                        pos, door: door.ang, doorVel: door.vel,
-                        tl: s.tl, tr: s.tr,
-                        nl: s.nl, nr: s.nr, crossLR, crossRL, cond: v.key });
+                        seed: seedTag, phase, trial: t, trainTrials,
+                        pos, door: door.ang, doorVel: door.vel, hold: door.hold,
+                        tl: s.tl, tr: s.tr, nl: s.nl, nr: s.nr,
+                        crossLR, crossRL, cond: v.key,
+                        sensors: brain ? lastSens.map(x => Math.round(x * 1000) / 1000) : null,
+                        motorActivity: lastMotor, action: door.hold,
+                        classical: door.classical, reward: epRewTotal,
+                        dopamine: epDaPeak,
+                        demonAgree: epDecisions ? epAgree / epDecisions : 0 });
         }
       }
       const s = _apparatusSideStats(parts, L * H * D / 2, L * H * D / 2);
       const imb = (s.nl - s.nr) / Math.max(1, s.nl + s.nr);
       const fl = angSamples.length > 2
         ? Math.sqrt(angSamples.reduce((a, x) => a + x * x, 0) / angSamples.length) : 0;
-      rows.push({ condition: v.key, phase: "train", trial: t, seed: 1,
-                  steps: maxSteps, crossings: epL + epR,
-                  crossingRate: (epL + epR) / episode,
-                  crossLR: epL, crossRL: epR,
+      rows.push({ condition: v.key, phase, trial: t, seed: seedTag,
+                  steps: maxSteps, crossings: epLtoR + epRtoL,
+                  crossingRate: (epLtoR + epRtoL) / episode,
+                  crossLR: epLtoR, crossRL: epRtoL,
                   leftCount: s.nl, rightCount: s.nr,
                   densityDiff: imb,
                   trapdoorAngle: door.ang,
                   trapdoorFluctuation: fl,
-                  demonAgree: 0,
-                  directionalBias: epL + epR > 0 ? (epL - epR) / (epL + epR) : 0,
-                  measuredBits: 0, sortEntropy: 0, spatialH: 0, miNeural: 0,
+                  directionalBias: (epLtoR + epRtoL) > 0 ? (epLtoR - epRtoL) / (epLtoR + epRtoL) : 0,
+                  demonAgree: epDecisions ? epAgree / epDecisions : 0,
+                  decisionAccuracy: epDecisions ? 1 - epWrong / epDecisions : 0,
+                  holdFraction: epHoldSteps / Math.max(1, maxSteps),
+                  reward: epRewTotal,
+                  rewardWork: epRewWork, rewardSelection: epRewSel, rewardPenalty: epRewPen,
+                  rewardPerSec: epRewTotal / episode,
+                  measuredBits: brain ? epDecisions : 0,
+                  motorActivity: lastMotor,
+                  motorRateMean: epDecisions ? epMotorSum / epDecisions : 0,
+                  sensoryActivity: epDecisions ? epSensSum / epDecisions : 0,
+                  spikeRate: epDecisions ? epSpikeSum / epDecisions : 0,
+                  dopamine: epDaPeak, dopamineMean: epDecisions ? epDaSum / epDecisions : 0,
+                  weightDrift: epWChange,
+                  pgReleaseP: lastPopen,   // P(action=1) = P(release) from the PG readout
+                  sortEntropy: 0, spatialH: 0, miNeural: 0,
                   dTfinal: s.tr - s.tl,
                   openFraction: 0, pistonX: 0, workJ: 0, erasureCostJ: 0, netWorkJ: 0 });
-      if (cfg.onTrialData) cfg.onTrialData(v.key, "train", rows[rows.length - 1]);
+      // ---- Brain outcome telemetry (same contract as E9 rows) -------------
+      const row = rows[rows.length - 1];
+      if (brain) {
+        if (brain.layerSpikeRates) {
+          const lr = brain.layerSpikeRates();
+          if (lr && Object.keys(lr).length) row.layerRates = lr;
+        }
+        if (brain.fireVec) {
+          const fv = brain.fireVec();
+          if (fv && fv.vec) row.fireVec = fv;
+        }
+        if (brain.neuralActivity && brain.particleSample) {
+          row.miNeural = METRICS.mutualInformation(
+            brain.neuralActivity(), brain.particleSample({ particles: parts }));
+        }
+      }
+      if (cfg.onTrialData) cfg.onTrialData(v.key, phase, row);
     }
     const avg = (f) => rows.reduce((a, r) => a + (Number.isFinite(r[f]) ? r[f] : 0), 0) / rows.length;
+    const avgT = (f) => rows.filter(r => r.phase === "test").length
+      ? rows.filter(r => r.phase === "test").reduce((a, r) => a + (Number.isFinite(r[f]) ? r[f] : 0), 0) / rows.filter(r => r.phase === "test").length : avg(f);
     conditions[v.key] = {
       label: v.label,
       summary: {
-        testDT: { mean: avg("densityDiff"), ci: 0, n: rows.length },
-        testOpenFraction: { mean: avg("crossingRate"), ci: 0, n: rows.length },
-        testPistonX: { mean: avg("trapdoorFluctuation"), ci: 0, n: rows.length },
-        testMiNeural: { mean: 0, ci: 0, n: rows.length },
+        testDT: { mean: avgT("densityDiff"), ci: 0, n: rows.length },
+        testOpenFraction: { mean: avgT("crossingRate"), ci: 0, n: rows.length },
+        testPistonX: { mean: avgT("trapdoorFluctuation"), ci: 0, n: rows.length },
+        testMiNeural: { mean: avgT("miNeural"), ci: 0, n: rows.length },
+        testWorkJ: { mean: avgT("netWorkJ"), ci: 0, n: rows.length },
+        testReward: { mean: avgT("reward"), ci: 0, n: rows.length },
+        testAccuracy: { mean: avgT("decisionAccuracy"), ci: 0, n: rows.length },
+        testDemonAgree: { mean: avgT("demonAgree"), ci: 0, n: rows.length },
       },
       _apparatus: true,
     };
@@ -1131,23 +1464,74 @@ function smoluchowskiCore(cfg) {
 /** E11 · Feynman Ratchet & Pawl — event-rate model with exact detailed
  *  balance: forward slips come from the hot vanes (rate ∝ Th), backward
  *  steps need the cold-bath pawl lift against the load bias. At Th = Tc the
- *  rates balance and net rotation is zero — the machine cannot extract work
- *  from a single bath; with Th > Tc it turns forward and lifts the load. */
+ *  rates balance EXACTLY (the backward exponent carries the +load·STEP
+ *  raise it needs: exp(-(EPS - load*STEP)/Tc) at load*STEP < EPS) and net
+ *  rotation is zero — the machine cannot extract work from a single bath;
+ *  with Th > Tc it turns forward and lifts the load.
+ *
+ *  Work is the SIGNED mechanical work done against the load (a backward
+ *  slip PAYS work back — there is no max(0,·) clamp to hide losses).
+ *
+ *  With cfg.brainFactory the fly brain joins as PAWL OPERATOR. The wheel is
+ *  thermally rattled (an equilibrium bath, NOT a gradient): hops forward and
+ *  backward are near-symmetric and the raw machine extracts nothing. The
+ *  brain's one actuator is pawl.lift — pin the pawl UP (disengaged: the
+ *  wheel slips both ways freely) or drop it DOWN (engaged: it blocks
+ *  backward hops while forward hops lift it over). Timing the lift against
+ *  the wheel's net bias is the only way to rectify the rattle; that IS
+ *  information gathering. The classical reference (lift DOWN iff recent
+ *  wheel net motion is forward) is computed every decision for
+ *  demonAgreement ONLY and never actuates the pawl.
+ *
+ *    thermal rattle -> ratchetHops -> senseE11() 8ch -> brain.observe/step
+ *      -> lift 0|1 -> pawl physics -> net rotation -> work against load
+ *      -> physical reward -> brain.receiveFeedback -> dopamine
+ *      -> eligibility traces -> weights (persist across trials)
+ *
+ *  Note on regime: this model's bath is EQUILIBRIUM (Th == Tc); the brain
+ *  creates the asymmetry in time, not the temperature field. A Th>Tc
+ *  variant is provided as the classical Feynman gradient reference — its
+ *  pawl is NOT brain-controlled. */
 function feynmanRatchetCore(cfg) {
   cfg = cfg || {};
+  const seedTag = cfg.seedTag !== undefined ? cfg.seedTag : 1;
   const rng = makeRng(cfg.seed !== undefined ? cfg.seed : 1);
   const trials = cfg.trials || 20;
+  const trainTrials = Math.max(0, Math.min(trials, cfg.trainTrials !== undefined ? cfg.trainTrials : Math.floor(trials / 2)));
   const episode = cfg.episodeSeconds || 20;
   const dt = cfg.dt || 1 / 60;
   const TEETH = 24, STEP = (Math.PI * 2) / TEETH;
   const EPS = 0.10;                        // pawl lift barrier (arb. units)
   const LOADQ = 6.95;                      // load -> energy bias: load*STEP*LOADQ
   const GAMMA = 3.0;
+  // ---- reward coefficients (documented; nothing hidden in a magic number) --
+  const E11_REWARD_DOC = {
+    wWork: 0.5,        // per decision: wWork * clamp(signed angular work of
+                       //   the decision window / W_NORM, -1, 1)
+    wStep: 0.3,        // per hop: +wStep forward (against the load),
+                       //   -1.5*wStep backward (work paid back)
+    wWrong: 0.15,      // per decision: -wWrong for dropping the pawl while
+                       //   the wheel's recent motion is backward
+    W_NORM: 0.15,      // wheel-turns per second of net rotation that count
+                       //   as "full" mechanical reward in a decision window
+    DECISION_S: 0.25,  // seconds between pawl decisions
+  };
+  const PG_CREDIT_GAMMA = 0.99;   // discounted credit window (~1.7 s at 60 Hz)
+  const RDOC = (cfg.rewardCfg && typeof cfg.rewardCfg === "object")
+    ? Object.assign({}, E11_REWARD_DOC, cfg.rewardCfg) : E11_REWARD_DOC;
+  const hasBrain = typeof cfg.brainFactory === "function";
   const variants = [
-    { key: "ratchet_gradient", Th: 2.0, Tc: 1.0, load: 0.055, label: "Th > Tc (extracts work)" },
-    { key: "ratchet_equilibrium", Th: 1.0, Tc: 1.0, load: 0.055, label: "Th = Tc (equilibrium)" },
-    { key: "ratchet_heavy_load", Th: 2.0, Tc: 1.0, load: 0.0825, label: "gradient + heavy load" },
+    { key: "ratchet_gradient", Th: 2.0, Tc: 1.0, load: 0.055, label: "Th > Tc (extracts work)", mode: "physics" },
+    { key: "ratchet_equilibrium", Th: 1.0, Tc: 1.0, load: 0.055, label: "Th = Tc (equilibrium)", mode: "physics" },
+    { key: "ratchet_heavy_load", Th: 2.0, Tc: 1.0, load: 0.0825, label: "gradient + heavy load", mode: "physics" },
   ];
+  if (hasBrain) variants.push(
+    { key: "ratchet_neural", Th: 1.0, Tc: 1.0, load: 0.055, label: "fly-brain pawl (learning, equilibrium bath)", mode: "neural" },
+    { key: "ratchet_frozen", Th: 1.0, Tc: 1.0, load: 0.055, label: "fly-brain pawl (weights frozen)", mode: "frozen" });
+  if (Array.isArray(cfg.variants) && cfg.variants.length) {
+    const keep = variants.filter(v => cfg.variants.includes(v.key));
+    if (keep.length) variants.length = 0, variants.push(...keep);
+  }
   const conditions = {};
   const maxSteps = Math.round(episode / dt);
   for (let vi = 0; vi < variants.length; vi++) {
@@ -1155,54 +1539,245 @@ function feynmanRatchetCore(cfg) {
     const vRng = makeRng((cfg.seed !== undefined ? cfg.seed : 1) * 31 + vi * 7919);
     let ang = 0, fwd = 0, rev = 0, qh = 0, qc = 0;
     let velSm = 0, wobAng = 0;
+    // brain state (actuator + decision variables; neural/frozen only)
+    const brain = (v.mode === "neural" || v.mode === "frozen")
+      ? (hasBrain ? cfg.brainFactory(seedTag) : null) : null;
+    if ((v.mode === "neural" || v.mode === "frozen") && !brain)
+      throw new Error("ratchet_neural/frozen require cfg.brainFactory");
+    const pawl = { lift: 0, dwell: 0, flips: 0, prev: 0, classical: 0 };
     const rows = [];
+    let epRewWork = 0, epRewStep = 0, epRewPen = 0, epRewTotal = 0, epPgAcc = 0;
+    let epDecisions = 0, epAgree = 0, epWrong = 0, epLiftSteps = 0;
+    let epSensSum = 0, epMotorSum = 0, epSpikeSum = 0, epDaSum = 0, epDaPeak = 0, epWChange = 0;
+    let lastSens = new Array(8).fill(0), lastMotor = 0, lastPopen = 0;
+    let netSm = 0;                            // EMA of signed hop events (sensor)
+    let mFast = 0, mSlow = 0, mInit = 0;      // population-code fallback
     for (let t = 0; t < trials; t++) {
-      let epF = 0, epR = 0, ang0 = ang;
+      const phase = t < trainTrials ? "train" : "test";
+      if (brain && brain.setLearning) brain.setLearning(v.mode === "neural" && phase === "train");
+      if (brain && brain.resetForTrial) brain.resetForTrial();
+      epRewWork = 0; epRewStep = 0; epRewPen = 0; epRewTotal = 0; epPgAcc = 0;
+      epDecisions = 0; epAgree = 0; epWrong = 0; epLiftSteps = 0;
+      epSensSum = 0; epMotorSum = 0; epSpikeSum = 0; epDaSum = 0; epDaPeak = 0; epWChange = 0;
+      mFast = 0; mSlow = 0; mInit = 0;
+      const fwd0 = fwd, rev0 = rev, ang0 = ang, qh0 = qh, qc0 = qc;
+      let dWorkSm = ang;                      // cumulative angle at last decision
       for (let st = 0; st < maxSteps; st++) {
         // thermal rattle of the wheel (visual + fluctuation metric)
         wobAng = wobAng * 0.96 + (vRng() - 0.5) * v.Th * 0.02;
-        // event probabilities with detailed balance:
-        const pFwd = Math.min(0.5, GAMMA * v.Th * dt);
-        const pBack = Math.min(0.5, GAMMA * v.Tc *
-                               Math.exp(-(EPS - v.load * STEP * LOADQ) / v.Tc) * dt);
+        // ---- event rates with the barrier physics made EXPLICIT -------------
+        // Lb = load·STEP·LOADQ is the load's energy bias per tooth. A forward
+        // hop must lift the load AND the pawl (energy EPS + Lb, paid from the
+        // hot-vane bath at Th); a backward hop is downhill for the load and
+        // only needs the pawl to bounce (EPS − Lb, paid from the cold bath).
+        // With the pawl LIFTED the teeth are cleared: both hops see the load
+        // alone. In every state pFwd/pBack = (Th/Tc)·exp(−(EPS+Lb)/Th + (EPS−Lb)/Tc)
+        // or its lifted analogue — at Th = Tc this is exp(−2Lb/T) < 1 for ANY
+        // Lb > 0: the wheel can only back-drive at equilibrium. The old model
+        // gave forward hops a barrier-free rate and balanced them against
+        // backward only through the accidental near-cancellation
+        // EPS ≈ load·STEP·LOADQ — a knife edge, not detailed balance.
+        const Lb = v.load * STEP * LOADQ;
+        const pFwd = Math.min(0.5, GAMMA * v.Th * dt *
+          (pawl.lift > 0.5 ? Math.exp(-Lb / v.Th)
+                           : Math.exp(-(EPS + Lb) / v.Th)));
+        const pBack = Math.min(0.5, GAMMA * v.Tc * dt *
+          (pawl.lift > 0.5 ? Math.exp(Lb / v.Tc)
+                           : Math.exp(-(EPS - Lb) / v.Tc)));
         const r = vRng();
         let dAng = 0;
-        if (r < pFwd) { dAng = STEP; fwd++; epF++; qh += EPS; }
-        else if (r < pFwd + pBack) { dAng = -STEP; rev++; epR++; qc += EPS; }
+        const fwdBefore = fwd, revBefore = rev;
+        if (r < pFwd) {
+          dAng = STEP; fwd++; qh += (pawl.lift > 0.5 ? Lb : EPS + Lb);
+        } else if (r < pFwd + pBack) {
+          dAng = -STEP; rev++; qc += (pawl.lift > 0.5 ? Lb : EPS - Lb);
+        }
         ang += dAng;
         velSm += (dAng / dt - velSm) * Math.min(1, dt * 6);
+        netSm += (dAng / STEP - netSm) * 0.02;      // signed hop EMA (sensor ch7)
+        // ---- per-hop reward (physical outcome; brain modes only) ----------
+        if (brain) {
+          const nF = fwd - fwdBefore, nR = rev - revBefore;
+          // SIGNED mechanical reward per hop: +wStep forward (against the
+          // load), -1.5*wStep backward (work paid back + the pawl failed to
+          // block — the documented E11 contract).
+          const rStep = RDOC.wStep * nF - 1.5 * RDOC.wStep * nR;
+          if (rStep !== 0) {
+            epRewStep += rStep;
+            epRewTotal += rStep;
+            epPgAcc = epPgAcc * PG_CREDIT_GAMMA + rStep;
+            if (brain.receiveFeedback)
+              brain.receiveFeedback({ reward: rStep, kind: "e11_hop",
+                                      fwd: nF, rev: nR });
+          }
+        }
+        // ---- decision (the ONLY place pawl.lift is written; brain modes) --
+        if (brain) {
+          pawl.dwell -= dt;
+          if (pawl.dwell <= 0) {
+            const fwdRate = fwd - fwd0, revRate = rev - rev0;
+            const sens = [
+              Math.min(1, (fwd - fwd0) / 40),            // forward-hop count / ep
+              Math.min(1, (rev - rev0) / 40),            // backward-hop count / ep
+              Math.max(-1, Math.min(1, netSm)),          // signed hop-rate EMA
+              Math.max(-1, Math.min(1, velSm / 25)),     // smoothed angular velocity
+              Math.min(1, ((ang % STEP) + STEP) % STEP / STEP), // wheel angle within tooth
+              Math.min(1, v.Th / 2),                     // hot-bath temperature
+              Math.min(1, v.Tc / 2),                     // cold-bath temperature
+              Math.min(1, fwdRate + revRate > 0
+                ? (fwdRate - revRate) / (fwdRate + revRate) : 0),  // recent-hop imbalance
+            ];
+            lastSens = sens;
+            brain.observe({ readSensors: () => sens,
+              readVisualField: () => new Array(8).fill(0),
+              pawl, particles: [] });
+            brain.step(dt * 4, { readSensors: () => sens,
+              readVisualField: () => new Array(8).fill(0),
+              pawl, particles: [] });
+            const tel = brain.telemetry ? brain.telemetry() : {};
+            lastMotor = tel.motorRate !== undefined ? tel.motorRate : lastMotor;
+            if (tel.spikeCount !== undefined) epSpikeSum += tel.spikeCount;
+            if (tel.dopamine !== undefined) {
+              epDaSum += tel.dopamine;
+              if (tel.dopamine > epDaPeak) epDaPeak = tel.dopamine;
+            }
+            if (brain.weightDrift) epWChange = brain.weightDrift();
+            // ---- action selection (same contract as E10) ----------------
+            let action = 1;
+            const popenFn = brain.policyProb ? brain.policyProb() : null;
+            if (popenFn !== null && popenFn !== undefined) {
+              brain.pgReward = epPgAcc;            // credit window -> REINFORCE
+              epPgAcc = 0;
+              lastPopen = popenFn;
+              const sampled = brain.lastPgAction ? brain.lastPgAction() : null;
+              action = sampled !== null && sampled !== undefined ? sampled : 1;
+            } else {
+              if (!mInit) { mInit = 1; mSlow = lastMotor; }
+              mFast += (lastMotor - mFast) * 0.35;
+              mSlow += (lastMotor - mSlow) * 0.02;
+              action = (mFast - mSlow) > 0 ? 1 : 0;
+            }
+            // classical reference — demonAgreement ONLY, never actuates:
+            // drop the pawl (engage the ratchet) while the wheel's recent
+            // motion is forward, lift it when motion is backward.
+            const refAction = netSm > 0 ? 1 : 0;
+            pawl.classical = refAction;
+            if (action !== pawl.prev) { pawl.flips++; pawl.prev = action; }
+            const wrong = action === 0 && netSm < 0;
+            if (wrong) epWrong++;
+            epDecisions++;
+            if (action === refAction) epAgree++;
+            pawl.lift = 1 - action;             // action 1 = pawl DOWN (engaged)
+            pawl.dwell = RDOC.DECISION_S;
+            epSensSum += sens.reduce((a, x) => a + x, 0) / 8;
+            epMotorSum += lastMotor;
+            if (brain.receiveFeedback) {
+              if (wrong) {
+                epRewPen -= RDOC.wWrong;
+                epRewTotal -= RDOC.wWrong;
+                brain.receiveFeedback({ reward: -RDOC.wWrong,
+                                        kind: "e11_penalty" });
+              }
+              brain.receiveFeedback({
+                reward: 0,
+                good: netSm > 0 && action === 1,
+                kind: "e11_decision", action, classicalAction: refAction,
+                netHopRate: netSm,
+              });
+            }
+            // ---- decision-window mechanical reward (physical outcome) -----
+            // hops since the last decision, normalized by W_NORM turns/s ×
+            // window duration × teeth (i.e. hops-at-full-reward)
+            const rWork = RDOC.wWork *
+              Math.max(-1, Math.min(1, ((ang - dWorkSm) / STEP) /
+                                    (RDOC.W_NORM * RDOC.DECISION_S * TEETH)));
+            epRewWork += rWork;
+            epRewTotal += rWork;
+            epPgAcc = epPgAcc * PG_CREDIT_GAMMA + rWork;
+            if (rWork !== 0 && brain.receiveFeedback)
+              brain.receiveFeedback({ reward: rWork, kind: "e11_mechanical",
+                                      dAng: ang - dWorkSm });
+            dWorkSm = ang;
+          }
+        }
+        if (pawl.lift > 0.5) epLiftSteps++;
         if (cfg.onState && (st % 20) === 0) {
           cfg.onState({ kind: "ratchet", t: (t * episode) + st / maxSteps, trials,
+                        seed: seedTag, phase, trial: t, trainTrials,
                         ang: ang + wobAng, angSnap: ang, vel: velSm,
                         teeth: TEETH, fwd, rev, th: v.Th, tc: v.Tc,
-                        load: v.load, qh, qc, cond: v.key });
+                        load: v.load, qh, qc, cond: v.key,
+                        lift: pawl.lift,
+                        sensors: brain ? lastSens.map(x => Math.round(x * 1000) / 1000) : null,
+                        motorActivity: lastMotor, action: 1 - pawl.lift,
+                        classical: pawl.classical, reward: epRewTotal,
+                        dopamine: epDaPeak,
+                        demonAgree: epDecisions ? epAgree / epDecisions : 0 });
         }
       }
-      const net = ang - ang0;
-      const entropy = qh / v.Th - qc / v.Tc;
-      const work = Math.max(0, net) * v.load;
-      rows.push({ condition: v.key, phase: "train", trial: t, seed: 1,
-                  steps: maxSteps, crossings: fwd + rev,
+      const net = ang - ang0;                 // THIS episode's net rotation
+      const entropy = (qh - qh0) / v.Th - (qc - qc0) / v.Tc;   // per-episode
+      // SIGNED mechanical work against the load: backward rotation pays work
+      // back. (The old max(0, net) clamp hid backward losses — removed.)
+      const workEp = net * v.load;
+      rows.push({ condition: v.key, phase, trial: t, seed: seedTag,
+                  steps: maxSteps, crossings: (fwd - fwd0) + (rev - rev0),
                   ratchetAngle: ang, angularVelocity: velSm,
-                  torque: v.load, forwardSteps: fwd, reverseSteps: rev,
+                  torque: v.load, forwardSteps: fwd - fwd0, reverseSteps: rev - rev0,
                   netRotation: ang, netPerEpisode: net,
+                  liftFraction: brain ? epLiftSteps / Math.max(1, maxSteps) : 0,
                   thermalFluctuation: Math.abs(wobAng),
-                  workJ: work * 1e-21, heatJ: (qh + qc) * 1e-21,
-                  demonAgree: 0,
+                  workJ: ang * v.load * 1e-21, workJEp: workEp * 1e-21,
+                  heatJ: (qh + qc) * 1e-21,
+                  demonAgree: brain ? (epDecisions ? epAgree / epDecisions : 0) : 0,
+                  decisionAccuracy: brain ? (epDecisions ? 1 - epWrong / epDecisions : 0) : 0,
                   entropyProduction: entropy,
-                  efficiency: qh > 0 ? work / qh : 0,
-                  measuredBits: 0, sortEntropy: 0, spatialH: 0, miNeural: 0,
+                  efficiency: qh > 0 ? Math.max(0, workEp) / (qh - qh0) : 0,
+                  reward: brain ? epRewTotal : 0,
+                  rewardWork: epRewWork, rewardSelection: epRewStep, rewardPenalty: epRewPen,
+                  rewardPerSec: brain ? epRewTotal / episode : 0,
+                  measuredBits: brain ? epDecisions : 0,
+                  motorActivity: lastMotor,
+                  motorRateMean: epDecisions ? epMotorSum / epDecisions : 0,
+                  sensoryActivity: epDecisions ? epSensSum / epDecisions : 0,
+                  spikeRate: epDecisions ? epSpikeSum / epDecisions : 0,
+                  dopamine: brain ? epDaPeak : 0,
+                  dopamineMean: epDecisions ? epDaSum / epDecisions : 0,
+                  weightDrift: brain ? epWChange : 0,
+                  pgEngageP: lastPopen,   // P(action=1) = P(engage) from the PG readout
+                  sortEntropy: 0, spatialH: 0, miNeural: 0,
                   dTfinal: net, openFraction: 0, pistonX: 0,
-                  workJ: work * 1e-21, erasureCostJ: 0, netWorkJ: work * 1e-21 });
-      if (cfg.onTrialData) cfg.onTrialData(v.key, "train", rows[rows.length - 1]);
+                  erasureCostJ: 0, netWorkJ: workEp * 1e-21 });
+      const row = rows[rows.length - 1];      // fix: telemetry block below needs it
+      if (brain) {
+        if (brain.layerSpikeRates) {
+          const lr = brain.layerSpikeRates();
+          if (lr && Object.keys(lr).length) row.layerRates = lr;
+        }
+        if (brain.fireVec) {
+          const fv = brain.fireVec();
+          if (fv && fv.vec) row.fireVec = fv;
+        }
+        if (brain.neuralActivity && brain.particleSample) {
+          row.miNeural = METRICS.mutualInformation(
+            brain.neuralActivity(), brain.particleSample({ particles: [] }));
+        }
+      }
+      if (cfg.onTrialData) cfg.onTrialData(v.key, phase, row);
     }
     const avg = (f) => rows.reduce((a, r) => a + (Number.isFinite(r[f]) ? r[f] : 0), 0) / rows.length;
+    const avgT = (f) => rows.filter(r => r.phase === "test").length
+      ? rows.filter(r => r.phase === "test").reduce((a, r) => a + (Number.isFinite(r[f]) ? r[f] : 0), 0) / rows.filter(r => r.phase === "test").length : avg(f);
     conditions[v.key] = {
       label: v.label,
       summary: {
-        testDT: { mean: avg("netPerEpisode"), ci: 0, n: rows.length },
-        testOpenFraction: { mean: avg("efficiency"), ci: 0, n: rows.length },
-        testMiNeural: { mean: 0, ci: 0, n: rows.length },
+        testDT: { mean: avgT("netPerEpisode"), ci: 0, n: rows.length },
+        testOpenFraction: { mean: avgT("efficiency"), ci: 0, n: rows.length },
+        testMiNeural: { mean: avgT("miNeural"), ci: 0, n: rows.length },
+        testWorkJ: { mean: avgT("netWorkJ"), ci: 0, n: rows.length },
+        testReward: { mean: avgT("reward"), ci: 0, n: rows.length },
+        testAccuracy: { mean: avgT("decisionAccuracy"), ci: 0, n: rows.length },
+        testDemonAgree: { mean: avgT("demonAgree"), ci: 0, n: rows.length },
       },
       _apparatus: true,
     };

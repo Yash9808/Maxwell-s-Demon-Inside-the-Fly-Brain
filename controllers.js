@@ -560,13 +560,17 @@ function connectomeController(circuit, opts) {
     const TAU = 1;                                // softmax temperature
     pg = {
       WPG, get W() { return WPG; },
+      bias: 0,                           // learnable action prior: without it
+                                         // P(open) is pinned to 0.5 until the
+                                         // pool spikes correlate with reward —
+                                         // measured: P never left 0.5 in E10
       probs: 0.5,                        // cached P(open), updated every step
       action: 0,                         // cached Bernoulli sample
       RNG, TAU,
     };
   }
-  function pgProbs(W, phi, tau) {                  // P(open) — 2-action softmax
-    let z = 0;
+  function pgProbs(W, phi, tau, bias) {            // P(open) — 2-action softmax
+    let z = bias;
     for (let i = 0; i < W.length; i++) z += W[i] * phi[i];
     const e = Math.exp(clamp(z / tau, -20, 20));
     return e / (e + 1);                            // = 1 / (1 + e^(-z))
@@ -616,18 +620,22 @@ function connectomeController(circuit, opts) {
     // OWN rng so a seed fully determines the trajectory. The core consumes
     // both the probability (telemetry/rows) and the action (valve command).
     if (pg) {
-      // REINFORCE: apply credit accrued since the last SAMPLE, using that
-      // sample's cached (action, P, features) — exact one-step REINFORCE, not
-      // a same-tick approximation. Learning stops when frozen (learning=false).
-      if (pgR !== 0 && pg.pend && learning) {
-        const ga = 0.08 * pgR * (pg.pend.a - pg.pend.p);
+      // REINFORCE: apply credit accrued since the last SAMPLE, paired with
+      // THAT decision's own cached (action, P, features) — snapshotted by
+      // lastPgAction() at decision time (decPend). Without the snapshot the
+      // credit would pair with a mid-window 60 Hz sample instead of the
+      // action that earned it: measured, the gradient then carries zero
+      // information (E10 P(hold) never left 0.5). Learning stops when frozen.
+      if (pgR !== 0 && pg.decPend && learning) {
+        const ga = 0.08 * pgR * (pg.decPend.a - pg.decPend.p);
         for (let i = 0; i < pg.WPG.length; i++)
-          pg.WPG[i] = clamp(pg.WPG[i] + ga * pg.pend.phi[i], -2, 2);
+          pg.WPG[i] = clamp(pg.WPG[i] + ga * pg.decPend.phi[i], -2, 2);
+        pg.bias = clamp(pg.bias + ga, -2, 2);      // the prior learns too
         pgR = 0;
       }
       phi = new Float32Array(m1 - m0);           // readout features: this
       for (let i = m0; i < m1; i++) phi[i - m0] = spikes[i];   // tick's pool spikes
-      pg.probs = pgProbs(pg.WPG, phi, pg.TAU);
+      pg.probs = pgProbs(pg.WPG, phi, pg.TAU, pg.bias);
       pg.action = pg.RNG() < pg.probs ? 1 : 0;
       pg.pend = { a: pg.action, p: pg.probs, phi };
     }
@@ -733,6 +741,16 @@ function connectomeController(circuit, opts) {
       // Topology-sensitive: real wiring routes sensory activity into the
       // fixed pool; shuffled wiring makes the pool exchangeable (ratio ~1).
       const ratio = motorRateSmooth / Math.max(layerRateSmooth, 1e-6) - 1;
+      // (guard) door-equipped envs (E1/E2/E8/E9...) get the pool-ratio policy
+      // written to env.door.target + scored against the demon reference.
+      // Actuator envs without a door (E11 ratchet: the core reads the action
+      // from brain.policyProb/lastPgAction) still count the decision and run
+      // dopamine-gated plasticity, but never touch env.door.
+      if (!env.door) {
+        decisions++;
+        if (learning) { applyLearning(0.004); if ((decisions & 255) === 0) syncWeights(); }
+        return;
+      }
       env.door.target = clamp(ratio * 40, 0, 1);
       const open = env.door.target > 0.5;
       decisions++;
@@ -761,7 +779,7 @@ function connectomeController(circuit, opts) {
                       agreeCount = 0; decisions = 0;
                       activeTraces.length = 0; inActive.fill(0);
                       lastTouchTick.fill(-1e9);
-                      if (pg) { pgR = 0; phi = null; pg.probs = 0.5; pg.action = 0; pg.pend = null; } },
+                      if (pg) { pgR = 0; phi = null; pg.probs = 0.5; pg.action = 0; pg.pend = null; pg.decPend = null; } },
     summary() {
       let s = 0; for (let i = m0; i < m1; i++) s += spikes[i];
       return { demonAgree: decisions > 0 ? agreeCount / decisions : 0,
@@ -793,7 +811,16 @@ function connectomeController(circuit, opts) {
     // drives the valve from lastPgAction() and routes each decision's reward
     // window into pgReward, closing the loop Δw_i ∝ r·(a − P_open).
     policyProb() { return pg ? pg.probs : null; },
-    lastPgAction() { return pg ? pg.action : null; },
+    // The core reads the sampled action at decision time; this read is what
+    // DEFINES the decision, so it latches the sample's (a, P, phi) snapshot
+    // for the REINFORCE update that will consume the credit this decision
+    // accrues. 60 Hz ticks in between must not touch it.
+    lastPgAction() {
+      if (pg) pg.decPend = { a: pg.action, p: pg.probs, phi };
+      return pg ? pg.action : null;
+    },
+    // PG readout state for HUD/tests: P(hold), sampled action, learned prior
+    pgState() { return pg ? { probs: pg.probs, action: pg.action, bias: pg.bias } : null; },
     set pgReward(v) { if (pg) pgR = v; },
     fireVec() {
       // Uint8-quantized per-neuron spike counts (log scale preserves the
