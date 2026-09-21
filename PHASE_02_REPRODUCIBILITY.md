@@ -166,15 +166,16 @@ protocol bytes: unchanged (MEASURED bit-exact).
 
 ## 15. Final reference
 
-* Tag: **`phase-02-candidate`** → `6af54d2aed2fc369420fa0a8624b2fa17a21aa93`
-  (annotated; target of the final zero-stale manifest regeneration in the
-  pristine freeze worktree). Branch `deployment/phase-02` points at the tag
-  target.
+* Tag: **`phase-02-candidate`** (annotated) on branch `deployment/phase-02` —
+  the authoritative Phase 02 reference. Resolve its exact target with
+  `git rev-parse phase-02-candidate^{commit}`; the tag annotation records the
+  lineage and the frozen results. (This document intentionally names the tag,
+  not a hardcoded SHA, so the reference stays valid at the fixed point.)
 * Final measured state at the tag: manifest 105 entries, **0 stale**, 4
   documented-missing (raw MCNS + 3 machine-local provisions), 0
   null-by-design at generation, docx excluded; acceptance **12/12 PASS**,
   protocol PASS, failure injection **12/12 DETECTED** (exit 0 = all
-detected).
+  detected).
 
 ## 16. Verdict
 
