@@ -62,8 +62,8 @@ case "${1:-}" in
   *) FAIL "usage: bash deployment/bootstrap.sh [--embodiment|--flyvis]" ;;
 esac
 
-mkvenv() { # mkvenv <dir> <requirements>
-  local dir="$1" req="$2"
+mkvenv() { # mkvenv <dir> <requirements> [extra pip index args]
+  local dir="$1" req="$2"; shift 2
   if [ ! -x "$dir/Scripts/python.exe" ] && [ ! -x "$dir/bin/python" ]; then
     log "creating $dir from $req ..."
     "$PYEXE" -m venv "$dir"
@@ -71,12 +71,15 @@ mkvenv() { # mkvenv <dir> <requirements>
   local PIP
   if [ -x "$dir/Scripts/python.exe" ]; then PIP="$dir/Scripts/python.exe"; else PIP="$dir/bin/python"; fi
   "$PIP" -m pip install --upgrade pip >/dev/null
-  "$PIP" -m pip install -r "$req"
+  "$PIP" -m pip install "$@" -r "$req"
   log "installed $req -> $dir"
 }
 
 [ "$WANT_EMBODIMENT" = 1 ] && mkvenv .venv-embodiment requirements-embodiment.txt
-[ "$WANT_FLYVIS" = 1 ]     && mkvenv .venv-flyvis     requirements-flyvis.txt
+# torch's pinned +cpu wheel lives only on the PyTorch CPU index (documented in
+# the requirement file header) — the extra-index-url is part of provisioning.
+[ "$WANT_FLYVIS" = 1 ]     && mkvenv .venv-flyvis requirements-flyvis.txt \
+                             --extra-index-url https://download.pytorch.org/whl/cpu
 
 # ------------------------------------------------- 3. manifest verification
 log "verifying manifest integrity (canonical tool) ..."

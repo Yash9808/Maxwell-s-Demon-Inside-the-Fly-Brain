@@ -1,7 +1,10 @@
 # LOCKED ENVIRONMENT — flyvis sidecar (Stage F bridge + parity harness)
 # Generated 2026-09-21T13:28Z from a verified working .venv-flyvis (Python 3.11.9).
-# Recreate:  py -3.11 -m venv .venv-flyvis && .venv-flyvis/Scripts/python -m pip install -r requirements-flyvis.txt
-# torch is the CPU wheel; flyvis pinned to the exact audited commit
+# Recreate:  py -3.11 -m venv .venv-flyvis
+#            .venv-flyvis/Scripts/python -m pip install --extra-index-url https://download.pytorch.org/whl/cpu -r requirements-flyvis.txt
+# torch is the CPU wheel (+cpu local version lives ONLY on the PyTorch CPU
+# index, not PyPI) — the index above is REQUIRED for the pinned wheel.
+# flyvis pinned to the exact audited commit
 # (Lappalainen et al., Nature 2024, 10.1038/s41586-024-07939-3).
 # After install: FLYVIS_ROOT_DIR=.flyvis_data flyvis download-pretrained
 #
