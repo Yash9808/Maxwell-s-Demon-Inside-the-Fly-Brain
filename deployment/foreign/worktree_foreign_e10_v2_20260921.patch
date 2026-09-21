@@ -1,0 +1,1525 @@
+diff --git a/controllers.js b/controllers.js
+index 83c96437..44696c69 100644
+--- a/controllers.js
++++ b/controllers.js
+@@ -654,10 +654,49 @@ function connectomeController(circuit, opts) {
+   // low-variance sensor→action association trained by the same reward
+   // channel. Learning stops entirely when learning=false (frozen control).
+   let pg = null, phi = null, pgR = 0;     // readout state (factory scope:
++  // --- KC-style sparse code for the policy readout (opt-in pgKc) ----------
++  // The fly solves learned sensory->action association with the mushroom
++  // body: random high-dimensional expansion of sensory drive into a sparse
++  // Kenyon-cell code (12-of-200 winner-take-all), read out by plastic
++  // synapses. The rate-only policy readout tunnels every sensory distinction
++  // through one smoothed motor-rate scalar — measured on E10 it yields a
++  // correctly-signed but tiny gradient (~0.03 P-movement per 24 episodes).
++  // Feeding a sparse random-projection code to the softmax lets REINFORCE
++  // associate visitor TYPE with action directly: one weight per active KC,
++  // distinct codewords per visitor type (overlap ~12^2/200 < 1 KC).
++  // Allocated/rng-consuming ONLY when opts.pgKc — every other experiment
++  // keeps byte-identical behavior and rng streams.
++  let pgKcState = null;
++  if (opts.policyGradient && opts.pgKc) {
++    const NKCp = 200, KCAP = 12;                // expansion size, sparsity
++    const wSK = new Float32Array(12 * NKCp);    // sensory ch -> KC (fixed)
++    const kcRng = makeRng(((opts.seed !== undefined ? opts.seed : 7) *
++                           2654435761 % 4294967291 + 1013904223) % 4294967291);
++    for (let i = 0; i < wSK.length; i++) wSK[i] = kcRng() * 2 - 1;
++    pgKcState = {
++      wSK, NKCp, KCAP,
++      drive: new Float32Array(NKCp),
++      bit: new Uint8Array(NKCp),
++      ids: new Uint16Array(KCAP),               // active KC ids this tick
++      n: 0,
++      W: new Float32Array(NKCp),                // KC -> policy (LEARNED)
++    };
++  }
+   if (opts.policyGradient) {               // brainTick updates it every tick)
+     const WPG = new Float32Array(m1 - m0);        // readout weights, zero-init
+     const RNG = opts.pgRng || makeRng(opts.seed !== undefined ? opts.seed * 2654435761 % 4294967291 : 7);
+     const TAU = 1;                                // softmax temperature
++    // Baseline mode (opt-in pgBaseline): one REINFORCE update per decision
++    // with the reward centered by an EMA baseline (unbiased variance
++    // reduction) and zero-reward windows INCLUDED — in event-locked E10 an
++    // r=0 window is a correct rejection (the hold kept a leak out), the
++    // strongest pro-hold sample available, and the legacy pgR!==0 gate
++    // discards it. Delivery is also fixed: the cores write pgReward BEFORE
++    // lastPgAction() re-latches the sample, so applying at delivery time
++    // pairs credit with the decision that earned it (the deferred tick
++    // update pairs it with the NEXT decision — an off-by-one that corrupts
++    // the gradient whenever consecutive decisions differ).
++    const baseBeta = !!opts.pgBaseline;
+     pg = {
+       WPG, get W() { return WPG; },
+       bias: 0,                           // learnable action prior: without it
+@@ -667,8 +706,42 @@ function connectomeController(circuit, opts) {
+       probs: 0.5,                        // cached P(open), updated every step
+       action: 0,                         // cached Bernoulli sample
+       RNG, TAU,
++      baseBeta, base: 0,                 // EMA reward baseline (baseBeta only)
++      BASE_BETA: 0.05,
++      kc: pgKcState,                     // null unless opts.pgKc
+     };
+   }
++  function pgZ(pg, phi) {                        // policy logit
++    let z = pg.bias;
++    for (let i = 0; i < pg.WPG.length; i++) z += pg.WPG[i] * phi[i];
++    // KC branch uses the MBON readout's own normalization (mean of active
++    // weights, cf. mb[m] *= 1/nAct): raw sums across 12 active KCs inflate
++    // logit variance ~sqrt(12)x, saturating the softmax and killing the
++    // gradient (measured: E10 delta −0.254 ± 0.114 with raw sums).
++    if (pg.kc && pg.kc.n > 0) {
++      let s = 0;
++      for (let n = 0; n < pg.kc.n; n++) s += pg.kc.W[pg.kc.ids[n]];
++      z += s / pg.kc.n;
++    }
++    return z;
++  }
++  function pgProbs2(pg, phi) {                   // P(open) — 2-action softmax
++    const e = Math.exp(clamp(pgZ(pg, phi) / pg.TAU, -20, 20));
++    return e / (e + 1);                          // = 1 / (1 + e^(-z))
++  }
++  function pgDelta(pg, ga) {                     // REINFORCE weight move
++    const d = pg.decPend;
++    for (let i = 0; i < pg.WPG.length; i++)
++      pg.WPG[i] = clamp(pg.WPG[i] + ga * d.phi[i], -2, 2);
++    // KC mean readout: dLogit/dW_k = 1/n for each active k, so the exact
++    // per-synapse move is ga/n (credit shared equally among the codeword).
++    if (pg.kc && d.kc && d.kc.n > 0) {
++      const gk = ga / d.kc.n;
++      for (let n = 0; n < d.kc.n; n++)
++        pg.kc.W[d.kc.ids[n]] = clamp(pg.kc.W[d.kc.ids[n]] + gk, -2, 2);
++    }
++    pg.bias = clamp(pg.bias + ga, -2, 2);        // the prior learns too
++  }
+   function pgProbs(W, phi, tau, bias) {            // P(open) — 2-action softmax
+     let z = bias;
+     for (let i = 0; i < W.length; i++) z += W[i] * phi[i];
+@@ -677,6 +750,26 @@ function connectomeController(circuit, opts) {
+   }
+   function brainTick(rng, sens, visual, motorDrive, opticScale) {
+     injectLayerChannels(0, sens, 12, rng);
++    // KC sparse code (pgKc only): random fixed expansion of the sensory
++    // channels into a 12-of-200 winner-take-all codeword — the mushroom-body
++    // motif. Deterministic in sens, consumes no rng: legacy streams untouched.
++    if (pg && pg.kc) {
++      const K = pg.kc, sL = Math.min(12, sens.length);
++      for (let k = 0; k < K.NKCp; k++) {
++        let a = 0;
++        for (let j = 0; j < sL; j++) a += (sens[j] || 0) * K.wSK[j * K.NKCp + k];
++        K.drive[k] = a;
++        K.bit[k] = 0;
++      }
++      K.n = 0;
++      for (let it = 0; it < K.KCAP; it++) {      // top-K winner-take-all
++        let bi = -1, bv = -Infinity;
++        for (let k = 0; k < K.NKCp; k++)
++          if (!K.bit[k] && K.drive[k] > bv) { bv = K.drive[k]; bi = k; }
++        if (bi < 0) break;
++        K.bit[bi] = 1; K.ids[K.n++] = bi;
++      }
++    }
+     if (opticInput === "retinotopy") {
+       if (opticByColumn) {
+         // Stage F retinotopic injection: per-column drive from the 800-bin
+@@ -766,22 +859,26 @@ function connectomeController(circuit, opts) {
+     // OWN rng so a seed fully determines the trajectory. The core consumes
+     // both the probability (telemetry/rows) and the action (valve command).
+     if (pg) {
+-      // REINFORCE: apply credit accrued since the last SAMPLE, paired with
+-      // THAT decision's own cached (action, P, features) — snapshotted by
+-      // lastPgAction() at decision time (decPend). Without the snapshot the
+-      // credit would pair with a mid-window 60 Hz sample instead of the
+-      // action that earned it: measured, the gradient then carries zero
+-      // information (E10 P(hold) never left 0.5). Learning stops when frozen.
+-      if (pgR !== 0 && pg.decPend && learning) {
+-        const ga = 0.08 * pgR * (pg.decPend.a - pg.decPend.p);
+-        for (let i = 0; i < pg.WPG.length; i++)
+-          pg.WPG[i] = clamp(pg.WPG[i] + ga * pg.decPend.phi[i], -2, 2);
+-        pg.bias = clamp(pg.bias + ga, -2, 2);      // the prior learns too
+-        pgR = 0;
++      // REINFORCE, two delivery modes:
++      //  legacy (default): apply accrued credit on a later tick, paired with
++      //    decPend — the decision snapshot captured by lastPgAction(). This
++      //    preserves E9's byte-identical behavior.
++      //  pgBaseline: the update is applied at DELIVERY time (see the set
++      //    pgReward accessor below) so credit pairs with the decision that
++      //    earned it even when the next sample latches within the same core
++      //    step; ticks only recompute the policy here. Zero-reward windows
++      //    still count: in event-locked E10 an r=0 window is a correct
++      //    rejection (the hold kept a leak out), not missing data.
++      if (!pg.baseBeta) {
++        if (pgR !== 0 && pg.decPend && learning) {
++          const ga = 0.08 * pgR * (pg.decPend.a - pg.decPend.p);
++          pgDelta(pg, ga);
++          pgR = 0;
++        }
+       }
+       phi = new Float32Array(m1 - m0);           // readout features: this
+       for (let i = m0; i < m1; i++) phi[i - m0] = spikes[i];   // tick's pool spikes
+-      pg.probs = pgProbs(pg.WPG, phi, pg.TAU, pg.bias);
++      pg.probs = pgProbs2(pg, phi);
+       pg.action = pg.RNG() < pg.probs ? 1 : 0;
+       pg.pend = { a: pg.action, p: pg.probs, phi };
+     }
+@@ -1010,16 +1107,32 @@ function connectomeController(circuit, opts) {
+     // window into pgReward, closing the loop Δw_i ∝ r·(a − P_open).
+     policyProb() { return pg ? pg.probs : null; },
+     // The core reads the sampled action at decision time; this read is what
+-    // DEFINES the decision, so it latches the sample's (a, P, phi) snapshot
+-    // for the REINFORCE update that will consume the credit this decision
+-    // accrues. 60 Hz ticks in between must not touch it.
++    // DEFINES the decision, so it latches the sample's (a, P, phi, KC code)
++    // snapshot for the REINFORCE update that will consume the credit this
++    // decision accrues. 60 Hz ticks in between must not touch it.
+     lastPgAction() {
+-      if (pg) pg.decPend = { a: pg.action, p: pg.probs, phi };
++      if (pg) pg.decPend = { a: pg.action, p: pg.probs, phi,
++                             kc: pg.kc ? { ids: Uint16Array.from(pg.kc.ids.subarray(0, pg.kc.n)), n: pg.kc.n } : null };
+       return pg ? pg.action : null;
+     },
+     // PG readout state for HUD/tests: P(hold), sampled action, learned prior
+     pgState() { return pg ? { probs: pg.probs, action: pg.action, bias: pg.bias } : null; },
+-    set pgReward(v) { if (pg) pgR = v; },
++    set pgReward(v) {
++      if (!pg) return;
++      if (pg.baseBeta) {
++        // Baseline mode: credit applies NOW, against decPend — the decision
++        // that earned this window (cores deliver before re-latching the next
++        // sample). The EMA baseline centers the reward without biasing the
++        // gradient, and zero windows flow through as correct rejections.
++        if (pg.decPend && learning) {
++          const ga = 0.08 * (v - pg.base) * (pg.decPend.a - pg.decPend.p);
++          if (ga !== 0) pgDelta(pg, ga);
++          pg.base += pg.BASE_BETA * (v - pg.base);
++        }
++      } else {
++        pgR = v;                               // legacy deferred delivery
++      }
++    },
+     fireVec() {
+       // Uint8-quantized per-neuron spike counts (log scale preserves the
+       // dynamic range: 255 = 256+ spikes in the trial, 1 = 1 spike)
+diff --git a/experiment_worker.js b/experiment_worker.js
+index 63bdb071..317545f4 100644
+--- a/experiment_worker.js
++++ b/experiment_worker.js
+@@ -1,652 +1,666 @@
+-/**
+- * experiment_worker.js — background experiment runner (Web Worker).
+- *
+- * Runs the seeded multi-controller experiments from the research plan in a
+- * separate thread so the 3D lab keeps animating. Posts progress messages:
+- *   { type:"progress", expId, phase, trial, nTrials, seedIdx, nSeeds,
+- *     curve: [{cond, block, phase, agree, goodBadRatio, sortEntropy, miNeural,
+- *              energyJ, dT, openFraction}], live: {cond: agree} }
+- *   { type:"done", expId, summary: {conditions}, rows: [...], provenance: {...} }
+- *   { type:"error", expId, message }
+- *
+- * Rows are identical in shape to research_data/ JSONL (benchmark.js).
+- *
+- * NOTE: experiment_core.js / controllers.js are CommonJS files (module.exports)
+- * while workers only provide importScripts. We shim `module`/`exports` around
+- * each import and capture what each file exports.
+- */
+-"use strict";
+-
+-let CORE = null;   // experiment_core.js exports
+-let CTRL = null;   // controllers.js exports
+-
+-function importAs(url, requireFn) {
+-  // Synchronous same-origin fetch (allowed in workers).
+-  const xhr = new XMLHttpRequest();
+-  xhr.open("GET", url, false);
+-  xhr.send();
+-  if (xhr.status !== 200 && xhr.status !== 0) {
+-    throw new Error("cannot load " + url + " (status " + xhr.status + ")");
+-  }
+-  const mod = { exports: {} };
+-  // Evaluate inside a function scope: importScripts would execute both files
+-  // in the worker's single global scope, colliding on shared top-level consts
+-  // (e.g. `const METRICS` in both experiment_core.js and controllers.js).
+-  const fn = new Function("module", "exports", "require",
+-                          xhr.responseText + "\n//# sourceURL=" + url);
+-  fn(mod, mod.exports, requireFn);   // file ends with: module.exports = {...}
+-  return mod.exports;
+-}
+-
+-let RT = null;     // p1_retinotopy.js exports (Stage F hex-lattice optic input)
+-
+-try {
+-  CORE = importAs("experiment_core.js",
+-                  () => { throw new Error("experiment_core.js must not require()"); });
+-  RT = importAs("p1_retinotopy.js",
+-                () => { throw new Error("p1_retinotopy.js must not require()"); });
+-  // controllers.js pulls in both: p1_retinotopy.js (Stage F) + experiment_core.js.
+-  CTRL = importAs("controllers.js",
+-                  (spec) => String(spec).includes("p1_retinotopy") ? RT : CORE);
+-} catch (err) {
+-  postMessage({ type: "error", expId: null, message: "worker init failed: " + String(err) });
+-}
+-
+-// ---- closed-loop core (browser↔body gate) --------------------------------
+-// One loop implementation, shared verbatim with the CLI runner
+-// (tools/closed_loop_runner.js). The canonical brain that drives the loop
+-// lives HERE in the worker — exactly one brain; the page only renders the
+-// cl_state stream this mode emits. See embodiment/closed_loop_core.js and
+-// embodiment/state_contract.js (versioned, fail-closed contract).
+-let CLCORE = null, CLWS = null;
+-try {
+-  const CONTRACT = importAs("embodiment/state_contract.js",
+-                            () => { throw new Error("state_contract must not require()"); });
+-  CLWS = importAs("embodiment/cl_ws.js",
+-                  () => { throw new Error("cl_ws must not require()"); });
+-  CLCORE = importAs("embodiment/closed_loop_core.js",
+-                    (spec) => spec === "state_contract" ? CONTRACT
+-                            : spec === "experiment_core" ? CORE
+-                            : CTRL);
+-  CLCORE.init((spec) => spec === "state_contract" ? CONTRACT
+-              : spec === "experiment_core" ? CORE : CTRL);
+-} catch (err) {
+-  postMessage({ type: "error", expId: null, message: "closed-loop init failed: " + String(err) });
+-}
+-
+-// ------------------------------------------------------- closed-loop mode --
+-// Drive the CANONICAL connectome brain (the same factory e9BrainFactory uses
+-// — never a page-side copy) through the REAL FlyBody/MuJoCo sidecar over
+-// WebSocket and stream the actual loop state to the page (cl_state). Follows
+-// the app_state discipline: monotone seq, real values only, no placeholders.
+-function runClosedLoop(m) {
+-  if (!m.circuit) { postMessage({ type: "error", expId: "cl", message: "circuit data missing" }); return; }
+-  if (!CLCORE || !CLWS) { postMessage({ type: "error", expId: "cl", message: "closed-loop core failed to init" }); return; }
+-  const steps = Math.max(1, Math.min(20000, m.steps || 240));
+-  const seed = m.seed !== undefined ? m.seed : 11;
+-  const episode = m.episode || 0;
+-  const learning = m.frozen ? false : true;
+-  const port = m.port || 8795;
+-  let seq = 0;
+-  // fail-closed envelope check: never post a malformed state to the page
+-  const validEnvelope = (st) => st && typeof st === "object" &&
+-    Number.isInteger(st.episode) && Number.isInteger(st.t) &&
+-    typeof st.mode === "string" && st.contract_v === 1;
+-  const sock = new CLWS.CLWebSocket("ws://127.0.0.1:" + port);
+-  sock.connect().then(() => CLCORE.runEpisode({
+-    send: (msg) => sock.send(msg),
+-    circuit: m.circuit, seed, steps, learning, episode,
+-    onTick: (rec) => {
+-      const st = {   // thin snapshot of the ACTUAL loop state
+-        kind: "closed_loop", contract_v: 1,
+-        episode, t: rec.t, seed, learning, mode: rec.mode,
+-        body_pos: rec.body_pos, body_quat: rec.body_quat,
+-        action: rec.action, reward: rec.reward,
+-        dopamine: rec.da_after, weight_drift: rec.weight_drift,
+-        motor_rate: rec.motor_rate,
+-        neural_active: rec.neural.reduce((a, c) => a + (c > 0 ? 1 : 0), 0),
+-        neural_dim: rec.neural.length,
+-      };
+-      if (validEnvelope(st)) postMessage({ type: "cl_state", expId: "cl", seq: ++seq, state: st });
+-    },
+-  })).then(({ gates, mode }) => {
+-    sock.close();
+-    postMessage({ type: "cl_done", expId: "cl", gates, mode, steps });
+-  }).catch((e) => {
+-    sock.close();
+-    postMessage({ type: "error", expId: "cl",
+-      message: String(e && e.message || e) +
+-        " (sidecar must run: python embodiment/sidecar.py --ws --port " + port + ")" });
+-  });
+-}
+-
+-// ------------------------------------------------ E9 fly-brain factory ----
+-// E9's demon_neural/demon_frozen variants need a real neural controller. We
+-// reuse the EXACT E4 connectome machinery (LIF over the FAFB circuit, CSR
+-// spike propagation, eligibility traces, dopamine-gated applyLearning) via a
+-// small adapter — no second brain implementation. The circuit JSON arrives
+-// with the run message (window.__expCircuit on the page); if it is missing we
+-// fall back to the classical-only variant set (core drops the neural rows).
+-let E9_CIRCUIT = null;
+-function e9BrainFactory(seedIdx) {
+-  if (!E9_CIRCUIT) throw new Error("e9 brain requested but no circuit loaded");
+-  // plasticity "full": every excitatory synapse is eligible; dopamine gates
+-  // updates through receiveFeedback({reward}). resetForTrial() clears state,
+-  // NOT weights — learned weights persist across trials inside the controller.
+-  // One distinct brain draw per seed index so cross-seed CIs reflect
+-  // seed-to-seed variance, not a shared trajectory.
+-  return CTRL.connectomeController(E9_CIRCUIT, {
+-    shuffle: false, rng: makeRng(9176 + (seedIdx || 0) * 37), seed: 1,
+-    opticDrive: 0,              // no visual field in the pressure apparatus
+-    motorDrive: 0.6,            // tonic motor-pool drive tuned so the pool can
+-                                // cross threshold on strong sensory evidence
+-    plasticity: "full",
+-    // ---- E9 credit assignment upgrades (opt-in; default paths untouched) --
+-    // Per-crossing eligibility windows: fast/mid/slow traces so dopamine that
+-    // arrives seconds after a gate decision still lands on the synapses that
+-    // caused it (the single 0.985 trace forgets a 3 s-old decision).
+-    eligibility: [{ tau: 0.90, w: 0.45 }, { tau: 0.985, w: 0.35 }, { tau: 0.9995, w: 0.20 }],
+-    // Trained policy-gradient readout on the motor population: the core
+-    // samples P(open) from a REINFORCE-trained softmax over pool rates and
+-    // routes each decision's credit window into it via pgReward.
+-    policyGradient: true,
+-    pgRng: makeRng(424243 + (seedIdx || 0) * 977),
+-  });
+-}
+-function makeRng(seed) {        // local PRNG for the brain factory (mulberry32)
+-  let a = seed >>> 0;
+-  return function () {
+-    a |= 0; a = (a + 0x6D2B79F5) | 0;
+-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+-  };
+-}
+-
+-// Apparatus brains (E10/E11) use the SAME connectome controller and credit
+-// upgrades as E9 — the only difference is what the actuators mean:
+-//   E10: action 1 = RELEASE the trapdoor flap (sorting window open)
+-//   E11: action 1 = DROP the pawl (engage the ratchet)
+-function apparatusBrainFactory(expId, seedIdx) {
+-  if (!E9_CIRCUIT) throw new Error(expId + " brain requested but no circuit loaded");
+-  return CTRL.connectomeController(E9_CIRCUIT, {
+-    shuffle: false, rng: makeRng(9176 + (seedIdx || 0) * 37), seed: 1,
+-    opticDrive: 0,
+-    motorDrive: 0.6,
+-    plasticity: "full",
+-    // same credit-assignment upgrades as e9BrainFactory (windows + PG readout)
+-    eligibility: [{ tau: 0.90, w: 0.45 }, { tau: 0.985, w: 0.35 }, { tau: 0.9995, w: 0.20 }],
+-    policyGradient: true,
+-    pgRng: makeRng(424243 + (seedIdx || 0) * 977),
+-  });
+-}
+-
+-// ---------------------------------------------------------------- registry
+-const EXPERIMENTS = {
+-  e1: { label: "E1 · Classical Maxwell Demon",
+-        needsCircuit: false,
+-        controllers: () => ({ classical_demon: (rng, env, cfg) => CTRL.classicalDemon(rng, env, cfg) }),
+-        seeds: 2, train: 60, test: 12, episode: 12 },
+-  e2: { label: "E2 · Artificial Neural Demon",
+-        needsCircuit: false,
+-        controllers: () => ({ ann: (rng, env, cfg) => CTRL.annController(rng, env, cfg),
+-                              random: (rng, env) => CTRL.randomController(rng, env) }),
+-        seeds: 2, train: 60, test: 12, episode: 12 },
+-  e3: { label: "E3 · Drosophila-Inspired Network",
+-        needsCircuit: false,
+-        controllers: () => ({ drosophila: (rng, env, cfg) => CTRL.drosophilaController(rng, env, cfg) }),
+-        seeds: 2, train: 60, test: 12, episode: 12 },
+-  e4: { label: "E4 · Connectome-Constrained (4A/4B/4C)",
+-        needsCircuit: true,
+-        controllers: () => ({
+-          connectome_4A: (rng, env, cfg) => CTRL.connectomeController(cfg.circuit,
+-            { shuffle: false, rng, seed: 1, opticDrive: 0.25, plasticity: "full" }),
+-          connectome_4B: (rng, env, cfg) => CTRL.connectomeController(cfg.circuit,
+-            { shuffle: false, rng, seed: 1, opticDrive: 0.25, plasticity: "restricted" }),
+-          connectome_4C: (rng, env, cfg) => CTRL.connectomeController(cfg.circuit,
+-            { shuffle: true, rng, seed: 7, opticDrive: 0.25, plasticity: "full" }),
+-        }),
+-        seeds: 1, train: 40, test: 10, episode: 12 },
+-  e6: { label: "E6 · Jet-Closure Paradox (causal decomposition)",
+-        needsCircuit: false,
+-        controllers: () => ({
+-          classical_demon: (rng, env, cfg) => CTRL.classicalDemon(rng, env, cfg),
+-          random: (rng, env, cfg) => CTRL.randomController(rng, env, cfg),
+-          never_gate: (rng, env, cfg) => CTRL.neverGateController(rng, env, cfg),
+-        }),
+-        seeds: 2, train: 60, test: 12, episode: 12 },
+-  e7: { label: "E7 · Generalization Sweep (density × noise)",
+-        needsCircuit: false,
+-        controllers: () => ({
+-          classical_demon: (rng, env, cfg) => CTRL.classicalDemon(rng, env, cfg),
+-        }),
+-        // three physics regimes per seed: sparse/clean, default, dense/noisy
+-        physics: (seedIdx) => seedIdx === 1 ? { nParticles: 120, noise: 0.0 }
+-                              : seedIdx === 2 ? { nParticles: 640, noise: 0.30 }
+-                              : { nParticles: 320, noise: 0.12 },
+-        seeds: 3, train: 50, test: 10, episode: 12 },
+-  e8: { label: "E8 · Information-Limited Demons",
+-        needsCircuit: false,
+-        controllers: () => ({
+-          demon_adaptive: (rng, env, cfg) => CTRL.classicalDemon(rng, env, cfg, { adaptive: true }),
+-          demon_fixed: (rng, env, cfg) => CTRL.classicalDemon(rng, env, cfg, { adaptive: false }),
+-          demon_mem4: (rng, env, cfg) => CTRL.classicalDemon(rng, env, cfg, { memSize: 4 }),
+-        }),
+-        seeds: 2, train: 60, test: 12, episode: 12 },
+-  e9: { label: "E9 · Pressure Demon",
+-        needsCircuit: false,
+-        apparatus: "pressureDemonCore",          // CORE function name
+-        apparatusEnv: "pressure",                // 3D environment id
+-        controllers: () => ({}),
+-        physics: () => ({ nParticles: 260, noise: 0 }),
+-        // multi-seed by default: learning curves aggregate across seeds with
+-        // 95% CIs (CORE.apparatusCurve); override via run opts.seeds
+-        seeds: 3, train: 12, test: 12, episode: 20 },
+-  e10: { label: "E10 · Smoluchowski Trapdoor",
+-        needsCircuit: true,
+-        apparatus: "smoluchowskiCore",
+-        apparatusEnv: "trapdoor",
+-        controllers: () => ({}),
+-        physics: () => ({ nParticles: 220, noise: 0 }),
+-        seeds: 1, train: 8, test: 8, episode: 16 },
+-  e11: { label: "E11 · Feynman Ratchet & Pawl",
+-        needsCircuit: true,
+-        apparatus: "feynmanRatchetCore",
+-        apparatusEnv: "ratchet",
+-        controllers: () => ({}),
+-        physics: () => ({ nParticles: 0, noise: 0 }),
+-        seeds: 1, train: 10, test: 10, episode: 12 },
+-  e5: { label: "E5 · Full Comparator Study",
+-        needsCircuit: true,
+-        controllers: () => ({
+-          classical_demon: (rng, env, cfg) => CTRL.classicalDemon(rng, env, cfg),
+-          ann: (rng, env, cfg) => CTRL.annController(rng, env, cfg),
+-          drosophila: (rng, env) => CTRL.drosophilaController(rng, env),
+-          connectome: (rng, env, cfg) => CTRL.connectomeController(cfg.circuit,
+-            { shuffle: false, rng, seed: 1, opticDrive: 0.25, plasticity: "full" }),
+-          shuffled_connectome: (rng, env, cfg) => CTRL.connectomeController(cfg.circuit,
+-            { shuffle: true, rng, seed: 7, opticDrive: 0.25, plasticity: "full" }),
+-        }),
+-        seeds: 1, train: 40, test: 10, episode: 12 },
+-};
+-
+-// ------------------------------------------------------- message protocol
+-self.onmessage = (ev) => {
+-  const m = ev.data;
+-  if (m.type === "run") {
+-    E9_CIRCUIT = m.circuit || null;   // real connectome for the E9 fly brain
+-    runExperiment(m.expId, m.circuit, m.opts || {});
+-  }
+-  else if (m.type === "run_custom") {
+-    try { registerCustom(m); runExperiment("chat", m.circuit, m.opts || {}); }
+-    catch (err) { postMessage({ type: "error", expId: "chat",
+-                                message: "custom spec: " + String(err && err.message || err) }); }
+-  }
+-  else if (m.type === "run_cl") { try { runClosedLoop(m); }
+-    catch (err) { postMessage({ type: "error", expId: "cl", message: String(err && err.message || err) }); } }
+-  else if (m.type === "ping") postMessage({ type: "pong" });
+-};
+-
+-// ------------------------------------------------- chat-designed experiments
+-// The lab page's Chat card lets an LLM (GPT API / local Ollama / LM Studio)
+-// design an experiment; the design arrives as `spec`, gets registered as the
+-// pseudo-experiment "chat", and then runs through the exact same pipeline as
+-// E1-E8 (same rows, curve, provenance and plots broadcasts).
+-const CHAT_FACTORIES = {
+-  classical_demon: (rng, env, cfg) => CTRL.classicalDemon(rng, env, cfg),
+-  ann:             (rng, env, cfg) => CTRL.annController(rng, env, cfg),
+-  drosophila:      (rng, env, cfg) => CTRL.drosophilaController(rng, env, cfg),
+-  never_gate:      (rng, env, cfg) => CTRL.neverGateController(rng, env, cfg),
+-  random:          (rng, env, cfg) => CTRL.randomController(rng, env, cfg),
+-};
+-const CHAT_ALIASES = {
+-  classical_demon: "classical_demon", classical: "classical_demon",
+-  demon: "classical_demon", classic: "classical_demon", physical: "classical_demon",
+-  ann: "ann", mlp: "ann", neural: "ann", network: "ann",
+-  drosophila: "drosophila", fly: "drosophila", fly_brain: "drosophila",
+-  mb: "drosophila", mushroom: "drosophila", mushroom_body: "drosophila",
+-  never_gate: "never_gate", nevergate: "never_gate", never: "never_gate",
+-  random: "random", control: "random", baseline: "random",
+-};
+-function registerCustom(m) {
+-  const s = m.spec || {};
+-  if (!s || typeof s !== "object") throw new Error("spec missing");
+-  const name = String(s.name || "Chat experiment").slice(0, 60);
+-  const conds = Array.isArray(s.conditions) ? s.conditions : [];
+-  const ids = [];
+-  for (const c of conds) {
+-    const k = CHAT_ALIASES[String(c).toLowerCase().trim()];
+-    if (k && !ids.includes(k)) ids.push(k);
+-  }
+-  if (!ids.length) ids.push("classical_demon");
+-  if (ids.length > 4) ids.length = 4;
+-  const nP = Math.max(40, Math.min(640, Math.round(Number(s.nParticles) || 320)));
+-  const nN = Math.max(0, Math.min(0.4, Number(s.noise) || 0.12));
+-  const ep = Math.max(4, Math.min(12, Math.round(Number(s.episodeSeconds) || 12)));
+-  const tr = Math.max(8, Math.min(60, Math.round(Number(s.trainTrials) || 40)));
+-  const te = Math.max(4, Math.min(12, Math.round(Number(s.testTrials) || 8)));
+-  const controllers = () => {
+-    const out = {};
+-    ids.forEach((k, i) => {
+-      const key = k + "_" + (i + 1);
+-      out[key] = (rng, env, cfg) => CHAT_FACTORIES[k](rng, env, cfg);
+-    });
+-    return out;
+-  };
+-  EXPERIMENTS.chat = {
+-    label: "\uD83D\uDCAC " + name,
+-    needsCircuit: false,
+-    controllers,
+-    physics: () => ({ nParticles: nP, noise: nN }),
+-    seeds: 1, train: tr, test: te, episode: ep,
+-    design: s,                    // echoed into provenance for the paper trail
+-  };
+-}
+-
+-function runExperiment(expId, circuit, opts) {
+-  const spec = EXPERIMENTS[expId];
+-  if (!spec) { postMessage({ type: "error", expId, message: "unknown experiment" }); return; }
+-  if (spec.needsCircuit && !circuit) {
+-    postMessage({ type: "error", expId, message: "circuit data missing" }); return;
+-  }
+-  const nSeeds  = opts.seeds  || spec.seeds;
+-  const train   = opts.train  || spec.train;
+-  const test    = opts.test   || spec.test;
+-  const episode = opts.episode || spec.episode;
+-  const t0 = Date.now();
+-
+-  // per-condition accumulation of full trial rows (streamed via onTrialData)
+-  const trialRows = {};     // key -> [row, ...]
+-  let lastEmit = 0;
+-  let curveBuilder = buildCurve;   // apparatus branch swaps in the generic one
+-
+-  // ---- apparatus experiments (E9/E10/E11): self-contained cores that stream
+-  // live 3D state + one metrics row per episode. They bypass runBenchmark
+-  // (no _raw seeds / per-neuron vectors) and reuse everything else: rows ->
+-  // curve -> sparklines, provenance, plots broadcast.
+-  if (spec.apparatus) {
+-    const coreFn = CORE[spec.apparatus];
+-    const nSeeds = Math.max(1, opts.seeds || spec.seeds || 1);
+-    const nTrials = train + test;
+-    curveBuilder = () => buildApparatusCurve(4);
+-    try {
+-      let lastAppPost = 0, lastAppSeq = 0;   // (patch 17) app_state replay-stream gate
+-      for (let s = 0; s < nSeeds; s++) {
+-        const seed = (opts.seed !== undefined ? opts.seed : 1) + s * 101;
+-        coreFn({
+-          seed,
+-          seedTag: s + 1,           // rows carry which batch seed produced them
+-          trials: nTrials,
+-          trainTrials: train,
+-          episodeSeconds: episode,
+-          nParticles: (spec.physics && spec.physics(0, 1) || {}).nParticles || 260,
+-          // fly-brain conditions are added only when a real circuit arrived;
+-          // one distinct brain draw per seed (cross-seed CI over brains)
+-          brainFactory: (expId === "e9" && E9_CIRCUIT) ? (sd) => e9BrainFactory(sd)
+-            : (expId === "e10" && E9_CIRCUIT) ? (sd) => apparatusBrainFactory("e10", sd)
+-            : (expId === "e11" && E9_CIRCUIT) ? (sd) => apparatusBrainFactory("e11", sd)
+-            : undefined,
+-          onTrialData: (cond, phase, tr) => {
+-            pushRow(cond, phase, tr);
+-            emit(expId, phase, (tr.trial || 0) + 1, nTrials * nSeeds, s + 1, false);
+-          },
+-          // 3D replay stream for the first seed; later seeds stream every
+-          // other episode so the stage stays live without tripling batch time.
+-          // (patch 17) full-speed streaming flooded the main thread with ~460
+-          // structured-clone app_state messages/sec and froze the fly (8fps).
+-          // Time-gate to ~30Hz - still above the 24fps replay pump on the page.
+-          onState: (st) => {
+-            if (s === 0 || ((st.trial | 0) & 1) === 0) {
+-              const now = Date.now();
+-              if (now - lastAppPost >= 33) {
+-                lastAppPost = now;
+-                st.__seq = (++lastAppSeq);
+-                postMessage({ type: "app_state", expId, state: st });
+-              }
+-            }
+-          },
+-        });
+-      }
+-      const curve = buildApparatusCurve(4);
+-      // FIX (ReferenceError: res is not defined): the apparatus branch never
+-      // had a `res` — cores stream rows via onTrialData instead of returning
+-      // a result object. Build the per-condition summary from those rows;
+-      // apparatus panels derive their statistics from the rows themselves.
+-      // Brain outcome reduction (same contract as the runBenchmark branch):
+-      // keep per-trial fireVec only for the late-train / late-test / early-train
+-      // windows of the FIRST seed, emit each as a mean b64 vector on one row
+-      // per phase (fireVecMean / fireVecEarly), and drop the heavy per-trial
+-      // vectors from all other rows. E10/E11 have no brain — rows without
+-      // fireVec pass through untouched.
+-      const meanVec = (vecs, n) => {
+-        if (!vecs.length) return null;
+-        const acc = new Float64Array(n);
+-        for (const v of vecs) {
+-          const bin = atob(v.vec); const bytes = new Uint8Array(bin.length);
+-          for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+-          for (let i = 0; i < n; i++) acc[i] += bytes[i];
+-        }
+-        const out = new Uint8Array(n);
+-        for (let i = 0; i < n; i++) out[i] = Math.round(acc[i] / vecs.length);
+-        let b64 = "";
+-        const CH = 3 * 4096;   // multiple of 3 so concatenated base64 stays valid
+-        for (let o = 0; o < n; o += CH)
+-          b64 += btoa(String.fromCharCode.apply(null, out.subarray(o, Math.min(n, o + CH))));
+-        return b64;
+-      };
+-      const conditions = {};
+-      const flatRows = [];
+-      const firstSeed = {};
+-      for (const r of Object.values(trialRows).flat())
+-        if (r.fireVec && firstSeed[r.condition] === undefined) firstSeed[r.condition] = r.seed;
+-      for (const [key, rows] of Object.entries(trialRows)) {
+-        conditions[key] = { episodes: rows.length };
+-        const f0 = firstSeed[key];
+-        const lateTrain = rows.filter(r => r.fireVec && r.seed === f0 && r.phase === "train").slice(-8);
+-        const earlyTrain = rows.filter(r => r.fireVec && r.seed === f0 && r.phase === "train").slice(0, 8);
+-        const lateTest = rows.filter(r => r.fireVec && r.seed === f0 && r.phase === "test").slice(-4);
+-        let nVec = 0, layout = null;
+-        for (const fv of [...lateTrain, ...lateTest, ...earlyTrain])
+-          if (fv && fv.fireVec && fv.fireVec.n) { nVec = fv.fireVec.n; layout = fv.fireVec.layout || null; break; }
+-        const emitted = { train: false, test: false, early: false };
+-        for (const r of rows) {
+-          const row = Object.assign({}, r);
+-          const fv = row.fireVec; delete row.fireVec;
+-          if (nVec && r.seed === f0 && fv) {
+-            const ph = row.phase === "test" ? "test" : "train";
+-            if (lateTrain.includes(r) && !emitted.train) {
+-              row.fireVecMean = { phase: "train", vec: meanVec(lateTrain.map(x => x.fireVec), nVec), n: nVec, layout, count: lateTrain.length };
+-              emitted.train = true;
+-            } else if (lateTest.includes(r) && !emitted.test) {
+-              row.fireVecMean = { phase: "test", vec: meanVec(lateTest.map(x => x.fireVec), nVec), n: nVec, layout, count: lateTest.length };
+-              emitted.test = true;
+-            }
+-            if (earlyTrain.includes(r) && !emitted.early) {
+-              row.fireVecEarly = { phase: "train", vec: meanVec(earlyTrain.map(x => x.fireVec), nVec), n: nVec, layout, count: earlyTrain.length };
+-              emitted.early = true;
+-            }
+-          }
+-          flatRows.push(row);
+-        }
+-      }
+-      const prov = {
+-        experiment: expId, label: spec.label,
+-        seeds: nSeeds, seedBase: opts.seed !== undefined ? opts.seed : 1,
+-        trainTrials: train, testTrials: test,
+-        episodeSeconds: episode,
+-        nParticles: (spec.physics && (spec.physics(0, 1) || {}).nParticles) || 260,
+-        noise: 0, dt: 1 / 60, tKelvin: 300, simToJoule: 1e-21,
+-        apparatus: spec.apparatusEnv,
+-        software: "Fly-Demon Lab v2 experiment list",
+-        startedISO: new Date(t0).toISOString(),
+-        elapsedSeconds: (Date.now() - t0) / 1000,
+-      };
+-      postMessage({ type: "done", expId, summary: { conditions, curve },
+-                    rows: flatRows, provenance: prov, apparatus: spec.apparatusEnv });
+-    } catch (err) {
+-      postMessage({ type: "error", expId, message: String(err && err.stack || err) });
+-    }
+-    return;
+-  }
+-
+-  function pushRow(key, phase, tr) {
+-    const row = Object.assign({ condition: key, phase }, tr);
+-    (trialRows[key] = trialRows[key] || []).push(row);
+-  }
+-
+-  // Apparatus curve: delegate to the pure CORE.apparatusCurve aggregator —
+-  // cross-seed block means with 95% CIs, train/test block continuity, and
+-  // agree/energyJ aliases (rows already carry their seed tag).
+-  function buildApparatusCurve(B) {
+-    let all = [];
+-    for (const rows of Object.values(trialRows)) all = all.concat(rows);
+-    return CORE.apparatusCurve(all, B);
+-  }
+-
+-  function buildCurve() {
+-    const curve = [], live = {};
+-    for (const [key, rows] of Object.entries(trialRows)) {
+-      const B = 10;
+-      const bCount = Math.max(1, Math.floor(rows.length / B));
+-      for (let b = 0; b < bCount; b++) {
+-        const seg = rows.slice(b * B, (b + 1) * B);
+-        if (!seg.length) continue;
+-        const avg = (f) => {
+-          const vals = seg.map(x => x[f]).filter(v => v !== null && v !== undefined && Number.isFinite(v));
+-          return vals.length ? vals.reduce((a, c) => a + c, 0) / vals.length : null;
+-        };
+-        const eJ = avg("energyJ");   // E1-E8 extractable work; E10/E11 stream
+-        const energyJ = eJ !== null ? eJ : (avg("workJ") !== null ? avg("workJ") : avg("netWorkJ"));
+-        curve.push({ cond: key, block: b, phase: seg[0].phase,
+-                     agree: avg("demonAgree"), goodBadRatio: avg("goodBadRatio"),
+-                     sortEntropy: avg("sortEntropy"), miNeural: avg("miNeural"),
+-                     energyJ, dT: avg("dTfinal"),
+-                     openFraction: avg("openFraction") });
+-      }
+-      // live headline: mean agreement over the last 10 rows
+-      const tail = rows.slice(-10).map(x => x.demonAgree || 0);
+-      live[key] = tail.length ? tail.reduce((a, c) => a + c, 0) / tail.length : 0;
+-    }
+-    return { curve, live };
+-  }
+-
+-  function emit(expId_, phase, trial, nTrials, seedIdx, force) {
+-    const now = Date.now();
+-    if (!force && now - lastEmit < 400) return;   // throttle UI chatter
+-    lastEmit = now;
+-    const built = curveBuilder();
+-    const curve = built.curve || built, live = built.live || {};
+-    postMessage({ type: "progress", expId, phase, trial, nTrials, seedIdx,
+-                  nSeeds, curve, live });
+-  }
+-
+-  try {
+-    const result = CORE.runBenchmark({
+-      seed: opts.seed !== undefined ? opts.seed : 1,
+-      nSeeds,
+-      trialsTrain: train,
+-      trialsTest: test,
+-      episodeSeconds: episode,
+-      nParticles: opts.nParticles || 320,
+-      noise: 0.12,
+-      doorHeight: 64,
+-      _physics: spec.physics || null,   // per-seed env overrides (E7)
+-      circuit,                                  // E4/E5 read it via cfg
+-      controllers: spec.controllers(),
+-      onTrial: (cond, phase, t, n, si, sn) => {
+-        emit(expId, phase, t, n, si, false);
+-      },
+-      onTrialData: (cond, phase, tr) => { pushRow(cond, phase, tr); },
+-    });
+-
+-    // ---- per-condition summary (without raw rows) + flat rows -----------
+-    // fireVec reduction: decode the last-8-train / last-4-test per-neuron
+-    // vectors, average them, and attach as fireVecMean on one row per phase
+-    // (per-trial vectors are dropped to keep the message small).
+-    const b64toBytes = (b64) => Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+-    const meanVec = (vecs, n) => {
+-      if (!vecs.length) return null;
+-      const acc = new Float64Array(n);
+-      for (const v of vecs) {
+-        // accept either a b64 string or a fireVec object {vec,...}
+-        const b64 = typeof v === "string" ? v : v.vec;
+-        const b = b64toBytes(b64); for (let i = 0; i < n; i++) acc[i] += b[i];
+-      }
+-      const out = new Uint8Array(n);
+-      for (let i = 0; i < n; i++) out[i] = Math.round(acc[i] / vecs.length);
+-      let b64 = "";
+-      const CH = 3 * 4096;   // multiple of 3 so concatenated base64 stays valid
+-      for (let o = 0; o < n; o += CH)
+-        b64 += btoa(String.fromCharCode.apply(null, out.subarray(o, Math.min(n, o + CH))));
+-      return b64;
+-    };
+-    const conditions = {}, rows = [];
+-    for (const [key, cond] of Object.entries(result.conditions)) {
+-      const { _raw, ...rest } = cond;
+-      conditions[key] = rest;
+-      const run = _raw[0];   // seed 0 carries the anatomy vectors
+-      if (run) {
+-        const trs = run.trials;
+-        const trainTr = trs.filter(t => t.phase !== "test");
+-        const testTr = trs.filter(t => t.phase === "test");
+-        const pick = (arr, k) => arr.slice(-k).filter(t => t.fireVec);
+-        // early-train vectors: first trials of the train phase (for the
+-        // real-anatomy learning-delta maps: late − early at real positions)
+-        const pickEarly = (arr, k) => arr.slice(0, k).filter(t => t.fireVec);
+-        const fvs = { train: pick(trainTr, 8), test: pick(testTr, 4),
+-                      early: pickEarly(trainTr, 8) };
+-        let emitted = { train: false, test: false, early: false };
+-        let meta = null;
+-        // FIX: fv here is the TRIAL row — the vector lives at fv.fireVec.
+-        // The old code read fv.n, so meta stayed null and fireVecMean was
+-        // never emitted (anatomy cards silently fell back to region means).
+-        for (const tr of [...fvs.train, ...fvs.test, ...fvs.early]) {
+-          if (tr && tr.fireVec && tr.fireVec.n) { meta = { n: tr.fireVec.n, layout: tr.fireVec.layout || null }; break; }
+-        }
+-        for (const tr of trs) {
+-          const row = Object.assign({ condition: key }, tr);
+-          delete row.fireVec;
+-          const ph = tr.phase === "test" ? "test" : "train";
+-          if (!emitted[ph] && meta) {
+-            const vecs = fvs[ph];
+-            if (vecs.length) {
+-              row.fireVecMean = { phase: ph, vec: meanVec(vecs.map(t2 => t2.fireVec), meta.n),
+-                                  n: meta.n, layout: meta.layout,
+-                                  count: vecs.length };
+-              emitted[ph] = true;
+-            }
+-          }
+-          // one row carries the early-train mean alongside the late-train one
+-          if (!emitted.early && meta && fvs.early.length && !row.fireVecMean) {
+-            row.fireVecEarly = { phase: "train", vec: meanVec(fvs.early.map(t2 => t2.fireVec), meta.n),
+-                                 n: meta.n, layout: meta.layout, count: fvs.early.length };
+-            emitted.early = true;
+-          } else if (!emitted.early && meta && fvs.early.length) {
+-            row.fireVecEarly = { phase: "train", vec: meanVec(fvs.early.map(t2 => t2.fireVec), meta.n),
+-                                 n: meta.n, layout: meta.layout, count: fvs.early.length };
+-            emitted.early = true;
+-          }
+-          rows.push(row);
+-        }
+-      } else {
+-        for (const tr of run ? run.trials : []) rows.push(Object.assign({ condition: key }, tr));
+-      }
+-    }
+-    const { curve } = buildCurve();
+-    const prov = {
+-      experiment: expId, label: spec.label,
+-      seeds: nSeeds, trainTrials: train, testTrials: test,
+-      episodeSeconds: episode, doorHeight: 64,
+-      nParticles: (spec.physics && (spec.physics(0, nSeeds) || {}).nParticles) || 320,
+-      noise: (spec.physics && (spec.physics(0, nSeeds) || {}).noise) || 0.12,
+-      dt: 1 / 60, tKelvin: 300, simToJoule: 1e-21,
+-      software: "Fly-Demon Lab v2 experiment list",
+-      chatDesign: spec.design || null,
+-      startedISO: new Date(t0).toISOString(),
+-      elapsedSeconds: (Date.now() - t0) / 1000,
+-    };
+-    postMessage({ type: "done", expId, summary: { conditions, curve }, rows, provenance: prov });
+-  } catch (err) {
+-    postMessage({ type: "error", expId, message: String(err && err.stack || err) });
+-  }
+-}
++/**
++ * experiment_worker.js — background experiment runner (Web Worker).
++ *
++ * Runs the seeded multi-controller experiments from the research plan in a
++ * separate thread so the 3D lab keeps animating. Posts progress messages:
++ *   { type:"progress", expId, phase, trial, nTrials, seedIdx, nSeeds,
++ *     curve: [{cond, block, phase, agree, goodBadRatio, sortEntropy, miNeural,
++ *              energyJ, dT, openFraction}], live: {cond: agree} }
++ *   { type:"done", expId, summary: {conditions}, rows: [...], provenance: {...} }
++ *   { type:"error", expId, message }
++ *
++ * Rows are identical in shape to research_data/ JSONL (benchmark.js).
++ *
++ * NOTE: experiment_core.js / controllers.js are CommonJS files (module.exports)
++ * while workers only provide importScripts. We shim `module`/`exports` around
++ * each import and capture what each file exports.
++ */
++"use strict";
++
++let CORE = null;   // experiment_core.js exports
++let CTRL = null;   // controllers.js exports
++
++function importAs(url, requireFn) {
++  // Synchronous same-origin fetch (allowed in workers).
++  const xhr = new XMLHttpRequest();
++  xhr.open("GET", url, false);
++  xhr.send();
++  if (xhr.status !== 200 && xhr.status !== 0) {
++    throw new Error("cannot load " + url + " (status " + xhr.status + ")");
++  }
++  const mod = { exports: {} };
++  // Evaluate inside a function scope: importScripts would execute both files
++  // in the worker's single global scope, colliding on shared top-level consts
++  // (e.g. `const METRICS` in both experiment_core.js and controllers.js).
++  const fn = new Function("module", "exports", "require",
++                          xhr.responseText + "\n//# sourceURL=" + url);
++  fn(mod, mod.exports, requireFn);   // file ends with: module.exports = {...}
++  return mod.exports;
++}
++
++let RT = null;     // p1_retinotopy.js exports (Stage F hex-lattice optic input)
++
++try {
++  CORE = importAs("experiment_core.js",
++                  () => { throw new Error("experiment_core.js must not require()"); });
++  RT = importAs("p1_retinotopy.js",
++                () => { throw new Error("p1_retinotopy.js must not require()"); });
++  // controllers.js pulls in both: p1_retinotopy.js (Stage F) + experiment_core.js.
++  CTRL = importAs("controllers.js",
++                  (spec) => String(spec).includes("p1_retinotopy") ? RT : CORE);
++} catch (err) {
++  postMessage({ type: "error", expId: null, message: "worker init failed: " + String(err) });
++}
++
++// ---- closed-loop core (browser↔body gate) --------------------------------
++// One loop implementation, shared verbatim with the CLI runner
++// (tools/closed_loop_runner.js). The canonical brain that drives the loop
++// lives HERE in the worker — exactly one brain; the page only renders the
++// cl_state stream this mode emits. See embodiment/closed_loop_core.js and
++// embodiment/state_contract.js (versioned, fail-closed contract).
++let CLCORE = null, CLWS = null;
++try {
++  const CONTRACT = importAs("embodiment/state_contract.js",
++                            () => { throw new Error("state_contract must not require()"); });
++  CLWS = importAs("embodiment/cl_ws.js",
++                  () => { throw new Error("cl_ws must not require()"); });
++  CLCORE = importAs("embodiment/closed_loop_core.js",
++                    (spec) => spec === "state_contract" ? CONTRACT
++                            : spec === "experiment_core" ? CORE
++                            : CTRL);
++  CLCORE.init((spec) => spec === "state_contract" ? CONTRACT
++              : spec === "experiment_core" ? CORE : CTRL);
++} catch (err) {
++  postMessage({ type: "error", expId: null, message: "closed-loop init failed: " + String(err) });
++}
++
++// ------------------------------------------------------- closed-loop mode --
++// Drive the CANONICAL connectome brain (the same factory e9BrainFactory uses
++// — never a page-side copy) through the REAL FlyBody/MuJoCo sidecar over
++// WebSocket and stream the actual loop state to the page (cl_state). Follows
++// the app_state discipline: monotone seq, real values only, no placeholders.
++function runClosedLoop(m) {
++  if (!m.circuit) { postMessage({ type: "error", expId: "cl", message: "circuit data missing" }); return; }
++  if (!CLCORE || !CLWS) { postMessage({ type: "error", expId: "cl", message: "closed-loop core failed to init" }); return; }
++  const steps = Math.max(1, Math.min(20000, m.steps || 240));
++  const seed = m.seed !== undefined ? m.seed : 11;
++  const episode = m.episode || 0;
++  const learning = m.frozen ? false : true;
++  const port = m.port || 8795;
++  let seq = 0;
++  // fail-closed envelope check: never post a malformed state to the page
++  const validEnvelope = (st) => st && typeof st === "object" &&
++    Number.isInteger(st.episode) && Number.isInteger(st.t) &&
++    typeof st.mode === "string" && st.contract_v === 1;
++  const sock = new CLWS.CLWebSocket("ws://127.0.0.1:" + port);
++  sock.connect().then(() => CLCORE.runEpisode({
++    send: (msg) => sock.send(msg),
++    circuit: m.circuit, seed, steps, learning, episode,
++    onTick: (rec) => {
++      const st = {   // thin snapshot of the ACTUAL loop state
++        kind: "closed_loop", contract_v: 1,
++        episode, t: rec.t, seed, learning, mode: rec.mode,
++        body_pos: rec.body_pos, body_quat: rec.body_quat,
++        action: rec.action, reward: rec.reward,
++        dopamine: rec.da_after, weight_drift: rec.weight_drift,
++        motor_rate: rec.motor_rate,
++        neural_active: rec.neural.reduce((a, c) => a + (c > 0 ? 1 : 0), 0),
++        neural_dim: rec.neural.length,
++      };
++      if (validEnvelope(st)) postMessage({ type: "cl_state", expId: "cl", seq: ++seq, state: st });
++    },
++  })).then(({ gates, mode }) => {
++    sock.close();
++    postMessage({ type: "cl_done", expId: "cl", gates, mode, steps });
++  }).catch((e) => {
++    sock.close();
++    postMessage({ type: "error", expId: "cl",
++      message: String(e && e.message || e) +
++        " (sidecar must run: python embodiment/sidecar.py --ws --port " + port + ")" });
++  });
++}
++
++// ------------------------------------------------ E9 fly-brain factory ----
++// E9's demon_neural/demon_frozen variants need a real neural controller. We
++// reuse the EXACT E4 connectome machinery (LIF over the FAFB circuit, CSR
++// spike propagation, eligibility traces, dopamine-gated applyLearning) via a
++// small adapter — no second brain implementation. The circuit JSON arrives
++// with the run message (window.__expCircuit on the page); if it is missing we
++// fall back to the classical-only variant set (core drops the neural rows).
++let E9_CIRCUIT = null;
++function e9BrainFactory(seedIdx) {
++  if (!E9_CIRCUIT) throw new Error("e9 brain requested but no circuit loaded");
++  // plasticity "full": every excitatory synapse is eligible; dopamine gates
++  // updates through receiveFeedback({reward}). resetForTrial() clears state,
++  // NOT weights — learned weights persist across trials inside the controller.
++  // One distinct brain draw per seed index so cross-seed CIs reflect
++  // seed-to-seed variance, not a shared trajectory.
++  return CTRL.connectomeController(E9_CIRCUIT, {
++    shuffle: false, rng: makeRng(9176 + (seedIdx || 0) * 37), seed: 1,
++    opticDrive: 0,              // no visual field in the pressure apparatus
++    motorDrive: 0.6,            // tonic motor-pool drive tuned so the pool can
++                                // cross threshold on strong sensory evidence
++    plasticity: "full",
++    // ---- E9 credit assignment upgrades (opt-in; default paths untouched) --
++    // Per-crossing eligibility windows: fast/mid/slow traces so dopamine that
++    // arrives seconds after a gate decision still lands on the synapses that
++    // caused it (the single 0.985 trace forgets a 3 s-old decision).
++    eligibility: [{ tau: 0.90, w: 0.45 }, { tau: 0.985, w: 0.35 }, { tau: 0.9995, w: 0.20 }],
++    // Trained policy-gradient readout on the motor population: the core
++    // samples P(open) from a REINFORCE-trained softmax over pool rates and
++    // routes each decision's credit window into it via pgReward.
++    policyGradient: true,
++    pgRng: makeRng(424243 + (seedIdx || 0) * 977),
++  });
++}
++function makeRng(seed) {        // local PRNG for the brain factory (mulberry32)
++  let a = seed >>> 0;
++  return function () {
++    a |= 0; a = (a + 0x6D2B79F5) | 0;
++    let t = Math.imul(a ^ (a >>> 15), 1 | a);
++    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
++    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
++  };
++}
++
++// Apparatus brains (E10/E11) use the SAME connectome controller and credit
++// upgrades as E9 — the only difference is what the actuators mean:
++//   E10: action 1 = RELEASE the trapdoor flap (sorting window open)
++//   E11: action 1 = DROP the pawl (engage the ratchet)
++function apparatusBrainFactory(expId, seedIdx) {
++  if (!E9_CIRCUIT) throw new Error(expId + " brain requested but no circuit loaded");
++  return CTRL.connectomeController(E9_CIRCUIT, {
++    shuffle: false, rng: makeRng(9176 + (seedIdx || 0) * 37), seed: 1,
++    opticDrive: 0,
++    motorDrive: 0.6,
++    plasticity: "full",
++    // same credit-assignment upgrades as e9BrainFactory (windows + PG readout),
++    // plus the apparatus-grade pairing/feature upgrades: pgBaseline applies the
++    // REINFORCE update at reward-delivery time (pairs credit with the decision
++    // that earned it — the cores deliver before re-latching), includes
++    // zero-reward windows as correct rejections, and centers reward with an
++    // EMA baseline; pgKc adds the mushroom-body sparse code (12-of-200 random
++    // expansion of the sensory channels) as readout features so visitor TYPE
++    // reaches the policy directly. Measured pre-KC: correctly-signed but tiny
++    // gradient (~0.03 P-movement per 24 episodes) — direction right, magnitude
++    // useless for CI-clean learning deltas at practical budgets.
++    eligibility: [{ tau: 0.90, w: 0.45 }, { tau: 0.985, w: 0.35 }, { tau: 0.9995, w: 0.20 }],
++    policyGradient: true,
++    pgBaseline: true,
++    pgKc: true,
++    pgRng: makeRng(424243 + (seedIdx || 0) * 977),
++  });
++}
++
++// ---------------------------------------------------------------- registry
++const EXPERIMENTS = {
++  e1: { label: "E1 · Classical Maxwell Demon",
++        needsCircuit: false,
++        controllers: () => ({ classical_demon: (rng, env, cfg) => CTRL.classicalDemon(rng, env, cfg) }),
++        seeds: 2, train: 60, test: 12, episode: 12 },
++  e2: { label: "E2 · Artificial Neural Demon",
++        needsCircuit: false,
++        controllers: () => ({ ann: (rng, env, cfg) => CTRL.annController(rng, env, cfg),
++                              random: (rng, env) => CTRL.randomController(rng, env) }),
++        seeds: 2, train: 60, test: 12, episode: 12 },
++  e3: { label: "E3 · Drosophila-Inspired Network",
++        needsCircuit: false,
++        controllers: () => ({ drosophila: (rng, env, cfg) => CTRL.drosophilaController(rng, env, cfg) }),
++        seeds: 2, train: 60, test: 12, episode: 12 },
++  e4: { label: "E4 · Connectome-Constrained (4A/4B/4C)",
++        needsCircuit: true,
++        controllers: () => ({
++          connectome_4A: (rng, env, cfg) => CTRL.connectomeController(cfg.circuit,
++            { shuffle: false, rng, seed: 1, opticDrive: 0.25, plasticity: "full" }),
++          connectome_4B: (rng, env, cfg) => CTRL.connectomeController(cfg.circuit,
++            { shuffle: false, rng, seed: 1, opticDrive: 0.25, plasticity: "restricted" }),
++          connectome_4C: (rng, env, cfg) => CTRL.connectomeController(cfg.circuit,
++            { shuffle: true, rng, seed: 7, opticDrive: 0.25, plasticity: "full" }),
++        }),
++        seeds: 1, train: 40, test: 10, episode: 12 },
++  e6: { label: "E6 · Jet-Closure Paradox (causal decomposition)",
++        needsCircuit: false,
++        controllers: () => ({
++          classical_demon: (rng, env, cfg) => CTRL.classicalDemon(rng, env, cfg),
++          random: (rng, env, cfg) => CTRL.randomController(rng, env, cfg),
++          never_gate: (rng, env, cfg) => CTRL.neverGateController(rng, env, cfg),
++        }),
++        seeds: 2, train: 60, test: 12, episode: 12 },
++  e7: { label: "E7 · Generalization Sweep (density × noise)",
++        needsCircuit: false,
++        controllers: () => ({
++          classical_demon: (rng, env, cfg) => CTRL.classicalDemon(rng, env, cfg),
++        }),
++        // three physics regimes per seed: sparse/clean, default, dense/noisy
++        physics: (seedIdx) => seedIdx === 1 ? { nParticles: 120, noise: 0.0 }
++                              : seedIdx === 2 ? { nParticles: 640, noise: 0.30 }
++                              : { nParticles: 320, noise: 0.12 },
++        seeds: 3, train: 50, test: 10, episode: 12 },
++  e8: { label: "E8 · Information-Limited Demons",
++        needsCircuit: false,
++        controllers: () => ({
++          demon_adaptive: (rng, env, cfg) => CTRL.classicalDemon(rng, env, cfg, { adaptive: true }),
++          demon_fixed: (rng, env, cfg) => CTRL.classicalDemon(rng, env, cfg, { adaptive: false }),
++          demon_mem4: (rng, env, cfg) => CTRL.classicalDemon(rng, env, cfg, { memSize: 4 }),
++        }),
++        seeds: 2, train: 60, test: 12, episode: 12 },
++  e9: { label: "E9 · Pressure Demon",
++        needsCircuit: false,
++        apparatus: "pressureDemonCore",          // CORE function name
++        apparatusEnv: "pressure",                // 3D environment id
++        controllers: () => ({}),
++        physics: () => ({ nParticles: 260, noise: 0 }),
++        // multi-seed by default: learning curves aggregate across seeds with
++        // 95% CIs (CORE.apparatusCurve); override via run opts.seeds
++        seeds: 3, train: 12, test: 12, episode: 20 },
++  e10: { label: "E10 · Smoluchowski Trapdoor",
++        needsCircuit: true,
++        apparatus: "smoluchowskiCore",
++        apparatusEnv: "trapdoor",
++        controllers: () => ({}),
++        physics: () => ({ nParticles: 220, noise: 0 }),
++        // train: 24 — event-locked decisions fire once per molecule visit (~3x
++        // sparser than the old 4 Hz blind clock), so 24 train episodes give
++        // the policy a comparable number of graded decisions per training run
++        seeds: 1, train: 24, test: 8, episode: 16 },
++  e11: { label: "E11 · Feynman Ratchet & Pawl",
++        needsCircuit: true,
++        apparatus: "feynmanRatchetCore",
++        apparatusEnv: "ratchet",
++        controllers: () => ({}),
++        physics: () => ({ nParticles: 0, noise: 0 }),
++        seeds: 1, train: 10, test: 10, episode: 12 },
++  e5: { label: "E5 · Full Comparator Study",
++        needsCircuit: true,
++        controllers: () => ({
++          classical_demon: (rng, env, cfg) => CTRL.classicalDemon(rng, env, cfg),
++          ann: (rng, env, cfg) => CTRL.annController(rng, env, cfg),
++          drosophila: (rng, env) => CTRL.drosophilaController(rng, env),
++          connectome: (rng, env, cfg) => CTRL.connectomeController(cfg.circuit,
++            { shuffle: false, rng, seed: 1, opticDrive: 0.25, plasticity: "full" }),
++          shuffled_connectome: (rng, env, cfg) => CTRL.connectomeController(cfg.circuit,
++            { shuffle: true, rng, seed: 7, opticDrive: 0.25, plasticity: "full" }),
++        }),
++        seeds: 1, train: 40, test: 10, episode: 12 },
++};
++
++// ------------------------------------------------------- message protocol
++self.onmessage = (ev) => {
++  const m = ev.data;
++  if (m.type === "run") {
++    E9_CIRCUIT = m.circuit || null;   // real connectome for the E9 fly brain
++    runExperiment(m.expId, m.circuit, m.opts || {});
++  }
++  else if (m.type === "run_custom") {
++    try { registerCustom(m); runExperiment("chat", m.circuit, m.opts || {}); }
++    catch (err) { postMessage({ type: "error", expId: "chat",
++                                message: "custom spec: " + String(err && err.message || err) }); }
++  }
++  else if (m.type === "run_cl") { try { runClosedLoop(m); }
++    catch (err) { postMessage({ type: "error", expId: "cl", message: String(err && err.message || err) }); } }
++  else if (m.type === "ping") postMessage({ type: "pong" });
++};
++
++// ------------------------------------------------- chat-designed experiments
++// The lab page's Chat card lets an LLM (GPT API / local Ollama / LM Studio)
++// design an experiment; the design arrives as `spec`, gets registered as the
++// pseudo-experiment "chat", and then runs through the exact same pipeline as
++// E1-E8 (same rows, curve, provenance and plots broadcasts).
++const CHAT_FACTORIES = {
++  classical_demon: (rng, env, cfg) => CTRL.classicalDemon(rng, env, cfg),
++  ann:             (rng, env, cfg) => CTRL.annController(rng, env, cfg),
++  drosophila:      (rng, env, cfg) => CTRL.drosophilaController(rng, env, cfg),
++  never_gate:      (rng, env, cfg) => CTRL.neverGateController(rng, env, cfg),
++  random:          (rng, env, cfg) => CTRL.randomController(rng, env, cfg),
++};
++const CHAT_ALIASES = {
++  classical_demon: "classical_demon", classical: "classical_demon",
++  demon: "classical_demon", classic: "classical_demon", physical: "classical_demon",
++  ann: "ann", mlp: "ann", neural: "ann", network: "ann",
++  drosophila: "drosophila", fly: "drosophila", fly_brain: "drosophila",
++  mb: "drosophila", mushroom: "drosophila", mushroom_body: "drosophila",
++  never_gate: "never_gate", nevergate: "never_gate", never: "never_gate",
++  random: "random", control: "random", baseline: "random",
++};
++function registerCustom(m) {
++  const s = m.spec || {};
++  if (!s || typeof s !== "object") throw new Error("spec missing");
++  const name = String(s.name || "Chat experiment").slice(0, 60);
++  const conds = Array.isArray(s.conditions) ? s.conditions : [];
++  const ids = [];
++  for (const c of conds) {
++    const k = CHAT_ALIASES[String(c).toLowerCase().trim()];
++    if (k && !ids.includes(k)) ids.push(k);
++  }
++  if (!ids.length) ids.push("classical_demon");
++  if (ids.length > 4) ids.length = 4;
++  const nP = Math.max(40, Math.min(640, Math.round(Number(s.nParticles) || 320)));
++  const nN = Math.max(0, Math.min(0.4, Number(s.noise) || 0.12));
++  const ep = Math.max(4, Math.min(12, Math.round(Number(s.episodeSeconds) || 12)));
++  const tr = Math.max(8, Math.min(60, Math.round(Number(s.trainTrials) || 40)));
++  const te = Math.max(4, Math.min(12, Math.round(Number(s.testTrials) || 8)));
++  const controllers = () => {
++    const out = {};
++    ids.forEach((k, i) => {
++      const key = k + "_" + (i + 1);
++      out[key] = (rng, env, cfg) => CHAT_FACTORIES[k](rng, env, cfg);
++    });
++    return out;
++  };
++  EXPERIMENTS.chat = {
++    label: "\uD83D\uDCAC " + name,
++    needsCircuit: false,
++    controllers,
++    physics: () => ({ nParticles: nP, noise: nN }),
++    seeds: 1, train: tr, test: te, episode: ep,
++    design: s,                    // echoed into provenance for the paper trail
++  };
++}
++
++function runExperiment(expId, circuit, opts) {
++  const spec = EXPERIMENTS[expId];
++  if (!spec) { postMessage({ type: "error", expId, message: "unknown experiment" }); return; }
++  if (spec.needsCircuit && !circuit) {
++    postMessage({ type: "error", expId, message: "circuit data missing" }); return;
++  }
++  const nSeeds  = opts.seeds  || spec.seeds;
++  const train   = opts.train  || spec.train;
++  const test    = opts.test   || spec.test;
++  const episode = opts.episode || spec.episode;
++  const t0 = Date.now();
++
++  // per-condition accumulation of full trial rows (streamed via onTrialData)
++  const trialRows = {};     // key -> [row, ...]
++  let lastEmit = 0;
++  let curveBuilder = buildCurve;   // apparatus branch swaps in the generic one
++
++  // ---- apparatus experiments (E9/E10/E11): self-contained cores that stream
++  // live 3D state + one metrics row per episode. They bypass runBenchmark
++  // (no _raw seeds / per-neuron vectors) and reuse everything else: rows ->
++  // curve -> sparklines, provenance, plots broadcast.
++  if (spec.apparatus) {
++    const coreFn = CORE[spec.apparatus];
++    const nSeeds = Math.max(1, opts.seeds || spec.seeds || 1);
++    const nTrials = train + test;
++    curveBuilder = () => buildApparatusCurve(4);
++    try {
++      let lastAppPost = 0, lastAppSeq = 0;   // (patch 17) app_state replay-stream gate
++      for (let s = 0; s < nSeeds; s++) {
++        const seed = (opts.seed !== undefined ? opts.seed : 1) + s * 101;
++        coreFn({
++          seed,
++          seedTag: s + 1,           // rows carry which batch seed produced them
++          trials: nTrials,
++          trainTrials: train,
++          episodeSeconds: episode,
++          nParticles: (spec.physics && spec.physics(0, 1) || {}).nParticles || 260,
++          // fly-brain conditions are added only when a real circuit arrived;
++          // one distinct brain draw per seed (cross-seed CI over brains)
++          brainFactory: (expId === "e9" && E9_CIRCUIT) ? (sd) => e9BrainFactory(sd)
++            : (expId === "e10" && E9_CIRCUIT) ? (sd) => apparatusBrainFactory("e10", sd)
++            : (expId === "e11" && E9_CIRCUIT) ? (sd) => apparatusBrainFactory("e11", sd)
++            : undefined,
++          onTrialData: (cond, phase, tr) => {
++            pushRow(cond, phase, tr);
++            emit(expId, phase, (tr.trial || 0) + 1, nTrials * nSeeds, s + 1, false);
++          },
++          // 3D replay stream for the first seed; later seeds stream every
++          // other episode so the stage stays live without tripling batch time.
++          // (patch 17) full-speed streaming flooded the main thread with ~460
++          // structured-clone app_state messages/sec and froze the fly (8fps).
++          // Time-gate to ~30Hz - still above the 24fps replay pump on the page.
++          onState: (st) => {
++            if (s === 0 || ((st.trial | 0) & 1) === 0) {
++              const now = Date.now();
++              if (now - lastAppPost >= 33) {
++                lastAppPost = now;
++                st.__seq = (++lastAppSeq);
++                postMessage({ type: "app_state", expId, state: st });
++              }
++            }
++          },
++        });
++      }
++      const curve = buildApparatusCurve(4);
++      // FIX (ReferenceError: res is not defined): the apparatus branch never
++      // had a `res` — cores stream rows via onTrialData instead of returning
++      // a result object. Build the per-condition summary from those rows;
++      // apparatus panels derive their statistics from the rows themselves.
++      // Brain outcome reduction (same contract as the runBenchmark branch):
++      // keep per-trial fireVec only for the late-train / late-test / early-train
++      // windows of the FIRST seed, emit each as a mean b64 vector on one row
++      // per phase (fireVecMean / fireVecEarly), and drop the heavy per-trial
++      // vectors from all other rows. E10/E11 have no brain — rows without
++      // fireVec pass through untouched.
++      const meanVec = (vecs, n) => {
++        if (!vecs.length) return null;
++        const acc = new Float64Array(n);
++        for (const v of vecs) {
++          const bin = atob(v.vec); const bytes = new Uint8Array(bin.length);
++          for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
++          for (let i = 0; i < n; i++) acc[i] += bytes[i];
++        }
++        const out = new Uint8Array(n);
++        for (let i = 0; i < n; i++) out[i] = Math.round(acc[i] / vecs.length);
++        let b64 = "";
++        const CH = 3 * 4096;   // multiple of 3 so concatenated base64 stays valid
++        for (let o = 0; o < n; o += CH)
++          b64 += btoa(String.fromCharCode.apply(null, out.subarray(o, Math.min(n, o + CH))));
++        return b64;
++      };
++      const conditions = {};
++      const flatRows = [];
++      const firstSeed = {};
++      for (const r of Object.values(trialRows).flat())
++        if (r.fireVec && firstSeed[r.condition] === undefined) firstSeed[r.condition] = r.seed;
++      for (const [key, rows] of Object.entries(trialRows)) {
++        conditions[key] = { episodes: rows.length };
++        const f0 = firstSeed[key];
++        const lateTrain = rows.filter(r => r.fireVec && r.seed === f0 && r.phase === "train").slice(-8);
++        const earlyTrain = rows.filter(r => r.fireVec && r.seed === f0 && r.phase === "train").slice(0, 8);
++        const lateTest = rows.filter(r => r.fireVec && r.seed === f0 && r.phase === "test").slice(-4);
++        let nVec = 0, layout = null;
++        for (const fv of [...lateTrain, ...lateTest, ...earlyTrain])
++          if (fv && fv.fireVec && fv.fireVec.n) { nVec = fv.fireVec.n; layout = fv.fireVec.layout || null; break; }
++        const emitted = { train: false, test: false, early: false };
++        for (const r of rows) {
++          const row = Object.assign({}, r);
++          const fv = row.fireVec; delete row.fireVec;
++          if (nVec && r.seed === f0 && fv) {
++            const ph = row.phase === "test" ? "test" : "train";
++            if (lateTrain.includes(r) && !emitted.train) {
++              row.fireVecMean = { phase: "train", vec: meanVec(lateTrain.map(x => x.fireVec), nVec), n: nVec, layout, count: lateTrain.length };
++              emitted.train = true;
++            } else if (lateTest.includes(r) && !emitted.test) {
++              row.fireVecMean = { phase: "test", vec: meanVec(lateTest.map(x => x.fireVec), nVec), n: nVec, layout, count: lateTest.length };
++              emitted.test = true;
++            }
++            if (earlyTrain.includes(r) && !emitted.early) {
++              row.fireVecEarly = { phase: "train", vec: meanVec(earlyTrain.map(x => x.fireVec), nVec), n: nVec, layout, count: earlyTrain.length };
++              emitted.early = true;
++            }
++          }
++          flatRows.push(row);
++        }
++      }
++      const prov = {
++        experiment: expId, label: spec.label,
++        seeds: nSeeds, seedBase: opts.seed !== undefined ? opts.seed : 1,
++        trainTrials: train, testTrials: test,
++        episodeSeconds: episode,
++        nParticles: (spec.physics && (spec.physics(0, 1) || {}).nParticles) || 260,
++        noise: 0, dt: 1 / 60, tKelvin: 300, simToJoule: 1e-21,
++        apparatus: spec.apparatusEnv,
++        software: "Fly-Demon Lab v2 experiment list",
++        startedISO: new Date(t0).toISOString(),
++        elapsedSeconds: (Date.now() - t0) / 1000,
++      };
++      postMessage({ type: "done", expId, summary: { conditions, curve },
++                    rows: flatRows, provenance: prov, apparatus: spec.apparatusEnv });
++    } catch (err) {
++      postMessage({ type: "error", expId, message: String(err && err.stack || err) });
++    }
++    return;
++  }
++
++  function pushRow(key, phase, tr) {
++    const row = Object.assign({ condition: key, phase }, tr);
++    (trialRows[key] = trialRows[key] || []).push(row);
++  }
++
++  // Apparatus curve: delegate to the pure CORE.apparatusCurve aggregator —
++  // cross-seed block means with 95% CIs, train/test block continuity, and
++  // agree/energyJ aliases (rows already carry their seed tag).
++  function buildApparatusCurve(B) {
++    let all = [];
++    for (const rows of Object.values(trialRows)) all = all.concat(rows);
++    return CORE.apparatusCurve(all, B);
++  }
++
++  function buildCurve() {
++    const curve = [], live = {};
++    for (const [key, rows] of Object.entries(trialRows)) {
++      const B = 10;
++      const bCount = Math.max(1, Math.floor(rows.length / B));
++      for (let b = 0; b < bCount; b++) {
++        const seg = rows.slice(b * B, (b + 1) * B);
++        if (!seg.length) continue;
++        const avg = (f) => {
++          const vals = seg.map(x => x[f]).filter(v => v !== null && v !== undefined && Number.isFinite(v));
++          return vals.length ? vals.reduce((a, c) => a + c, 0) / vals.length : null;
++        };
++        const eJ = avg("energyJ");   // E1-E8 extractable work; E10/E11 stream
++        const energyJ = eJ !== null ? eJ : (avg("workJ") !== null ? avg("workJ") : avg("netWorkJ"));
++        curve.push({ cond: key, block: b, phase: seg[0].phase,
++                     agree: avg("demonAgree"), goodBadRatio: avg("goodBadRatio"),
++                     sortEntropy: avg("sortEntropy"), miNeural: avg("miNeural"),
++                     energyJ, dT: avg("dTfinal"),
++                     openFraction: avg("openFraction") });
++      }
++      // live headline: mean agreement over the last 10 rows
++      const tail = rows.slice(-10).map(x => x.demonAgree || 0);
++      live[key] = tail.length ? tail.reduce((a, c) => a + c, 0) / tail.length : 0;
++    }
++    return { curve, live };
++  }
++
++  function emit(expId_, phase, trial, nTrials, seedIdx, force) {
++    const now = Date.now();
++    if (!force && now - lastEmit < 400) return;   // throttle UI chatter
++    lastEmit = now;
++    const built = curveBuilder();
++    const curve = built.curve || built, live = built.live || {};
++    postMessage({ type: "progress", expId, phase, trial, nTrials, seedIdx,
++                  nSeeds, curve, live });
++  }
++
++  try {
++    const result = CORE.runBenchmark({
++      seed: opts.seed !== undefined ? opts.seed : 1,
++      nSeeds,
++      trialsTrain: train,
++      trialsTest: test,
++      episodeSeconds: episode,
++      nParticles: opts.nParticles || 320,
++      noise: 0.12,
++      doorHeight: 64,
++      _physics: spec.physics || null,   // per-seed env overrides (E7)
++      circuit,                                  // E4/E5 read it via cfg
++      controllers: spec.controllers(),
++      onTrial: (cond, phase, t, n, si, sn) => {
++        emit(expId, phase, t, n, si, false);
++      },
++      onTrialData: (cond, phase, tr) => { pushRow(cond, phase, tr); },
++    });
++
++    // ---- per-condition summary (without raw rows) + flat rows -----------
++    // fireVec reduction: decode the last-8-train / last-4-test per-neuron
++    // vectors, average them, and attach as fireVecMean on one row per phase
++    // (per-trial vectors are dropped to keep the message small).
++    const b64toBytes = (b64) => Uint8Array.from(atob(b64), c => c.charCodeAt(0));
++    const meanVec = (vecs, n) => {
++      if (!vecs.length) return null;
++      const acc = new Float64Array(n);
++      for (const v of vecs) {
++        // accept either a b64 string or a fireVec object {vec,...}
++        const b64 = typeof v === "string" ? v : v.vec;
++        const b = b64toBytes(b64); for (let i = 0; i < n; i++) acc[i] += b[i];
++      }
++      const out = new Uint8Array(n);
++      for (let i = 0; i < n; i++) out[i] = Math.round(acc[i] / vecs.length);
++      let b64 = "";
++      const CH = 3 * 4096;   // multiple of 3 so concatenated base64 stays valid
++      for (let o = 0; o < n; o += CH)
++        b64 += btoa(String.fromCharCode.apply(null, out.subarray(o, Math.min(n, o + CH))));
++      return b64;
++    };
++    const conditions = {}, rows = [];
++    for (const [key, cond] of Object.entries(result.conditions)) {
++      const { _raw, ...rest } = cond;
++      conditions[key] = rest;
++      const run = _raw[0];   // seed 0 carries the anatomy vectors
++      if (run) {
++        const trs = run.trials;
++        const trainTr = trs.filter(t => t.phase !== "test");
++        const testTr = trs.filter(t => t.phase === "test");
++        const pick = (arr, k) => arr.slice(-k).filter(t => t.fireVec);
++        // early-train vectors: first trials of the train phase (for the
++        // real-anatomy learning-delta maps: late − early at real positions)
++        const pickEarly = (arr, k) => arr.slice(0, k).filter(t => t.fireVec);
++        const fvs = { train: pick(trainTr, 8), test: pick(testTr, 4),
++                      early: pickEarly(trainTr, 8) };
++        let emitted = { train: false, test: false, early: false };
++        let meta = null;
++        // FIX: fv here is the TRIAL row — the vector lives at fv.fireVec.
++        // The old code read fv.n, so meta stayed null and fireVecMean was
++        // never emitted (anatomy cards silently fell back to region means).
++        for (const tr of [...fvs.train, ...fvs.test, ...fvs.early]) {
++          if (tr && tr.fireVec && tr.fireVec.n) { meta = { n: tr.fireVec.n, layout: tr.fireVec.layout || null }; break; }
++        }
++        for (const tr of trs) {
++          const row = Object.assign({ condition: key }, tr);
++          delete row.fireVec;
++          const ph = tr.phase === "test" ? "test" : "train";
++          if (!emitted[ph] && meta) {
++            const vecs = fvs[ph];
++            if (vecs.length) {
++              row.fireVecMean = { phase: ph, vec: meanVec(vecs.map(t2 => t2.fireVec), meta.n),
++                                  n: meta.n, layout: meta.layout,
++                                  count: vecs.length };
++              emitted[ph] = true;
++            }
++          }
++          // one row carries the early-train mean alongside the late-train one
++          if (!emitted.early && meta && fvs.early.length && !row.fireVecMean) {
++            row.fireVecEarly = { phase: "train", vec: meanVec(fvs.early.map(t2 => t2.fireVec), meta.n),
++                                 n: meta.n, layout: meta.layout, count: fvs.early.length };
++            emitted.early = true;
++          } else if (!emitted.early && meta && fvs.early.length) {
++            row.fireVecEarly = { phase: "train", vec: meanVec(fvs.early.map(t2 => t2.fireVec), meta.n),
++                                 n: meta.n, layout: meta.layout, count: fvs.early.length };
++            emitted.early = true;
++          }
++          rows.push(row);
++        }
++      } else {
++        for (const tr of run ? run.trials : []) rows.push(Object.assign({ condition: key }, tr));
++      }
++    }
++    const { curve } = buildCurve();
++    const prov = {
++      experiment: expId, label: spec.label,
++      seeds: nSeeds, trainTrials: train, testTrials: test,
++      episodeSeconds: episode, doorHeight: 64,
++      nParticles: (spec.physics && (spec.physics(0, nSeeds) || {}).nParticles) || 320,
++      noise: (spec.physics && (spec.physics(0, nSeeds) || {}).noise) || 0.12,
++      dt: 1 / 60, tKelvin: 300, simToJoule: 1e-21,
++      software: "Fly-Demon Lab v2 experiment list",
++      chatDesign: spec.design || null,
++      startedISO: new Date(t0).toISOString(),
++      elapsedSeconds: (Date.now() - t0) / 1000,
++    };
++    postMessage({ type: "done", expId, summary: { conditions, curve }, rows, provenance: prov });
++  } catch (err) {
++    postMessage({ type: "error", expId, message: String(err && err.stack || err) });
++  }
++}

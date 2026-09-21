@@ -80,7 +80,17 @@ mkvenv() { # mkvenv <dir> <requirements>
 
 # ------------------------------------------------- 3. manifest verification
 log "verifying manifest integrity (canonical tool) ..."
-python tools/verify_manifest.py > /dev/null || FAIL "manifest verification failed — payload hashes do not match"
+if ! python tools/verify_manifest.py > /dev/null 2>&1; then
+  # Self-heal for clones made before the byte-faithful attributes policy
+  # (*. -text) took effect: line endings may have been smudged at checkout.
+  # Rewrite the working tree from the index ONLY when there are no local
+  # modifications — this never destroys user changes.
+  if [ -z "$(git status --porcelain)" ]; then
+    log "re-materializing working tree byte-faithfully (checkout-index) ..."
+    git checkout-index -f -a
+  fi
+  python tools/verify_manifest.py > /dev/null || FAIL "manifest verification failed — payload hashes do not match"
+fi
 
 # ------------------------------------------------- 4. minimal smoke test
 log "running minimal smoke test ..."
