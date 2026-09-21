@@ -36,6 +36,8 @@ and fails closed on any substitution. No scientific semantics changed.
 | `19a05bb8` | Pinned `requirements-flybody.txt` for the dedicated P1 venv (F2d gap) |
 | `c7e330f5` | Verify mode: `DEPLOY_EXPECTED_COMMIT` gate + manifest-stamp-vs-HEAD (content-tree) check |
 | `0aa20332` | Final manifest regeneration at the reference tree (zero stale) |
+| `4c9767ac` | `PHASE_02_REPRODUCIBILITY.md` (this document) |
+| *(tagged)* | Final manifest regeneration at the tag (pristine worktree, zero stale) — tag target below |
 
 ## 4. Deployment runner (FACT)
 
@@ -164,11 +166,15 @@ protocol bytes: unchanged (MEASURED bit-exact).
 
 ## 15. Final reference
 
-* Branch `deployment/phase-02`; content commit `c7e330f5…`; manifest commit
-  `0aa20332…` (reference tree, zero stale).
-* Tag: **`phase-02-candidate`** — created at the final verified commit
-  immediately after this document's manifest regeneration (see `git tag` for
-  the exact SHA; the tag is the authoritative Phase 02 reference).
+* Tag: **`phase-02-candidate`** → `6af54d2aed2fc369420fa0a8624b2fa17a21aa93`
+  (annotated; target of the final zero-stale manifest regeneration in the
+  pristine freeze worktree). Branch `deployment/phase-02` points at the tag
+  target.
+* Final measured state at the tag: manifest 105 entries, **0 stale**, 4
+  documented-missing (raw MCNS + 3 machine-local provisions), 0
+  null-by-design at generation, docx excluded; acceptance **12/12 PASS**,
+  protocol PASS, failure injection **12/12 DETECTED** (exit 0 = all
+detected).
 
 ## 16. Verdict
 
