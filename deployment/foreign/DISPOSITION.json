@@ -1,0 +1,40 @@
+{
+  "artifact": "phase02_foreign_worktree_edit_disposition",
+  "recorded_utc": "2026-09-21T20:10:00Z",
+  "updated_utc": "2026-09-21T20:22:00Z",
+  "context": "During Phase 02 (branch deployment/phase-02, HEAD f1d8c7d2 = phase-01-baseline), manifest-tracked files were found modified in the working tree by an external process/user, plus one untracked diagnostic. The edits were NOT made by the Phase 02 agent.",
+  "timeline": [
+    {
+      "utc": "2026-09-21T19:45Z",
+      "observed": "controllers.js (+44/-6 pgBaseline work), experiment_worker.js (+12 pgBaseline opts + E10 train 24), e10_e11_batch_validate.js (+13), untracked _diag_e10batch.js",
+      "action": "all preserved byte-exact as a patch + diagnostic copy; three tracked files restored to HEAD; patch round-trip verified on tag f1d8c7d2"
+    },
+    {
+      "utc": "2026-09-21T20:15Z",
+      "observed": "controllers.js modified AGAIN, extended to +118/-18 (the E10 workstream is actively evolving). experiment_worker.js and e10_e11_batch_validate.js remained at HEAD (not re-applied).",
+      "action": "left in place untouched; Phase 02 commits are restricted to explicit Phase 02 paths so the foreign work cannot enter the freeze silently"
+    }
+  ],
+  "classification": "E10 policy-gradient experimentation (per-decision REINFORCE consumption with moving baseline, opts.pgBaseline=true) + E10 batch protocol change (train 8->24) + diagnostic probe. Legacy behavior preserved unless pgBaseline is set (E10 factory only). The 20:15Z state also touches shared controller internals — flagging for owner review before any freeze that would include it.",
+  "preserved_artifacts": [
+    {
+      "path": "deployment/foreign/worktree_foreign_e10_pg_baseline_20260921.patch",
+      "sha256": "c0caec8b5ce75152ea30a789b0d1dd53d20fbc9ac943f5d0b76c9fd50c2b0a02",
+      "round_trip_proof": "git worktree at f1d8c7d2 + 'git apply --check' succeeded; reproduces the 19:45Z worktree state (3 files, +60/-9)",
+      "note": "preserves the FIRST observed foreign state; the later +118/-18 extension supersedes it and is NOT covered by this patch"
+    },
+    {
+      "path": "deployment/foreign/_diag_e10batch.js.preserved",
+      "sha256": "4b486ad51fb52a36f0aa7f30af51f90f29991b07ec8576707ba5144671f62a35"
+    }
+  ],
+  "current_worktree_state_at_update": {
+    "controllers.js": "MODIFIED vs HEAD (+118/-18, foreign, evolving — excluded from Phase 02 commits, decision requested from user)",
+    "experiment_worker.js": "restored to HEAD",
+    "e10_e11_batch_validate.js": "restored to HEAD",
+    "_diag_e10batch.js": "removed from root (copy preserved)"
+  },
+  "nothing_lost": true,
+  "nothing_mixed_into_phase02_commits": true,
+  "note": "These changes belong to the E10 experimental track and must be re-introduced deliberately by their owner in a dedicated commit. The preserved patch applies cleanly on phase-01-baseline for that purpose. The LATER, larger controllers.js state exists only in the live worktree and was never captured — the owner may re-diff it at any time."
+}

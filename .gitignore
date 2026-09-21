@@ -32,7 +32,15 @@ s41586-024-07939-3.pdf
 embodiment/logs/
 embodiment/__pycache__/
 data/annotations/*.tsv
+# Phase 02 .docx disposition: the unattributed manuscript edit is preserved as
+# an untracked, hash-named artifact (see PHASE_02_REPRODUCIBILITY.md §docx);
+# it must never enter the deployment/runtime manifest.
+manuscripts/
 # Timestamped benchmark/diagnostic outputs (regenerable; repo tracks only _-prefixed fixtures)
 research_data/summary_20*.json
 research_data/trials_20*.jsonl
 research_data/ab_optic_input_20*.json
+
+# Phase 02: runner scratch runs (regenerable; final acceptance evidence is
+# deliberately archived under baselines/ at freeze time)
+deployment/runs/

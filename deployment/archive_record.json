@@ -1,0 +1,37 @@
+{
+  "artifact": "phase01_offline_archive",
+  "created_utc": "2026-09-21T19:33:00Z",
+  "source_repo_branch": "deployment/phase-02 (branched from phase-01-baseline)",
+  "source_commit": "f1d8c7d2397961d420edb26d4bf5c6222485b802",
+  "tag": "phase-01-baseline",
+  "tag_target": "f1d8c7d2397961d420edb26d4bf5c6222485b802",
+  "archive_directory": "../Fly-phase01-archive (outside the deployment repository)",
+  "files": [
+    {
+      "name": "phase01-baseline.bundle",
+      "sha256": "8ae7ee74adc30f9f14e09051c1710cc2da4e094c2fe78302635f71c5c21b6a61",
+      "bytes": 157618687,
+      "contents": "complete git history + annotated tag phase-01-baseline"
+    },
+    {
+      "name": "phase01-baseline-tree.tar.gz",
+      "sha256": "db62dc83c5702d236aa9ac1b92e4acb69699f79d7ed44487b9ff21acb6f3fe09",
+      "bytes": 155812035,
+      "contents": "working tree of the tagged commit (git archive)"
+    }
+  ],
+  "verification": {
+    "method": "fresh 'git clone' from the bundle into a separate directory, checkout of the tag",
+    "cloned_head": "f1d8c7d2397961d420edb26d4bf5c6222485b802",
+    "cloned_tag_exact_match": true,
+    "payload_hash_check": {
+      "data/circuits/fafb_circuit.js": { "clone_sha256_prefix": "42f5a80fda18e413", "matches_manifest_record": true },
+      "data/circuits/mcns_circuit.js": { "clone_sha256_prefix": "3d3e8fa094edb9b6", "matches_manifest_record": true }
+    },
+    "result": "VERIFIED — archive is self-contained and restorable on another machine"
+  },
+  "notes": [
+    "The Phase 01 tag was not modified and no history was rewritten.",
+    "baselines/** and MANIFEST.json are contained in both the bundle and the tarball."
+  ]
+}

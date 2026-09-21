@@ -1,0 +1,35 @@
+"use strict";
+/** deployment/lib/mode_replay.js — canonical seed-11 replay vs frozen Phase 01 hash. */
+const fs = require("fs");
+const path = require("path");
+const util = require("./util");
+
+const FROZEN_SHA = "05c47753fe56af3de12d5fa3b209e6c3ef20f88a74952154977b1c568bac204b";
+
+async function modeReplay(jsonOut) {
+  const problems = [];
+  const py = util.needPython(jsonOut, "PYTHON_EMBODIMENT");
+  if (!py) return ["PYTHON_EMBODIMENT gate failed"];
+
+  const log = path.join(jsonOut.dir, "replay.log");
+  const script = path.join(util.ROOT, "deployment", "replay_canonical.js");
+
+  const r = util.runSuite([process.execPath, script], log, {
+    env: { PYTHON_EMBODIMENT: py },
+    timeout: 900_000,
+  });
+  const text = fs.readFileSync(log, "utf8");
+  const m = text.match(/TRAJECTORY_SHA256=([0-9a-f]{64})/);
+  const got = m ? m[1] : null;
+  const records = (() => { try { return parseInt((text.match(/RECORDS=(\d+)/) || [])[1], 10) || null; } catch { return null; } })();
+
+  const ok = r.status === 0 && got === FROZEN_SHA && records === 240;
+  jsonOut.suites.push(util.suiteResult("canonical_replay", [process.execPath, "deployment/replay_canonical.js"], r, {
+    logPath: log, pass: ok,
+    checks: { expected: FROZEN_SHA, observed: got, records, match: got === FROZEN_SHA },
+  }));
+  if (!ok) problems.push("canonical_replay_mismatch");
+  return problems;
+}
+
+module.exports = modeReplay;
