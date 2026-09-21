@@ -34,18 +34,24 @@ command -v node >/dev/null 2>&1 || FAIL "node not found on PATH"
 NODE_MAJOR="$(node -p 'process.versions.node.split(".")[0]')"
 [ "$NODE_MAJOR" -ge 18 ] || FAIL "node >= 18 required, found $(node --version)"
 
-PY=""
+# Resolve a Python 3.11 interpreter EXE (venv tracks are pinned to 3.11).
+# Order: python3/python on PATH -> Windows py launcher -> fail.
+PYEXE=""
 for cand in python3 python; do
   if command -v "$cand" >/dev/null 2>&1; then
     V="$("$cand" -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
-    if [ "$V" = "3.11" ]; then PY="$cand"; break; fi
+    if [ "$V" = "3.11" ]; then PYEXE="$("$cand" -c 'import sys; print(sys.executable)')"; break; fi
   fi
 done
-[ -n "$PY" ] || FAIL "python 3.11.x not found on PATH (embodiment/flyvis tracks are pinned to 3.11)"
+if [ -z "$PYEXE" ] && command -v py >/dev/null 2>&1; then
+  V="$(py -3.11 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")' 2>/dev/null || true)"
+  [ "$V" = "3.11" ] && PYEXE="$(py -3.11 -c 'import sys; print(sys.executable)')"
+fi
+[ -n "$PYEXE" ] || FAIL "python 3.11.x not found (PATH or py launcher) — embodiment/flyvis tracks are pinned to 3.11"
 
 log "git       : $(git --version)"
 log "node      : $(node --version)"
-log "python3.11: $("$PY" --version)"
+log "python3.11: $("$PYEXE" --version) via $PYEXE"
 
 # ---------------------------------------------------------------- 2. envs
 WANT_EMBODIMENT=1; WANT_FLYVIS=1
@@ -60,7 +66,7 @@ mkvenv() { # mkvenv <dir> <requirements>
   local dir="$1" req="$2"
   if [ ! -x "$dir/Scripts/python.exe" ] && [ ! -x "$dir/bin/python" ]; then
     log "creating $dir from $req ..."
-    "$PY" -m venv "$dir"
+    "$PYEXE" -m venv "$dir"
   fi
   local PIP
   if [ -x "$dir/Scripts/python.exe" ]; then PIP="$dir/Scripts/python.exe"; else PIP="$dir/bin/python"; fi
