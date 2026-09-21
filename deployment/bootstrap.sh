@@ -71,7 +71,7 @@ mkvenv() { # mkvenv <dir> <requirements>
   local PIP
   if [ -x "$dir/Scripts/python.exe" ]; then PIP="$dir/Scripts/python.exe"; else PIP="$dir/bin/python"; fi
   "$PIP" -m pip install --upgrade pip >/dev/null
-  "$PIP" install -r "$req"
+  "$PIP" -m pip install -r "$req"
   log "installed $req -> $dir"
 }
 
