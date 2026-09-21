@@ -17,12 +17,13 @@
 # the only mode where server-paced auto-stepping exists).
 import argparse
 import json
+import math
 import os
 import sys
 import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from motor_decoder import MotorDecoder, ACTION_DIM  # noqa: E402
+from motor_decoder import MotorDecoder, ACTION_DIM, MOTOR_POOL_SIZE, NEURAL_MAX_DIM  # noqa: E402
 
 PROTOCOL_VERSION = 1
 DT_PHYS = 1.0 / 60.0
@@ -244,7 +245,8 @@ class Sidecar:
         self.episode = -1
         self.seed = 0
         self.t_phys = 0
-        self.last_neural = None
+        self._last_neural_len = None   # first step command must re-declare
+                                       # its neural vector dim (C1 contract)
         self.decoder = MotorDecoder(seed=0)
         self.body = None
         self.stats = {"dropped_in": 0, "auto_steps": 0, "overloaded": False,
@@ -275,7 +277,15 @@ class Sidecar:
                 "dependency_note": self.dep_note, "pace_note": self.pace_note}
 
     def reset(self, msg):
-        seed = int(msg.get("seed", 0)) or int(time.time_ns() % 2**31)
+        # Closed-loop discipline (state_contract.js): a declared seed is used
+        # exactly as sent (no wall-clock default), so an episode is fully
+        # determined by its command stream. A reset without a seed is a
+        # protocol violation - interactive sessions always send one.
+        if "seed" not in msg:
+            return {"type": "error", "code": "contract_violation",
+                    "message": "reset requires an explicit seed "
+                               "(episodes must be replayable)"}
+        seed = int(msg["seed"])
         self.seed = seed
         self.episode = int(msg.get("episode", self.episode + 1))
         if self.logger:
@@ -285,11 +295,12 @@ class Sidecar:
             % (time.strftime("%Y%m%d_%H%M%S"), self.episode))).open()
         self.body.reset(seed)
         self.decoder = MotorDecoder(seed=seed)
+        self._last_neural_len = None
         self.t_phys = 0
-        self.last_neural = None
         self.stats = {"dropped_in": 0, "auto_steps": 0, "overloaded": False,
                       "rtt_p50": None, "rtt_p95": None}
-        return {"type": "reset_ack", "episode": self.episode, "seed_used": seed,
+        return {"type": "reset_ack", "v": PROTOCOL_VERSION, "episode": self.episode,
+                "seed_used": seed,
                 "mode": self.body.mode,
                 "obs0": self.body.observation(), "body0": self.body._state()}
 
@@ -301,10 +312,38 @@ class Sidecar:
             self.stats["dropped_in"] += 1
         self._last_seq = seq
 
+        # ---- fail-closed contract validation (embodiment/state_contract.js) --
+        if msg.get("v", PROTOCOL_VERSION) != PROTOCOL_VERSION:
+            return {"type": "error", "code": "contract_violation",
+                    "message": "contract version %r != supported %d"
+                               % (msg.get("v"), PROTOCOL_VERSION)}
+        if int(msg.get("episode", -1)) != self.episode:
+            return {"type": "error", "code": "stale_episode",
+                    "message": "step.episode %r != current %d"
+                               % (msg.get("episode"), self.episode)}
+        t_n = int(msg.get("t_neural", self.t_phys))
+        if t_n < self.t_phys:
+            return {"type": "error", "code": "stale_time",
+                    "message": "step.t_neural %d < already-processed %d" % (t_n, self.t_phys)}
+        # C1: the canonical neural vector is REQUIRED. The legacy
+        # last-value-hold fallback was a synthetic-substitution path and is
+        # REMOVED from the production loop; smoke tests always send neural.
         neural = msg.get("neural")
-        if not neural:
-            neural = self.last_neural if self.last_neural is not None else [0.0]
-        self.last_neural = neural
+        if not isinstance(neural, list) or not neural:
+            return {"type": "error", "code": "missing_neural",
+                    "message": "step.neural required (no synthetic fallback)"}
+        if len(neural) > NEURAL_MAX_DIM:
+            return {"type": "error", "code": "contract_violation",
+                    "message": "step.neural length %d > NEURAL_MAX_DIM %d"
+                               % (len(neural), NEURAL_MAX_DIM)}
+        if any(not (isinstance(x, (int, float)) and math.isfinite(x)) for x in neural):
+            return {"type": "error", "code": "contract_violation",
+                    "message": "step.neural contains a non-finite value"}
+        if self._last_neural_len is not None and len(neural) != self._last_neural_len:
+            return {"type": "error", "code": "neural_dim_changed",
+                    "message": "step.neural length %d != fixed dim %d"
+                               % (len(neural), self._last_neural_len)}
+        self._last_neural_len = len(neural)
         learn = float(msg.get("learn", 0.0))
         src = "auto" if msg.get("src") == "auto" else "client"
         if src == "auto":
@@ -326,6 +365,7 @@ class Sidecar:
 
         rec = {  # full causal chain — the evidence artifact
             "t": self.t_phys, "episode": self.episode, "seed": self.seed, "src": src,
+            "neural_len": len(neural), "contract_v": PROTOCOL_VERSION,
             "motor": MotorDecoder.summarize_motor(neural),
             "decoder": self.decoder.describe(),
             "action": [round(float(x), 4) for x in a59],
@@ -339,7 +379,8 @@ class Sidecar:
         }
         if self.logger:
             self.logger.step(rec)
-        return {"type": "step_result", "t_phys": self.t_phys, "mode": self.body.mode,
+        return {"type": "step_result", "v": PROTOCOL_VERSION, "episode": self.episode,
+                "t_phys": self.t_phys, "mode": self.body.mode,
                 "body": body, "action": rec["action"], "joints": body.get("joints"),
                 "reward": rec["env"]["reward"], "task": task,
                 "obs_next": rec["sensory"]["obs_next"],

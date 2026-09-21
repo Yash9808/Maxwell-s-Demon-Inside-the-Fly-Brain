@@ -52,6 +52,74 @@ try {
   postMessage({ type: "error", expId: null, message: "worker init failed: " + String(err) });
 }
 
+// ---- closed-loop core (browser↔body gate) --------------------------------
+// One loop implementation, shared verbatim with the CLI runner
+// (tools/closed_loop_runner.js). The canonical brain that drives the loop
+// lives HERE in the worker — exactly one brain; the page only renders the
+// cl_state stream this mode emits. See embodiment/closed_loop_core.js and
+// embodiment/state_contract.js (versioned, fail-closed contract).
+let CLCORE = null, CLWS = null;
+try {
+  const CONTRACT = importAs("embodiment/state_contract.js",
+                            () => { throw new Error("state_contract must not require()"); });
+  CLWS = importAs("embodiment/cl_ws.js",
+                  () => { throw new Error("cl_ws must not require()"); });
+  CLCORE = importAs("embodiment/closed_loop_core.js",
+                    (spec) => spec === "state_contract" ? CONTRACT
+                            : spec === "experiment_core" ? CORE
+                            : CTRL);
+  CLCORE.init((spec) => spec === "state_contract" ? CONTRACT
+              : spec === "experiment_core" ? CORE : CTRL);
+} catch (err) {
+  postMessage({ type: "error", expId: null, message: "closed-loop init failed: " + String(err) });
+}
+
+// ------------------------------------------------------- closed-loop mode --
+// Drive the CANONICAL connectome brain (the same factory e9BrainFactory uses
+// — never a page-side copy) through the REAL FlyBody/MuJoCo sidecar over
+// WebSocket and stream the actual loop state to the page (cl_state). Follows
+// the app_state discipline: monotone seq, real values only, no placeholders.
+function runClosedLoop(m) {
+  if (!m.circuit) { postMessage({ type: "error", expId: "cl", message: "circuit data missing" }); return; }
+  if (!CLCORE || !CLWS) { postMessage({ type: "error", expId: "cl", message: "closed-loop core failed to init" }); return; }
+  const steps = Math.max(1, Math.min(20000, m.steps || 240));
+  const seed = m.seed !== undefined ? m.seed : 11;
+  const episode = m.episode || 0;
+  const learning = m.frozen ? false : true;
+  const port = m.port || 8795;
+  let seq = 0;
+  // fail-closed envelope check: never post a malformed state to the page
+  const validEnvelope = (st) => st && typeof st === "object" &&
+    Number.isInteger(st.episode) && Number.isInteger(st.t) &&
+    typeof st.mode === "string" && st.contract_v === 1;
+  const sock = new CLWS.CLWebSocket("ws://127.0.0.1:" + port);
+  sock.connect().then(() => CLCORE.runEpisode({
+    send: (msg) => sock.send(msg),
+    circuit: m.circuit, seed, steps, learning, episode,
+    onTick: (rec) => {
+      const st = {   // thin snapshot of the ACTUAL loop state
+        kind: "closed_loop", contract_v: 1,
+        episode, t: rec.t, seed, learning, mode: rec.mode,
+        body_pos: rec.body_pos, body_quat: rec.body_quat,
+        action: rec.action, reward: rec.reward,
+        dopamine: rec.da_after, weight_drift: rec.weight_drift,
+        motor_rate: rec.motor_rate,
+        neural_active: rec.neural.reduce((a, c) => a + (c > 0 ? 1 : 0), 0),
+        neural_dim: rec.neural.length,
+      };
+      if (validEnvelope(st)) postMessage({ type: "cl_state", expId: "cl", seq: ++seq, state: st });
+    },
+  })).then(({ gates, mode }) => {
+    sock.close();
+    postMessage({ type: "cl_done", expId: "cl", gates, mode, steps });
+  }).catch((e) => {
+    sock.close();
+    postMessage({ type: "error", expId: "cl",
+      message: String(e && e.message || e) +
+        " (sidecar must run: python embodiment/sidecar.py --ws --port " + port + ")" });
+  });
+}
+
 // ------------------------------------------------ E9 fly-brain factory ----
 // E9's demon_neural/demon_frozen variants need a real neural controller. We
 // reuse the EXACT E4 connectome machinery (LIF over the FAFB circuit, CSR
@@ -214,6 +282,8 @@ self.onmessage = (ev) => {
     catch (err) { postMessage({ type: "error", expId: "chat",
                                 message: "custom spec: " + String(err && err.message || err) }); }
   }
+  else if (m.type === "run_cl") { try { runClosedLoop(m); }
+    catch (err) { postMessage({ type: "error", expId: "cl", message: String(err && err.message || err) }); } }
   else if (m.type === "ping") postMessage({ type: "pong" });
 };
 

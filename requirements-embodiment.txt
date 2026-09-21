@@ -17,6 +17,10 @@ dm_control==1.0.46
 etils==1.14.0
 executing==2.2.1
 flybody @ git+https://github.com/TuragaLab/flybody.git@d015e9bfe441bd90ae431bac24c55cb74bdbce26
+# OPTIONAL browser closed-loop transport (sidecar --ws); added 2026-09-21 for
+# the brain↔body integration gate (embodiment/state_contract.js). Not part of
+# the audited physics environment; the audited result set never imports it.
+websockets==17.1
 fonttools==4.65.0
 fsspec==2026.9.0
 glfw==2.10.2

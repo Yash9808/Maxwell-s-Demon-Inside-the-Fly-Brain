@@ -92,7 +92,7 @@ async function runTests() {
     `seed=${ack.seed_used}, obs0[${ack.obs0.length}]`);
 
   // P3: step → step_result with the full causal payload
-  const step1 = await c1.send({ type: 'step', neural: new Array(32).fill(0.3), learn: 0.01, t_neural: 0 });
+  const step1 = await c1.send({ type: 'step', v: 1, episode: 0, neural: new Array(32).fill(0.3), learn: 0.01, t_neural: 0 });
   check('P3 step shape', step1.type === 'step_result' && step1.action.length === 59 &&
       step1.body && typeof step1.reward === 'number' && step1.obs_next.length === 15,
     `t=${step1.t_phys}, reward=${step1.reward}, latency=${step1.latency_ms}ms`);
@@ -104,7 +104,8 @@ async function runTests() {
   let x0 = null, x1 = null, rew = 0;
   const silentDrive = new Array(welcome.mode === 'flybody' ? 412 : 32).fill(0);
   for (let i = 0; i < 120; i++) {
-    const r = await c1.send({ type: 'step', neural: silentDrive, learn: 0, t_neural: i });
+    const r = await c1.send({ type: 'step', v: 1, episode: 1, neural: silentDrive, learn: 0, t_neural: i });
+    if (r.type === 'error') throw new Error('P4 contract violation: ' + r.code + ' ' + r.message);
     if (i === 0) x0 = r.body.pos[0];
     x1 = r.body.pos[0];
     rew += Math.abs(r.reward);
@@ -113,7 +114,8 @@ async function runTests() {
     await c1.send({ type: 'reset', seed: 77, episode: 1 });
     let d0 = null, d1 = null;
     for (let i = 0; i < 120; i++) {
-      const r = await c1.send({ type: 'step', neural: burstVector(412), learn: 0, t_neural: i });
+      const r = await c1.send({ type: 'step', v: 1, episode: 1, neural: burstVector(412), learn: 0, t_neural: i });
+      if (r.type === 'error') throw new Error('P4 contract violation: ' + r.code + ' ' + r.message);
       if (i === 0) d0 = r.body.pos[0];
       d1 = r.body.pos[0];
     }
@@ -127,8 +129,8 @@ async function runTests() {
 
   // P5: seq gap detected (dropped-frame accounting)
   await c1.send({ type: 'reset', seed: 88, episode: 2 });
-  await c1.send({ type: 'step', seq: 1, neural: [0.4, 0.4], learn: 0, t_neural: 0 });
-  const gap = await c1.send({ type: 'step', seq: 5, neural: [0.4, 0.4], learn: 0, t_neural: 1 });
+  await c1.send({ type: 'step', v: 1, seq: 1, episode: 2, neural: [0.4, 0.4], learn: 0, t_neural: 0 });
+  const gap = await c1.send({ type: 'step', v: 1, seq: 5, episode: 2, neural: [0.4, 0.4], learn: 0, t_neural: 1 });
   check('P5 drop detection', gap.task.sync.dropped_in >= 1, `dropped_in=${gap.task.sync.dropped_in}`);
 
   // P6: determinism across two fresh clients
@@ -138,7 +140,8 @@ async function runTests() {
     await c.send({ type: 'reset', seed: 909, episode: 3 });
     const out = [];
     for (let i = 0; i < 50; i++) {
-      const r = await c.send({ type: 'step', neural: [0.5, 0.2, 0.8, 0.1], learn: 0, t_neural: i });
+      const r = await c.send({ type: 'step', v: 1, episode: 3, neural: [0.5, 0.2, 0.8, 0.1], learn: 0, t_neural: i });
+      if (r.type === 'error') throw new Error('P6 contract violation: ' + r.code + ' ' + r.message);
       out.push(JSON.stringify({ a: r.action, b: r.body, r: r.reward }));
     }
     await c.stop();

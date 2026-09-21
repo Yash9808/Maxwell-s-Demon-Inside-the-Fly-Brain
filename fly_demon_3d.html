@@ -363,6 +363,17 @@
     <div class="row" style="margin-top:6px">
       <button id="btnOpenPlots" style="flex:1">📈 Open live plots (maximize)</button>
     </div>
+    <details class="exp-lab" data-lab="closedloop" open style="margin-top:8px">
+      <summary>🧬 CLOSED-LOOP BODY (FlyBody/MuJoCo)<button class="lab-run" title="Start the closed loop: canonical fly brain → motor decoder → 59-D action → MuJoCo physics → reward → dopamine → plasticity" id="btnRunCL">▶</button></summary>
+      <div class="exp-card" data-exp="cl" title="The canonical FAFB brain drives the REAL FlyBody/MuJoCo fly through the motor decoder. Requires the sidecar: python embodiment/sidecar.py --ws --port 8795">
+        <div class="exp-head"><b>CL · Brain↔Body closed loop</b>
+          <button class="exp-run" title="start the closed loop (needs the FlyBody sidecar on ws://127.0.0.1:8795)">▶</button></div>
+        <div class="exp-desc">FAFB brain → decoder → 59-D action → MuJoCo → reward → dopamine → plasticity. Start the sidecar first (see REPRODUCIBILITY_GUIDE.md).</div>
+        <div class="exp-meta"><span class="exp-eta" id="clPhys">sidecar: —</span><span class="exp-status">idle</span></div>
+        <canvas class="exp-spark" id="clSpark" width="220" height="44"></canvas>
+        <div class="exp-verdicts" id="clVerdicts"></div>
+      </div>
+    </details>
     
     
     
@@ -3723,7 +3734,99 @@ boot();
     if (wrap) wrap.innerHTML = "";
   }
 
+  // ================= CLOSED-LOOP BODY (CL · browser↔FlyBody gate) ==========
+  // The canonical brain that drives this loop lives in the experiment WORKER
+  // (run_cl mode → embodiment/closed_loop_core.js) — the page instantiates NO
+  // second brain and computes NO neural dynamics. It renders only what the
+  // worker streams from the real loop (cl_state), through the genuine state
+  // bridge window.__embodimentTap (no mock: entries are the actual experiment
+  // state, envelope-checked, seq-ordered, stale entries rejected).
+  const clState = { running: false, lastSeq: 0, path: [], last: null, queue: [] };
+  let clWorker = null;
+  // The genuine state bridge (FLYBODY_ARCHITECTURE.md §3): consumers read the
+  // real loop state; nothing here synthesizes a value.
+  window.__embodimentTap = {
+    get active() { return clState.running; },
+    get last() { return clState.last; },          // latest validated snapshot
+    pull() { return clState.queue.shift() || null; },   // FIFO of snapshots
+    _sink(st) { clState.last = st; clState.queue.push(st); if (clState.queue.length > 240) clState.queue.shift(); },
+    close() { clState.running = false; },
+  };
+  function clChips(st) {
+    const aMax = Math.max.apply(null, st.action.map(Math.abs));
+    return [
+      { txt: "physics " + st.mode, cls: st.mode === "flybody" ? "ok" : "bad" },
+      { txt: "Σ|Δw| " + st.weight_drift.toFixed(1), cls: st.weight_drift > 0 ? "ok" : "amb" },
+      { txt: "DA " + st.dopamine.toFixed(2), cls: Math.abs(st.dopamine) > 1e-6 ? "ok" : "amb" },
+      { txt: "motor " + st.motor_rate + " spk/tick", cls: st.motor_rate > 0 ? "ok" : "amb" },
+      { txt: "|a59|=" + aMax.toFixed(2), cls: aMax > 0 ? "ok" : "amb" },
+      { txt: st.learning ? "learning" : "frozen", cls: st.learning ? "ok" : "amb" },
+    ];
+  }
+  function clDrawTraj(canvas, path) {
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (path.length < 2) return;
+    let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity;
+    for (const p of path) { x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); z0 = Math.min(z0, p[1]); z1 = Math.max(z1, p[1]); }
+    const pad = 6, sx = v => x1 > x0 ? pad + (v - x0) / (x1 - x0) * (canvas.width - 2 * pad) : canvas.width / 2;
+    const sy = v => z1 > z0 ? canvas.height - pad - (v - z0) / (z1 - z0) * (canvas.height - 2 * pad) : canvas.height / 2;
+    ctx.strokeStyle = "#58a6ff"; ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let i = 0; i < path.length; i++) { const px = sx(path[i][0]), py = sy(path[i][1]); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }
+    ctx.stroke();
+    const last = path[path.length - 1];
+    ctx.fillStyle = "#3fb950"; ctx.beginPath(); ctx.arc(sx(last[0]), sy(last[1]), 3, 0, 6.284); ctx.fill();
+  }
+  function clFeed(st, seq) {
+    if (!Number.isInteger(seq) || seq <= clState.lastSeq) return;   // stale/out-of-order: rejected
+    clState.lastSeq = seq;
+    window.__embodimentTap._sink(st);   // genuine state bridge: real loop state only
+    const phys = document.getElementById("clPhys");
+    if (phys) phys.textContent = "sidecar: live (" + st.mode + ")";
+    if (st.t % 10 === 0) setStatus("cl", "running",
+      "t=" + st.t + " · x=" + st.body_pos[0].toFixed(4) + " m · DA " + st.dopamine.toFixed(3) + " · r " + st.reward.toFixed(3));
+    if (st.t % 20 === 0) {
+      clState.path.push([st.body_pos[0], st.body_pos[2]]);
+      const spark = document.getElementById("clSpark");
+      if (spark) clDrawTraj(spark, clState.path);
+      const chipW = document.getElementById("clVerdicts");
+      if (chipW) chipW.innerHTML = clChips(st).map(c => `<span class="chip ${c.cls}">${c.txt}</span>`).join("");
+    }
+  }
+  function clFinish(m) {
+    clState.running = false;
+    if (clWorker) { clWorker.terminate(); clWorker = null; }
+    let ok = true;
+    for (const v of Object.values(m.gates || {})) ok = ok && v;
+    setStatus("cl", ok ? "done" : "error",
+      ok ? "closed loop OK (" + m.mode + ", " + m.steps + " steps)" : "gates failed — see console");
+  }
+  function clStart() {
+    if (clState.running) return;
+    if (current || queue.length) { setStatus("cl", "error", "experiment worker busy — wait for queued runs"); return; }
+    clState.running = true; clState.lastSeq = 0; clState.path.length = 0; clState.queue.length = 0; clState.last = null;
+    clWorker = new Worker("experiment_worker.js?ts=" + Date.now());
+    clWorker.onmessage = (ev) => handleMsg("cl", ev.data);
+    clWorker.onerror = (e) => {
+      setStatus("cl", "error", "worker error: " + (e.message || "unknown"));
+      clState.running = false; clWorker = null;
+    };
+    setStatus("cl", "running", "connecting sidecar ws://127.0.0.1:8795…");
+    clWorker.postMessage({ type: "run_cl", circuit: window.__expCircuit || null,
+                           steps: 240, seed: 11, episode: 0, port: 8795 });
+  }
+  const clCard = cards.cl;
+  if (clCard) {
+    const runBtn = clCard.querySelector(".exp-run");
+    if (runBtn) runBtn.addEventListener("click", clStart);
+    const labBtn = document.getElementById("btnRunCL");
+    if (labBtn) labBtn.addEventListener("click", clStart);
+  }
+
   function handleMsg(expId, m) {
+    if (m.type === "cl_state") { if (clState.running) clFeed(m.state, m.seq); return; }
+    if (m.type === "cl_done") { clFinish(m); return; }
     if (m.type === "app_state") { const am = APPARATUS_META[expId]; if (am) appFeed(am.env, m.state); return; }
     if (m.type === "progress") {
       // (patch 16) full-speed sim made the page jerky: pace the canvas + DOM +
@@ -3773,6 +3876,10 @@ boot();
       worker.terminate(); worker = null; current = null; startNext();
       sixStep(expId);
     } else if (m.type === "error") {
+      if (expId === "cl" && clState.running) {   // CL owns its own worker lifecycle
+        clState.running = false;
+        if (clWorker) { clWorker.terminate(); clWorker = null; }
+      }
       setStatus(expId, "error", String(m.message).split("\n")[0].slice(0, 90));
       CH.postMessage({ kind: "plots", type: "session_error", expId });
       if (APPARATUS_META[expId]) appRestore();
@@ -3784,6 +3891,7 @@ boot();
   document.querySelectorAll(".exp-card .exp-run").forEach(btn => {
     btn.addEventListener("click", () => {
       const expId = btn.closest(".exp-card").dataset.exp;
+      if (expId === "cl") return;   // closed loop owns its worker (clStart)
       if (current === expId || queue.includes(expId)) return;  // already going
       queue.push(expId);
       openPlots();                       // pop the plots window so it's ready
@@ -3794,6 +3902,9 @@ boot();
 
   // ---- run-all-six session: queue E2,E3,E4,E5,E7,E8 and animate the figure --
   const SIX_IDS = ["e2", "e3", "e4", "e5", "e7", "e8"];
+  // (the closed-loop card reuses the exp-card chrome but runs its own worker;
+  //  it must never enter the generic experiment queue — guarded in the click
+  //  handler above and in the lab-run handler below)
   const btnAll = document.getElementById("btnRunAllSix");
   let sixLeft = 0;
   let sixBtn = null;             // (patch 15) button that owns the active session
@@ -3838,6 +3949,7 @@ boot();
     btn.title = btn.dataset.title;
     btn.addEventListener("click", (ev) => {
       ev.preventDefault(); ev.stopPropagation();  // don't fold the lab panel
+      if (lab.dataset.lab === "closedloop") return;   // CL owns its worker (clStart)
       const toast = (typeof msg === "function") ? msg : (window.__labMsg || (() => {}));
       const labName = (lab.querySelector("summary").firstChild.textContent || "").trim();
       const ids = [...lab.querySelectorAll(".exp-card[data-exp]")]

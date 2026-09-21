@@ -53,8 +53,8 @@ def run_sidecar_steps(sc, steps, neural_fn, seed, episode=0, learn=0.0):
     sc.handle({"type": "reset", "seed": seed, "episode": episode})
     results = []
     for i in range(steps):
-        r = sc.handle({"type": "step", "seq": i + 1, "neural": neural_fn(i),
-                       "learn": learn, "t_neural": i})
+        r = sc.handle({"type": "step", "v": 1, "seq": i + 1, "episode": episode,
+                       "neural": neural_fn(i), "learn": learn, "t_neural": i})
         results.append(r)
     return results
 
@@ -197,7 +197,7 @@ def t5_reward_is_environmental(mode):
     zero_motion_steps = 0
     big_action_zero_motion = 0
     for i in range(120):
-        r = sc.handle({"type": "step", "seq": i + 1,
+        r = sc.handle({"type": "step", "v": 1, "seq": i + 1, "episode": 5,
                        "neural": burst_neural(i, k=412) if i % 2 else [0.0] * 412,
                        "learn": 0.0, "t_neural": i})
         x = r["body"]["pos"][0]
@@ -224,8 +224,8 @@ def t6_learning_loop_closes(mode):
     delivered = 0
     stats_first, stats_last = None, None
     for i in range(300):
-        r = sc.handle({"type": "step", "seq": i + 1, "neural": burst_neural(i),
-                       "learn": 0.05, "t_neural": i})
+        r = sc.handle({"type": "step", "v": 1, "seq": i + 1, "episode": 6,
+                       "neural": burst_neural(i), "learn": 0.05, "t_neural": i})
         if r["task"]["sync"]["dropped_in"] == 0 and r["obs_next"] is not None:
             delivered += 1
         if i == 0:
@@ -254,7 +254,7 @@ def t7_determinism(mode):
         sc.handle({"type": "reset", "seed": 707, "episode": 7})
         traj = []
         for i in range(200):
-            r = sc.handle({"type": "step", "seq": i + 1,
+            r = sc.handle({"type": "step", "v": 1, "seq": i + 1, "episode": 7,
                            "neural": synthetic_motor(i, rng=rng).tolist(),
                            "learn": 0.01, "t_neural": i})
             traj.append(json.dumps({"a": r["action"], "b": r["body"],

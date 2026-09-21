@@ -14,6 +14,9 @@ import numpy as np
 
 U_DIM = 16          # motor intents: 6 leg groups x (stance,swing) + wings L/R + abdomen + head
 ACTION_DIM = 59     # flybody walking action dimensionality (TuragaLab/flybody)
+# Closed-loop contract constants (mirrored in embodiment/state_contract.js):
+MOTOR_POOL_SIZE = 200   # canonical motor-pool readout size (controllers.js POOL_N = min(200, motor-layer size))
+NEURAL_MAX_DIM = 512    # wire guard: max accepted neural vector length (C1)
 N_LEG_GROUPS = 6
 GAIT_DT = 1.5       # rad/s baseline stride rate
 GAIT_VIGOR = 2.0    # additional rad/s at full vigor

@@ -1,11 +1,11 @@
 {
   "manifest_version": 1,
-  "generated_utc": "2026-09-21T14:40:17Z",
+  "generated_utc": "2026-09-21T17:26:33Z",
   "application": {
     "name": "Maxwell's Demon: Inside the Fly Brain",
     "version": "0.9.0",
     "version_note": "First engineering-manifest release; pre-1.0 research code.",
-    "git_commit": "fc7272c0cbfc7bab03ed7b95b8db6432f33bc31e",
+    "git_commit": "d0a9e86fadf0788f9f8ccbc0f6a72e0295e2f485",
     "git_branch": "stabilization/pre-phase01",
     "git_dirty": true,
     "git_remote": "https://github.com/Yash9808/Maxwell-s-Demon-Inside-the-Fly-Brain.git"
@@ -78,15 +78,15 @@
       {
         "path": "controllers.js",
         "present": true,
-        "sha256": "debdcc2503065a75debe1fe236cafd95218deca90831d2b78bff3aab5dd1b694",
-        "bytes": 56340,
+        "sha256": "7dcc2ae0605426bfdde074f27de3d70ff411133402179699257343ba8e8b8d3e",
+        "bytes": 57502,
         "sha256_note": null
       },
       {
         "path": "experiment_worker.js",
         "present": true,
-        "sha256": "03ffe03eb14c46d65a344b52295a29a43daa54b6d564155b3f0034ef072a4a5a",
-        "bytes": 29682,
+        "sha256": "e2fe00d88fe8d3b8da95ed886eb96820b4c0ae412cc5299b52099fce009c60cc",
+        "bytes": 33450,
         "sha256_note": null
       },
       {
@@ -288,29 +288,29 @@
       {
         "path": "embodiment/sidecar.py",
         "present": true,
-        "sha256": "29e3a09a563d0e2727fc6159f56cd9d43b06bf2bddb2b7256f4b12d18bc676a9",
-        "bytes": 18454,
+        "sha256": "7eeea36a77367dc1a5b792a0059e1b71b665886e45916263db01d249a5c82fca",
+        "bytes": 21248,
         "sha256_note": null
       },
       {
         "path": "embodiment/motor_decoder.py",
         "present": true,
-        "sha256": "753012b5609a3d9cc5390f0fbccae9816a06c93e839e4a8b40f1c412193593c3",
-        "bytes": 9328,
+        "sha256": "679cea0a943516da2f857e0602a223eee06c9ee724978216604b465a2e1deb22",
+        "bytes": 9598,
         "sha256_note": null
       },
       {
         "path": "embodiment/smoke_test.py",
         "present": true,
-        "sha256": "f9745a497c555acea199c9b3d3fd1ac647888b5cc44e235fbee5b270da32a936",
-        "bytes": 14485,
+        "sha256": "c62e1d7ad958fcb13208a007d872f1ebbb883064f9ac0d0d20dc3a577771561c",
+        "bytes": 14579,
         "sha256_note": null
       },
       {
         "path": "embodiment/embodiment_client.js",
         "present": true,
-        "sha256": "09f84fdf1cc881cc0ccb219edcc3938c9718a17fa8e1b55bd648e53c0c881b38",
-        "bytes": 7369,
+        "sha256": "12a136844cb611d75069f670a27de5b751049c62a2e14f5ab927bc632766d1b4",
+        "bytes": 7781,
         "sha256_note": null
       },
       {
@@ -332,8 +332,8 @@
       {
         "path": "fly_demon_3d.html",
         "present": true,
-        "sha256": "601604f07f7428a202adebbe7ae7368b905ce3b0b22d7f05f24f8b87b1d38011",
-        "bytes": 450320,
+        "sha256": "3335005b003fbed7a0bf145ab2d8c725c6ef93ee2507fe4dfb412d89020e17ba",
+        "bytes": 457422,
         "sha256_note": null
       },
       {

@@ -94,6 +94,34 @@ audited working installations; hashes recorded in each header):
 - `requirements-flyvis.txt` — FlyVis connectome-neural-prediction track.
   Install: `python -m venv .venv-flyvis && .venv-flyvis/Scripts/pip install -r requirements-flyvis.txt`
 
+### Closed-loop brain↔body run (browser gate)
+
+The real end-to-end loop (canonical FAFB brain → motor decoder → 59-D action
+→ FlyBody/MuJoCo → reward → dopamine → plasticity) runs in two modes:
+
+1. **Headless (deterministic, CI-safe)** — the canonical evidence path:
+   `PYTHON_EMBODIMENT="$PWD/.venv-embodiment/Scripts/python.exe" node tools/closed_loop_runner.js --steps 240 --seed 11`
+   (all 9 causal gates print PASS; `--out <file>` writes the JSONL evidence;
+   `tests/closed_loop.test.js` proves 12 causal links + replay determinism).
+2. **Browser (visualization)** — start the sidecar transport, then open the lab
+   and press ▶ on the CLOSED-LOOP BODY card:
+   ```
+   .venv-embodiment/Scripts/python.exe embodiment/sidecar.py --ws --port 8795
+   python launch_fly_demon_3d.py
+   ```
+   The page instantiates NO second brain: the canonical brain lives in the
+   experiment worker (`run_cl`), and the page renders the worker's
+   `cl_state` stream through the genuine `window.__embodimentTap` state
+   bridge (envelope-checked, seq-ordered; stale/out-of-order entries are
+   rejected). Verified: the browser-run sidecar log is trajectory-identical
+   to the headless runner at the same seed (0/240 mismatches).
+
+The loop speaks the versioned fail-closed contract `embodiment/state_contract.js`
+(v1): `neural` is REQUIRED on every step (no synthetic fallback), episode/t
+identity is enforced both directions, actions are exactly 59-D, and malformed
+messages are rejected (`missing_neural` / `stale_time` / `stale_episode` /
+`neural_dim_changed` / `contract_violation`) — never patched or defaulted.
+
 `flybody` and `flyvis` are pinned to the exact commits used by the audited
 runs (`d015e9bf…` and `92b3845c…` respectively, recorded in the lock headers
 with their installed hashes). Verified: a clean venv built from

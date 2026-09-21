@@ -563,6 +563,14 @@ function connectomeController(circuit, opts) {
   const W_INIT = Float32Array.from(W);
 
   const V = new Float32Array(N), spikes = new Uint8Array(N), refac = new Uint8Array(N);
+  // Closed-loop tap: live zero-copy view of the current-tick spike vector over
+  // the designated motor pool (first POOL_N motor-layer neurons, fixed
+  // identity — same population the rate-code/policy readouts consume). This is
+  // the canonical neural→decoder interface for the FlyBody/MuJoCo embodiment
+  // loop (embodiment/state_contract.js, tools/closed_loop_runner.js). READ-ONLY
+  // by convention: consumers must never mutate the view; the brain advances it
+  // itself in brainTick. Built once; costs one subarray header, no per-tick work.
+  let MOTOR_VIEW = null;
   const trialSpikeCount = new Uint32Array(N);   // cumulative per trial (MI)
   // per-trial layer spike counts for the brain-outcome heatmap (additive)
   const layerSpikeSums = new Float64Array(layers.length);
@@ -969,6 +977,16 @@ function connectomeController(circuit, opts) {
       return s;
     },
     get dopamine() { return da.v; },
+    // ---- closed-loop read-only accessors (additive; no dynamics touched) ----
+    // Current-tick spike vector over the designated motor pool (len POOL_N;
+    // live view — each call returns the same backing buffer the brain writes).
+    motorSpikeVector() {
+      if (!MOTOR_VIEW) MOTOR_VIEW = spikes.subarray(m0, m0 + POOL_N);
+      return MOTOR_VIEW;
+    },
+    // Designated motor-pool size (the neural vector dimension the decoder is
+    // built for; a mid-episode change is a contract violation downstream).
+    motorPoolSize() { return POOL_N; },
     // ---- P0 modulatory-channel accessors (third factor; null/0 with legacy
     // schema so telemetry consumers can feature-detect) ----
     get modulatorTypes() { return modulatorCount ? Object.keys(modByType) : null; },
