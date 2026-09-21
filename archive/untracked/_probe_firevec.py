@@ -1,0 +1,11 @@
+import sys
+sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+w = open('experiment_worker.js','r',encoding='utf-8',errors='replace').read()
+i = w.find('fireVec')
+print('=== worker first fireVec mention ===')
+print(w[max(0,i-400):i+400])
+print()
+p = open('experiment_plots.html','r',encoding='utf-8',errors='replace').read()
+j = p.find('function collectBrainData(')
+print('=== collectBrainData ===')
+print(p[j:j+2600])

@@ -1,4 +1,4 @@
-# Local working folders and generated runtime output
+﻿# Local working folders and generated runtime output
 .freebuff/
 freebuf/
 __pycache__/
@@ -30,3 +30,10 @@ isolate-*.log
 *.zip
 *.tar
 s41586-024-07939-3.pdf
+.venv-flyvis/
+.venv-embodiment/
+.venv-flybody/
+embodiment/logs/
+.freebuf/
+.freebuff/
+freebuf/

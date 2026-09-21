@@ -1,0 +1,12 @@
+import sys
+sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+h = open('fly_demon_3d.html','rb').read().decode('utf-8','replace')
+i = h.find('function anatScatter(')
+print('anatScatter at', i)
+print(h[i:i+1600])
+print()
+# also check what buildBrain does AFTER the nodes for anatMode (shells, hulls, labels)
+j = h.find('brainHolder.shells', i)
+print('--- buildBrain anat shells section ---')
+k = h.find('REAL_HULLS', 40088424)
+print('REAL_HULLS in buildBrain at', k)

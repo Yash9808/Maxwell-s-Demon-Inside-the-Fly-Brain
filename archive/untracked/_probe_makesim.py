@@ -1,0 +1,12 @@
+import sys, re
+sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+h = open('fly_demon_3d.html','rb').read().decode('utf-8','replace')
+i = h.find('function makeSim(')
+print('makeSim at', i)
+print(h[i:i+3500])
+print()
+j = h.find('visual', i)
+# find the visual channel build (optic drive)
+k = h.find('function buildVisual') if h.find('function buildVisual')!=-1 else h.find('visualCh')
+print('visual-channel code at', k)
+print(h[k:k+1200])
