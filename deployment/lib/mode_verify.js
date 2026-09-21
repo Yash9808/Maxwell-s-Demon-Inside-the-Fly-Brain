@@ -24,23 +24,30 @@ async function modeVerify(jsonOut) {
       `HEAD=${head} expected=${expected.trim()}`);
   }
 
-  // 1c. manifest stamp must describe HEAD's CONTENT — the repo convention
-  //     regenerates the manifest at the content commit and commits it as the
-  //     next commit, so the stamp equals the content commit. The check is
-  //     therefore TREE identity: the stamped commit's tree must equal HEAD's
-  //     tree (manifest commits after regeneration keep content identical).
+  // 1c. manifest stamp must describe HEAD's CONTENT — repo convention:
+  //     regenerate at the content commit, commit the manifest next. The
+  //     check therefore allows EXACTLY one difference between the stamped
+  //     tree and HEAD's tree: MANIFEST.json itself. Any other difference is
+  //     an unregenerated manifest (fail closed).
   {
     const mPath = path.join(util.ROOT, "MANIFEST.json");
     if (fs.existsSync(mPath) && head) {
       try {
         const stamp = (JSON.parse(fs.readFileSync(mPath, "utf8")).application || {}).git_commit;
-        const headTree = util.git(["rev-parse", "HEAD^{tree}"], { tolerate: true });
-        const stampTree = stamp ? util.git(["rev-parse", `${stamp}^{tree}`], { tolerate: true }) : null;
-        check("manifest_stamp_matches_head_tree",
-          Boolean(headTree) && Boolean(stampTree) && headTree === stampTree,
-          `stamp=${stamp} stampTree=${stampTree} headTree=${headTree}`);
+        let ok = false, detail = `stamp=${stamp}`;
+        if (stamp) {
+          const diff = util.git(["diff", "--name-only", stamp, "HEAD"], { tolerate: true });
+          if (diff === null) {
+            detail += " (stamp commit not resolvable in this repository)";
+          } else {
+            const changed = diff.split("\n").filter(Boolean);
+            ok = changed.every((p) => p === "MANIFEST.json");
+            detail += ` changed-vs-HEAD=${changed.length ? changed.join(",") : "(none)"}`;
+          }
+        }
+        check("manifest_stamp_describes_head", ok, detail);
       } catch (e) {
-        check("manifest_stamp_matches_head_tree", false, `unreadable: ${e && e.message}`);
+        check("manifest_stamp_describes_head", false, `unreadable: ${e && e.message}`);
       }
     }
   }
