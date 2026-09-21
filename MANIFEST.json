@@ -1,11 +1,11 @@
 {
   "manifest_version": 1,
-  "generated_utc": "2026-09-21T17:26:33Z",
+  "generated_utc": "2026-09-21T17:33:44Z",
   "application": {
     "name": "Maxwell's Demon: Inside the Fly Brain",
     "version": "0.9.0",
     "version_note": "First engineering-manifest release; pre-1.0 research code.",
-    "git_commit": "d0a9e86fadf0788f9f8ccbc0f6a72e0295e2f485",
+    "git_commit": "771a8cfae1760a2fd2aed2158b64c859a3b18cd0",
     "git_branch": "stabilization/pre-phase01",
     "git_dirty": true,
     "git_remote": "https://github.com/Yash9808/Maxwell-s-Demon-Inside-the-Fly-Brain.git"
@@ -689,7 +689,7 @@
     "note": "source URLs UNKNOWN (not recorded at acquisition; flagged in ENGINEERING_READINESS_REPORT.md) - never fabricated"
   },
   "repository": {
-    "tracked_file_count": 343,
+    "tracked_file_count": 348,
     "note": "Large DATA (*.feather, malecns_circuit.json, s41586-024-07939-3.pdf) is git-ignored; hashed here when present.",
     "missing_files": [
       "malecns_circuit.json"
