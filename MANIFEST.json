@@ -1,11 +1,11 @@
 {
   "manifest_version": 1,
-  "generated_utc": "2026-09-21T20:03:06Z",
+  "generated_utc": "2026-09-21T21:16:58Z",
   "application": {
     "name": "Maxwell's Demon: Inside the Fly Brain",
     "version": "0.9.0",
     "version_note": "First engineering-manifest release; pre-1.0 research code.",
-    "git_commit": "28a5afb33932de4e9be9017c085937375204c818",
+    "git_commit": "c7e330f5b4aac158047d2d7f72160815f39d3536",
     "git_branch": "deployment/phase-02",
     "git_dirty": true,
     "git_remote": "https://github.com/Yash9808/Maxwell-s-Demon-Inside-the-Fly-Brain.git"
@@ -59,6 +59,8 @@
     "fly_brain_circuit.json": "python extract_circuit.py  (from v783 feather tables; requires synapses table for optic position channels)",
     "malecns_circuit_pruned.json": "pruned MCNS export (generator script not retained; see SCRIPT_ARCHIVE_INDEX.md)",
     "fly_brain_hulls*": "_rebuild_anatomy.py (anatomy pipeline; see SCRIPT_ARCHIVE_INDEX.md)",
+    "fly_brain_edge_paths*": "python tools/build_edge_waypoints.py (W1: per-edge polyline waypoints from the v783 synapse-level table; canonical frame, deterministic stride sampling; Dorkenwald et al. 2024 data)",
+    "data/skeletons/*": "python tools/build_neuron_skeletons.py (W2: published FlyWire skeletons, Zenodo 10877326 / Schlegel et al. 2024, curated top-degree subset; canonical frame, SWC parent topology)",
     "neuron_nt_classification.csv": "python classify_neurons.py",
     "neuropil_matrix.csv": "python neuropil_matrix.py",
     "report_v783.md": "python analyze_v783.py",
@@ -71,22 +73,22 @@
       {
         "path": "experiment_core.js",
         "present": true,
-        "sha256": "f070e6ab750e205420c93fbbf2e786836e36c08c8ae7ada23496db8e8f5aa4c3",
-        "bytes": 100241,
+        "sha256": "7fb11e3155214d506c48005b1f066b4e4bc50ba153527a2bdcc53f0beeb7044b",
+        "bytes": 101036,
         "sha256_note": null
       },
       {
         "path": "controllers.js",
         "present": true,
-        "sha256": "96db283f67e372998707f14bd9b316bc5e44c2e8a1f2e02d1b0469398d0dba2a",
-        "bytes": 63303,
+        "sha256": "72ef49138c5a7b1017fce060c59623c260bb94c57349cc12adf19563193df2b2",
+        "bytes": 63207,
         "sha256_note": null
       },
       {
         "path": "experiment_worker.js",
         "present": true,
-        "sha256": "6d223150d338fd9ca1f92c46735e99aee75c221feffd016cbc25f5be738fc68f",
-        "bytes": 34438,
+        "sha256": "33bbad5479f31788be610922e2747b412f5a7a0c2c12214f7b9e7ce156a391d6",
+        "bytes": 33581,
         "sha256_note": null
       },
       {
@@ -316,8 +318,8 @@
       {
         "path": "tools/make_manifest.py",
         "present": true,
-        "sha256": "ccbc0e00ec3d6b1d9307e9e87f117944a57ab780d74fc0399461a8f6060ffc61",
-        "bytes": 15429,
+        "sha256": "e6348be68103c5fd6a979022bf9e181113e93ca1a29cf886287b2453feb8385a",
+        "bytes": 16410,
         "sha256_note": null
       },
       {
@@ -326,14 +328,28 @@
         "sha256": "6be0e6ef40a9f537b195474e9977f883ae67170bccf77fd5fa4d19987addb25d",
         "bytes": 5958,
         "sha256_note": null
+      },
+      {
+        "path": "tools/build_edge_waypoints.py",
+        "present": true,
+        "sha256": "b776ad6df85852fc065bd81516170fbe7edaad7d584d377eb09596b02e5a7d41",
+        "bytes": 17726,
+        "sha256_note": null
+      },
+      {
+        "path": "tools/build_neuron_skeletons.py",
+        "present": true,
+        "sha256": "ca8e56c44c2092b740b845003603301480e56d6a5991dee085cd9672afc1c2fd",
+        "bytes": 17112,
+        "sha256_note": null
       }
     ],
     "hybrid_app": [
       {
         "path": "fly_demon_3d.html",
         "present": true,
-        "sha256": "3335005b003fbed7a0bf145ab2d8c725c6ef93ee2507fe4dfb412d89020e17ba",
-        "bytes": 457422,
+        "sha256": "481c5e9b8774a7d508973fa422de55ef9a30048ffa4de18cfa98fbb093271667",
+        "bytes": 477974,
         "sha256_note": null
       },
       {
@@ -470,6 +486,34 @@
         "present": true,
         "sha256": "6647d2b79a675c9be88d9e607d511215c7bc1f8b6cc930ff8fcf8d8294955a25",
         "bytes": 4204,
+        "sha256_note": null
+      },
+      {
+        "path": "fly_brain_edge_paths.bin",
+        "present": true,
+        "sha256": "ca77aa743fb4a8f39a8a65d19cec1d91e0d28922ec021659985ae6da866cd688",
+        "bytes": 40610160,
+        "sha256_note": null
+      },
+      {
+        "path": "fly_brain_edge_paths.json",
+        "present": true,
+        "sha256": "a6391fe57e994e7d224d776cbb52e17fd8c65b030ed7661fce4b9a9fbef2c038",
+        "bytes": 12881026,
+        "sha256_note": null
+      },
+      {
+        "path": "data/skeletons/skeletons.bin",
+        "present": true,
+        "sha256": "9bf7ed0d6674e2631eb5d9920c438fd8e9122abb134483b790dd0c4d40a7e4f3",
+        "bytes": 51909464,
+        "sha256_note": null
+      },
+      {
+        "path": "data/skeletons/skeletons_index.json",
+        "present": true,
+        "sha256": "0dd6f21179e08d7a633f470deb012c5408d7dab513f1ae24baed34ca8e67e105",
+        "bytes": 12802,
         "sha256_note": null
       }
     ],
@@ -824,7 +868,7 @@
     "note": "source URLs UNKNOWN (not recorded at acquisition; flagged in ENGINEERING_READINESS_REPORT.md) - never fabricated"
   },
   "repository": {
-    "tracked_file_count": 378,
+    "tracked_file_count": 391,
     "note": "Large DATA (*.feather, malecns_circuit.json, s41586-024-07939-3.pdf) is git-ignored; hashed here when present.",
     "missing_files": [
       "malecns_circuit.json"
