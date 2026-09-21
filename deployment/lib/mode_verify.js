@@ -24,17 +24,23 @@ async function modeVerify(jsonOut) {
       `HEAD=${head} expected=${expected.trim()}`);
   }
 
-  // 1c. manifest stamp must match HEAD in a clean checkout — catches a
-  //     manifest committed without regeneration after the last change.
+  // 1c. manifest stamp must describe HEAD's CONTENT — the repo convention
+  //     regenerates the manifest at the content commit and commits it as the
+  //     next commit, so the stamp equals the content commit. The check is
+  //     therefore TREE identity: the stamped commit's tree must equal HEAD's
+  //     tree (manifest commits after regeneration keep content identical).
   {
     const mPath = path.join(util.ROOT, "MANIFEST.json");
     if (fs.existsSync(mPath) && head) {
       try {
         const stamp = (JSON.parse(fs.readFileSync(mPath, "utf8")).application || {}).git_commit;
-        check("manifest_stamp_matches_head", stamp === head,
-          `stamp=${stamp} HEAD=${head}`);
+        const headTree = util.git(["rev-parse", "HEAD^{tree}"], { tolerate: true });
+        const stampTree = stamp ? util.git(["rev-parse", `${stamp}^{tree}`], { tolerate: true }) : null;
+        check("manifest_stamp_matches_head_tree",
+          Boolean(headTree) && Boolean(stampTree) && headTree === stampTree,
+          `stamp=${stamp} stampTree=${stampTree} headTree=${headTree}`);
       } catch (e) {
-        check("manifest_stamp_matches_head", false, `unreadable: ${e && e.message}`);
+        check("manifest_stamp_matches_head_tree", false, `unreadable: ${e && e.message}`);
       }
     }
   }
