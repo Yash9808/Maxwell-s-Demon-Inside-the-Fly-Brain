@@ -1,11 +1,11 @@
 {
   "manifest_version": 1,
-  "generated_utc": "2026-09-21T17:33:44Z",
+  "generated_utc": "2026-09-21T18:13:04Z",
   "application": {
     "name": "Maxwell's Demon: Inside the Fly Brain",
     "version": "0.9.0",
     "version_note": "First engineering-manifest release; pre-1.0 research code.",
-    "git_commit": "771a8cfae1760a2fd2aed2158b64c859a3b18cd0",
+    "git_commit": "027f0502fce3e003386ea0e58dbb9ce0a3efa0f8",
     "git_branch": "stabilization/pre-phase01",
     "git_dirty": true,
     "git_remote": "https://github.com/Yash9808/Maxwell-s-Demon-Inside-the-Fly-Brain.git"
@@ -309,15 +309,15 @@
       {
         "path": "embodiment/embodiment_client.js",
         "present": true,
-        "sha256": "12a136844cb611d75069f670a27de5b751049c62a2e14f5ab927bc632766d1b4",
-        "bytes": 7781,
+        "sha256": "009621e5a687bb6e48841de128c39457d5474103136cdedc3a4cfa0f746ab1f4",
+        "bytes": 8080,
         "sha256_note": null
       },
       {
         "path": "tools/make_manifest.py",
         "present": true,
-        "sha256": "027f43cc5fe256a2ada15a3754b2f3c8e3ed22d5fa0ee620be0cfe0f2f0566dc",
-        "bytes": 12790,
+        "sha256": "61146e633bd83ac2f9b815d7f06a8106b2d703ad6a58542329bfb611ec54ac47",
+        "bytes": 14543,
         "sha256_note": null
       },
       {
@@ -683,16 +683,155 @@
         "bytes": 2924,
         "sha256_note": null
       }
+    ],
+    "phase_01": [
+      {
+        "path": "baselines/ENVIRONMENT.md",
+        "present": true,
+        "sha256": "151a68dec13efd170c8ae59643df41e9b5c32f11782a9ca8de308c07764ad1d0",
+        "bytes": 2772,
+        "sha256_note": null
+      },
+      {
+        "path": "baselines/environment.json",
+        "present": true,
+        "sha256": "f152e40923974c0b4855a951f894c9c9f35ebcb7efafd4fe4f529cbc726a8832",
+        "bytes": 495,
+        "sha256_note": null
+      },
+      {
+        "path": "baselines/PROVENANCE_PHASE01.md",
+        "present": true,
+        "sha256": "f043847f5030a9f52833f129d98564bd815becdde5ddf87436926de288bfa99f",
+        "bytes": 4418,
+        "sha256_note": null
+      },
+      {
+        "path": "baselines/closed_loop/trajectory_meta.json",
+        "present": true,
+        "sha256": "d05baafb1501aa502c1c0ea3f7cc8d2b5c2ccf520e694947becd84bd1b27a437",
+        "bytes": 1783,
+        "sha256_note": null
+      },
+      {
+        "path": "baselines/closed_loop/trajectory_seed11.jsonl",
+        "present": true,
+        "sha256": "05c47753fe56af3de12d5fa3b209e6c3ef20f88a74952154977b1c568bac204b",
+        "bytes": 217099,
+        "sha256_note": null
+      },
+      {
+        "path": "baselines/protocol/state_contract_v1.json",
+        "present": true,
+        "sha256": "23c03e689d31dbc93cd55b0e23aea5693d30419a07abadeab42a3bd21d13e9f9",
+        "bytes": 1233,
+        "sha256_note": null
+      },
+      {
+        "path": "baselines/replay/e9_pressurereplay.json",
+        "present": true,
+        "sha256": "2d3cf93f3625da30478787c64e25883632db53af64577c38ac8032d2b2af4f86",
+        "bytes": 340,
+        "sha256_note": null
+      },
+      {
+        "path": "baselines/results/results_index.json",
+        "present": true,
+        "sha256": "3ad6a314ce81afa5b33a266406207a44135ae7342300b4220f3f4ce6903d1960",
+        "bytes": 3439,
+        "sha256_note": null
+      },
+      {
+        "path": "baselines/evidence/p0.log",
+        "present": true,
+        "sha256": "1afbdcfc8e2f90a033d65fae92e7748509405e610c1bf787a1fb467d80b88bd0",
+        "bytes": 1189,
+        "sha256_note": null
+      },
+      {
+        "path": "baselines/evidence/e9.log",
+        "present": true,
+        "sha256": "c425710c3fa9754ff5f4272dd56d136c0b1e14f184bf56161fb5e8eedd8954c0",
+        "bytes": 3552,
+        "sha256_note": null
+      },
+      {
+        "path": "baselines/evidence/validation.log",
+        "present": true,
+        "sha256": "1de2c959c77997dbcb640996fa7ce648c9fe218ea33626e90dc3822a4c92b066",
+        "bytes": 1277,
+        "sha256_note": null
+      },
+      {
+        "path": "baselines/evidence/p1.log",
+        "present": true,
+        "sha256": "698d12a89d75fc021185b8073e29b856a5890148297f5708c46f20ea1242a9c4",
+        "bytes": 4088,
+        "sha256_note": null
+      },
+      {
+        "path": "baselines/evidence/smoke.log",
+        "present": true,
+        "sha256": "2e6f10bb2a9b686bcdcd95b2992d5670c74465bfeb9a052cfc84b2474a780696",
+        "bytes": 2805,
+        "sha256_note": null
+      },
+      {
+        "path": "baselines/evidence/worker_sandbox.log",
+        "present": true,
+        "sha256": "bbdbc3b0ae1350b94d96ebf6d92fe4df7f304750097cec38c01ed9c536de0d62",
+        "bytes": 523,
+        "sha256_note": null
+      },
+      {
+        "path": "baselines/evidence/benchmark_quick.log",
+        "present": true,
+        "sha256": "a4a11610c1373795cdff69f4a97bef3f98344fe7f6b04f925e6026dc23780e27",
+        "bytes": 3965,
+        "sha256_note": null
+      },
+      {
+        "path": "baselines/evidence/embodiment_flybody.log",
+        "present": true,
+        "sha256": "007bf76ebb4a35f6d22b1cdfada06a754137f28e3c69509353358e51b93e6a0c",
+        "bytes": 910,
+        "sha256_note": null
+      },
+      {
+        "path": "baselines/evidence/embodiment_mock.log",
+        "present": true,
+        "sha256": "71ee9df0e42bf3741dc53a70ef10bf85bd5038ccf5eadef8f7af8740cfee8124",
+        "bytes": 1075,
+        "sha256_note": null
+      },
+      {
+        "path": "baselines/evidence/closed_loop.log",
+        "present": true,
+        "sha256": "1e46874cf389578cd52425788a4b7513261dc59ba47c3e38eb953a62cef26890",
+        "bytes": 863,
+        "sha256_note": null
+      },
+      {
+        "path": "baselines/evidence/flyvis_probe.log",
+        "present": true,
+        "sha256": "9e83d3ab73715d851ddb924df20a1c2a4cc3243085e2b30ddce6c78a5e8723b0",
+        "bytes": 1205,
+        "sha256_note": null
+      }
     ]
   },
   "mesh_assets_provenance": {
     "note": "source URLs UNKNOWN (not recorded at acquisition; flagged in ENGINEERING_READINESS_REPORT.md) - never fabricated"
   },
   "repository": {
-    "tracked_file_count": 348,
+    "tracked_file_count": 358,
     "note": "Large DATA (*.feather, malecns_circuit.json, s41586-024-07939-3.pdf) is git-ignored; hashed here when present.",
     "missing_files": [
       "malecns_circuit.json"
-    ]
+    ],
+    "phase_01_excluded": [
+      "research_paper_structure_maxwell_demon_drosophila.docx"
+    ],
+    "phase_01_excluded_note": "unattributed working-tree modification; both versions hash-recorded in baselines/ENVIRONMENT.md"
   }
 }
