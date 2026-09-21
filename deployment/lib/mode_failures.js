@@ -25,24 +25,21 @@ async function modeFailures(jsonOut) {
     if (required && !r.detected) problems.push(`failure_case_${r.name}`);
   };
 
-  // 1. wrong Git commit — clone the CURRENT HEAD to a scratch worktree-free
-  //    path and let the runner's git gate reject it.
+  // 1. wrong Git commit — clone the CURRENT HEAD to a scratch clone and run
+  //    verify with DEPLOY_EXPECTED_COMMIT pointing at a different commit: the
+  //    deployment-reference gate must reject it (non-zero exit).
   {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "clfail1-"));
     const clone = path.join(tmp, "repo");
-    const { execFileSync } = require("child_process");
+    const { execFileSync, spawnSync } = require("child_process");
     execFileSync("git", ["clone", "-q", util.ROOT, clone]);
-    let detected = false, detail = null;
-    try {
-      const { spawnSync } = require("child_process");
-      const r = spawnSync(process.execPath,
-        [path.join(util.ROOT, "deployment", "deploy_runner.js"), "verify"],
-        { cwd: clone, encoding: "utf8", timeout: 300_000 });
-      detected = r.status !== 0;
-      detail = (r.stdout || "").split("\n").filter(Boolean).pop() || null;
-    } catch (e) {
-      detected = false; detail = String(e);
-    }
+    const wrong = "0000000000000000000000000000000000000000";
+    const r = spawnSync(process.execPath,
+      [path.join(util.ROOT, "deployment", "deploy_runner.js"), "verify"],
+      { cwd: clone, encoding: "utf8", timeout: 300_000,
+        env: { ...process.env, DEPLOY_EXPECTED_COMMIT: wrong } });
+    const detected = r.status !== 0;
+    const detail = (r.stdout || "").split("\n").filter(Boolean).pop() || null;
     fs.rmSync(tmp, { recursive: true, force: true });
     record(result("01_wrong_git_commit", detected, detail), true);
   }

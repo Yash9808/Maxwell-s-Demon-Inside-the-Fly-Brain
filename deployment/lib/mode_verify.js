@@ -16,6 +16,29 @@ async function modeVerify(jsonOut) {
   const head = util.git(["rev-parse", "HEAD"]);
   check("git_head_resolves", Boolean(head), head || "git failed");
 
+  // 1b. deployment reference: DEPLOY_EXPECTED_COMMIT (documented, optional)
+  //     — when set, HEAD must equal it (fail closed on wrong-commit deploys).
+  const expected = process.env.DEPLOY_EXPECTED_COMMIT;
+  if (expected) {
+    check("deploy_expected_commit", head === expected.trim(),
+      `HEAD=${head} expected=${expected.trim()}`);
+  }
+
+  // 1c. manifest stamp must match HEAD in a clean checkout — catches a
+  //     manifest committed without regeneration after the last change.
+  {
+    const mPath = path.join(util.ROOT, "MANIFEST.json");
+    if (fs.existsSync(mPath) && head) {
+      try {
+        const stamp = (JSON.parse(fs.readFileSync(mPath, "utf8")).application || {}).git_commit;
+        check("manifest_stamp_matches_head", stamp === head,
+          `stamp=${stamp} HEAD=${head}`);
+      } catch (e) {
+        check("manifest_stamp_matches_head", false, `unreadable: ${e && e.message}`);
+      }
+    }
+  }
+
   // 2. manifest verification — canonical tool
   const vm = path.join(util.ROOT, "tools", "verify_manifest.py");
   if (!fs.existsSync(vm)) {
