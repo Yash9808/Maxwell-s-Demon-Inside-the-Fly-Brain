@@ -565,7 +565,7 @@
 <div class="hud" id="helpBox">
   <h3 style="margin:0 0 8px; color:#9fc2ff">What am I looking at?</h3>
   <p><b>The 3D brain (top)</b> is a real connectome — switch between <b>♀ FAFB v783</b>
-  (codex.flywire.ai/?dataset=fafb, female full brain, 139,255 neurons proofread) and <b>♂ MCNS v0.9</b>
+  (codex.flywire.ai/?dataset=fafb, female full brain, 139,255 neurons proofread) and <b>♂ MCNS v1.0</b>
   (codex.flywire.ai/?dataset=mcns, 166,694 neurons, brain+nerve cord) with the buttons on the left.
   Neurons are laid out layer by layer (AL → optic ME/LO/LOP → central → motor), every line is a real
   synapse-weighted edge, green/red = excitatory/inhibitory flashes. The optic lobe receives eight
@@ -2872,8 +2872,8 @@ $("btnGlb").addEventListener("click", () => {
 const DS_META = {
   fafb: { name:"FAFB v783", info:"codex.flywire.ai/?dataset=fafb — female full brain, 139,255 proofread neurons",
           badge:"FAFB v783", sim:null },
-  mcns: { name:"MCNS v0.9", info:"codex.flywire.ai/?dataset=mcns — male brain + nerve cord, 166,694 neurons",
-          badge:"MCNS v0.9", sim:null },
+  mcns: { name:"MCNS v1.0", info:"codex.flywire.ai/?dataset=mcns — male brain + nerve cord, 166,694 neurons",
+          badge:"MCNS v1.0", sim:null },
 };
 function switchDataset(key){
   const meta = DS_META[key];

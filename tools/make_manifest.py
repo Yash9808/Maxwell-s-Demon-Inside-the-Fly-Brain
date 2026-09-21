@@ -176,10 +176,17 @@ def main() -> int:
             },
             "mcns": {
                 "source": "FlyWire male CNS (MCNS) connectome",
-                "materialization": "payload dataset field: mcns_v1.0; app UI label: v0.9 (discrepancy flagged, unresolved)",
+                "materialization": "payload dataset field: mcns_v1.0; app UI label aligned to v1.0 (2026-09-21); upstream official version is MaleCNS v1.0 (Janelia/FlyWire codex)",
                 "url": "https://codex.flywire.ai/?dataset=mcns",
                 "DOI": "DOI: UNKNOWN",
                 "reference": "Berg et al., Sexual dimorphism in the complete connectome of the Drosophila male CNS (PMC12636603, preprint 2025; Cell 2026) - exact DOI not verified at generation time; NOT fabricated.",
+                "raw_payload_integrity_target": {
+                    "path": "malecns_circuit.json",
+                    "sha256": "72d96c29e83a173f64e4db50f05a90268b2688012af9452a562bd96889872482",
+                    "bytes": 138507515,
+                    "status": "NOT PRESENT (deleted in the 2026-09-21 stabilization incident; never tracked by git). Regeneration from the authoritative upstream (FlyWire codex MCNS export -> documented pruning) must reproduce this hash; the hash was recorded by the manifest while the file was present at commit 6ec0e9bf.",
+                    "note": "Runtime does not consume this raw file: data/circuits/mcns_circuit.js is a byte-exact embed of malecns_circuit_pruned.json (pruned sha256 140cb881af1d23d13947125adeae208085aecb42ecb7b1d1f603336c7b5d28c5, 8,715,602 bytes), verified by tools/split_payloads.py design and tests/run_smoke.js S3."
+                },
             },
             "neurotransmitter_predictions": {
                 "source": "Buhmann et al. synapse-type prediction model (two-stage automated NT classification)",

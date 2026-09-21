@@ -75,7 +75,7 @@ by S10 and the S9 golden fixture).
 | Artifact | Source |
 |---|---|
 | Connectome tables (`*.feather`, `proofread_root_ids_783.npy`) | FlyWire **FAFB materialization v783** (proofread scope), https://codex.flywire.ai/?dataset=fafb |
-| Male CNS circuit | FlyWire **MCNS** (`dataset=mcns`); payload says `mcns_v1.0`, app UI says v0.9 — flagged in MANIFEST.json |
+| Male CNS circuit | FlyWire **MCNS**; payload dataset field `mcns_v1.0`, app UI label aligned to v1.0 (2026-09-21); upstream official version MaleCNS v1.0 |
 | Neurotransmitter signs | Buhmann et al. synapse-type prediction scores (soft calls, not measurements) |
 | `fly_brain_circuit.json` | **Generated** by `extract_circuit.py` from the v783 tables (5-layer visual subnetwork; provenance block inside the file records extraction version, sources, root IDs) |
 | `data/circuits/*.js` | **Generated** from the JSONs by `tools/inject_circuit_3d.py` / `tools/split_payloads.py` |
@@ -141,7 +141,18 @@ analyze_v783.py          Python data pipeline (needs raw FlyWire tables)
   `s41586-024-07939-3` is this paper — not the Dorkenwald wiring-diagram
   paper, a former manifest mis-citation now corrected.)
 - Male CNS: Berg et al. 2025 (PMC12636603) — exact DOI UNKNOWN; recorded by
-  stable identifiers, not invented.
+  stable identifiers, not invented. Upstream official version: **MaleCNS v1.0**
+  (Janelia/FlyWire codex, June 2026); app UI label aligned to v1.0 (2026-09-21).
+- MCNS raw payload `malecns_circuit.json` (git-ignored, ~138 MB): **absent**
+  since the 2026-09-21 stabilization incident (never git-tracked). Integrity
+  target recorded while present: sha256
+  `72d96c29e83a173f64e4db50f05a90268b2688012af9452a562bd96889872482`,
+  138,507,515 bytes (see MANIFEST provenance `mcns.raw_payload_integrity_target`).
+  Runtime does NOT consume it: the browser payload `data/circuits/mcns_circuit.js`
+  is a byte-exact embed of `malecns_circuit_pruned.json` (sha256 `140cb881…d28c5`,
+  8,715,602 bytes), enforced by `tests/run_smoke.js` S3. Regeneration: FlyWire
+  codex MCNS export → the documented pruning step, which **must reproduce the
+  recorded raw-file hash**; if it cannot, stop and report rather than substitute.
 - Every UNKNOWN and MODEL-ASSUMED provenance flag is enumerated in the
   manifest's `provenance` block (see `MANIFEST.json`).
 tools/                   manifest/injection/archive/index generators + rebuild_anatomy
