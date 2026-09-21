@@ -1,20 +1,7 @@
-# Byte-exact assets: never convert line endings on checkout/commit.
-# The payload files must stay byte-identical to their JSON sources — the smoke
-# suite (tests/run_smoke.js S1) and MANIFEST.json hashes depend on exact bytes.
-data/circuits/*.js -text
-data/circuits/*.json -text
-fly_brain_circuit.json -text
-malecns_circuit.json -text
-malecns_circuit_pruned.json -text
-fly_demon_3d.html -text
-fly_demon_lab.html -text
-
-# True binary assets
-*.glb binary
-*.npy binary
-*.bin binary
-*.feather binary
-*.h5 binary
-*.png binary
-*.pdf binary
-*.docx binary
+# Phase 02 deployment policy: BYTE-FAITHFUL checkouts.
+#
+# MANIFEST.json pins sha256 over repository file bytes. Any EOL conversion
+# (core.autocrlf) makes fresh clones hash-verify as stale on Windows.
+# `-text` disables all EOL normalization: what is committed is what is
+# checked out, on every platform. Blobs are LF; checkouts are byte-exact.
+* -text

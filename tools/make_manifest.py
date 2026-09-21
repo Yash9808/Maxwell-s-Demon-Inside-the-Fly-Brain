@@ -25,6 +25,17 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "MANIFEST.json"
 
+# Phase 02: machine-local provisions — never git-tracked (way over the 100 MB
+# limit), downloaded/built per-machine from documented upstream sources. They
+# are verified by hash when present; absence is EXPECTED on a fresh machine,
+# not a deployment failure.
+LOCAL_PROVISIONED = {
+    "proofread_connections_783.feather",
+    "synapses_connections_783.feather",
+    "per_neuron_neuropil_count_pre_783.feather",
+    "per_neuron_neuropil_count_post_783.feather",
+}
+
 # Files > this size are recorded with sha256 null (too expensive / already
 # git-ignored); their identity is the FlyWire codex export they came from.
 MAX_HASH_BYTES = 512 * 1024 * 1024  # 512 MB
@@ -285,6 +296,11 @@ def main() -> int:
         "note": "Large DATA (*.feather, malecns_circuit.json, s41586-024-07939-3.pdf) is git-ignored; hashed here when present.",
         "missing_files": [f["path"] for g in manifest["files"].values()
                           for f in g if not f["present"]],
+        "local_provisioned_data": sorted(LOCAL_PROVISIONED),
+        "local_provisioned_note": "machine-local provisions, never git-tracked; "
+                                  "documented per-machine provisioning (FlyWire codex "
+                                  "v783 exports). Presence varies per machine; "
+                                  "hash-verified when present, expected-absent allowed.",
         "phase_01_excluded": PHASE_01_EXCLUDED,
         "phase_01_excluded_note": "unattributed working-tree modification; both "
                                   "versions hash-recorded in baselines/ENVIRONMENT.md",

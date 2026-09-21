@@ -54,6 +54,9 @@ def main() -> int:
     m = json.loads(manifest_path.read_text(encoding="utf-8"))
 
     documented_missing = set(m.get("repository", {}).get("missing_files", []))
+    # machine-local provisions: expected absent on a fresh machine (never
+    # git-tracked; per-machine documented provisioning) — reported separately.
+    local_provisioned = set(m.get("repository", {}).get("local_provisioned_data", []))
     excluded = set(m.get("repository", {}).get("phase_01_excluded", [])) | \
                set(m.get("repository", {}).get("phase_02_excluded", []))
 
@@ -81,7 +84,7 @@ def main() -> int:
                     null_by_design.append(path_rel)
                 continue
             if not fp.exists():
-                if path_rel in documented_missing:
+                if path_rel in documented_missing or path_rel in local_provisioned:
                     missing_documented.append(path_rel)
                 else:
                     missing.append(path_rel)
@@ -100,6 +103,8 @@ def main() -> int:
         "stale": stale,
         "missing_undocumented": missing,
         "missing_documented": missing_documented,
+        "local_provisioned_absent": sorted(
+            p for p in missing_documented if p in local_provisioned),
         "null_by_design": null_by_design,
         "excluded": sorted(excluded),
         "zero_stale": len(stale) == 0 and len(missing) == 0,
