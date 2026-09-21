@@ -1,12 +1,12 @@
 {
   "manifest_version": 1,
-  "generated_utc": "2026-09-21T18:13:04Z",
+  "generated_utc": "2026-09-21T20:03:06Z",
   "application": {
     "name": "Maxwell's Demon: Inside the Fly Brain",
     "version": "0.9.0",
     "version_note": "First engineering-manifest release; pre-1.0 research code.",
-    "git_commit": "027f0502fce3e003386ea0e58dbb9ce0a3efa0f8",
-    "git_branch": "stabilization/pre-phase01",
+    "git_commit": "28a5afb33932de4e9be9017c085937375204c818",
+    "git_branch": "deployment/phase-02",
     "git_dirty": true,
     "git_remote": "https://github.com/Yash9808/Maxwell-s-Demon-Inside-the-Fly-Brain.git"
   },
@@ -78,15 +78,15 @@
       {
         "path": "controllers.js",
         "present": true,
-        "sha256": "7dcc2ae0605426bfdde074f27de3d70ff411133402179699257343ba8e8b8d3e",
-        "bytes": 57502,
+        "sha256": "96db283f67e372998707f14bd9b316bc5e44c2e8a1f2e02d1b0469398d0dba2a",
+        "bytes": 63303,
         "sha256_note": null
       },
       {
         "path": "experiment_worker.js",
         "present": true,
-        "sha256": "e2fe00d88fe8d3b8da95ed886eb96820b4c0ae412cc5299b52099fce009c60cc",
-        "bytes": 33450,
+        "sha256": "6d223150d338fd9ca1f92c46735e99aee75c221feffd016cbc25f5be738fc68f",
+        "bytes": 34438,
         "sha256_note": null
       },
       {
@@ -316,8 +316,8 @@
       {
         "path": "tools/make_manifest.py",
         "present": true,
-        "sha256": "61146e633bd83ac2f9b815d7f06a8106b2d703ad6a58542329bfb611ec54ac47",
-        "bytes": 14543,
+        "sha256": "ccbc0e00ec3d6b1d9307e9e87f117944a57ab780d74fc0399461a8f6060ffc61",
+        "bytes": 15429,
         "sha256_note": null
       },
       {
@@ -824,11 +824,18 @@
     "note": "source URLs UNKNOWN (not recorded at acquisition; flagged in ENGINEERING_READINESS_REPORT.md) - never fabricated"
   },
   "repository": {
-    "tracked_file_count": 358,
+    "tracked_file_count": 378,
     "note": "Large DATA (*.feather, malecns_circuit.json, s41586-024-07939-3.pdf) is git-ignored; hashed here when present.",
     "missing_files": [
       "malecns_circuit.json"
     ],
+    "local_provisioned_data": [
+      "per_neuron_neuropil_count_post_783.feather",
+      "per_neuron_neuropil_count_pre_783.feather",
+      "proofread_connections_783.feather",
+      "synapses_connections_783.feather"
+    ],
+    "local_provisioned_note": "machine-local provisions, never git-tracked; documented per-machine provisioning (FlyWire codex v783 exports). Presence varies per machine; hash-verified when present, expected-absent allowed.",
     "phase_01_excluded": [
       "research_paper_structure_maxwell_demon_drosophila.docx"
     ],
