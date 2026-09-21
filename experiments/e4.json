@@ -1,0 +1,92 @@
+{
+  "id": "e4",
+  "manifest_version": 1,
+  "source_of_truth": "experiment_worker.js EXPERIMENTS.e4 + documented constants in experiment_core.js",
+  "label": "E4 \u00b7 Connectome-Constrained (4A/4B/4C)",
+  "question": "Does real FAFB wiring beat restricted-pathway and shuffled controls at the demon task?",
+  "needs_circuit": true,
+  "dataset": {
+    "connectome": "FlyWire FAFB v783 (proofread scope)",
+    "circuit_file": "fly_brain_circuit.json",
+    "circuit_sha256": "0eb64ba45135656360567fd1d73385c7b7a0be3c7d053ddbba1eda797de98671"
+  },
+  "physics": {
+    "chamber": {
+      "w": 760,
+      "h": 380,
+      "d": 300
+    },
+    "wall_thickness": 8,
+    "door_gap": 0.6,
+    "door_z_half": 105.0,
+    "pmass_cap": 600,
+    "dt_s": 0.016666666666666666,
+    "env_defaults": {
+      "nParticles": 320,
+      "noise": 0.12,
+      "doorHeight": 64,
+      "jetPower": 0.55,
+      "jetAim": 0.5,
+      "jetInterval": 3.5
+    },
+    "thermo": {
+      "sim_to_joule": 1e-21,
+      "T_env_K": 300,
+      "kB_J": 1.38e-23
+    },
+    "seed_scheme": "env seed = 1 + seedIdx*101; controller rng = makeRng(seed ^ 0x5f5f)"
+  },
+  "controllers": {
+    "connectome_4A": {
+      "type": "connectomeController",
+      "params": {
+        "shuffle": false,
+        "seed": 1,
+        "opticDrive": 0.25,
+        "plasticity": "full"
+      }
+    },
+    "connectome_4B": {
+      "type": "connectomeController",
+      "params": {
+        "shuffle": false,
+        "seed": 1,
+        "opticDrive": 0.25,
+        "plasticity": "restricted"
+      }
+    },
+    "connectome_4C": {
+      "type": "connectomeController",
+      "params": {
+        "shuffle": true,
+        "seed": 7,
+        "opticDrive": 0.25,
+        "plasticity": "full"
+      }
+    }
+  },
+  "reward_parameters": {
+    "kind": "good/bad crossing feedback via receiveFeedback({good, dir})"
+  },
+  "seed": {
+    "prng": "mulberry32 (experiment_core.js makeRng); seed = 1 + seedIdx*101",
+    "n_seeds": 1
+  },
+  "train_test_split": {
+    "train_trials": 40,
+    "test_trials": 10,
+    "episode_seconds": 12,
+    "learning_on": "train phase only"
+  },
+  "expected_outputs": {
+    "conditions": [
+      "connectome_4A",
+      "connectome_4B",
+      "connectome_4C"
+    ],
+    "rows": "one JSONL/row per condition\u00d7phase\u00d7trial\u00d7seed (schema identical to research_data/ rows; see run_smoke.js field assertions)",
+    "summary": "per-condition mean\u00b1CI block aggregates (early/late/test windows)",
+    "provenance": "run provenance echo (seeds, trials, physics, software tag, timestamps)"
+  },
+  "note": "opticDrive 0.25 = sparsest regime where real vs shuffled wiring diverges (verified by sweep; aggregate 1.0 saturates the motor layer)."
+}

@@ -2,7 +2,7 @@
   "experiment": "e9",
   "phase": 3,
   "kind": "training_sweep_final_analysis",
-  "dateISO": "2026-09-19T09:45:20.549Z",
+  "dateISO": "2026-09-20T22:23:38.080Z",
   "sourceAggregate": "e9_training_sweep.csv",
   "summaryProvenance": {
     "experiment": "e9",

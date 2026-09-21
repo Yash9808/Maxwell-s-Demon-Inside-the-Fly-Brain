@@ -1,0 +1,538 @@
+{
+  "manifest_version": 1,
+  "generated_utc": "2026-09-21T10:38:50Z",
+  "application": {
+    "name": "Maxwell's Demon: Inside the Fly Brain",
+    "version": "0.9.0",
+    "version_note": "First engineering-manifest release; pre-1.0 research code.",
+    "git_commit": "76bb7875f4b5fce97eb90a67e3af680c6f59e08e",
+    "git_branch": "Ver2(Split-code-fastframe)",
+    "git_dirty": true,
+    "git_remote": "https://github.com/Yash9808/Maxwell-s-Demon-Inside-the-Fly-Brain.git"
+  },
+  "connectome_provenance": {
+    "fafb": {
+      "source": "FlyWire Full Adult Fly Brain (FAFB) connectome",
+      "materialization": "v783",
+      "scope": "proofread (both partners proofread)",
+      "url": "https://codex.flywire.ai/?dataset=fafb",
+      "DOI": "DOI: UNKNOWN",
+      "reference": "Dorkenwald et al., Neuronal wiring diagram of an adult brain, bioRxiv 2023 / Nature 2024 (see s41586-024-07939-3.pdf)",
+      "caveat": "Root IDs are stable only within materialization v783."
+    },
+    "mcns": {
+      "source": "FlyWire male CNS (MCNS) connectome",
+      "materialization": "payload dataset field: mcns_v1.0; app UI label: v0.9 (discrepancy flagged, unresolved)",
+      "url": "https://codex.flywire.ai/?dataset=mcns",
+      "DOI": "DOI: UNKNOWN"
+    },
+    "neurotransmitter_predictions": {
+      "source": "Buhmann et al. synapse-type prediction model (two-stage automated NT classification)",
+      "note": "Scores are predictions (0-1), not experimental measurements; *_avg > 0.5 is a soft call.",
+      "DOI": "DOI: UNKNOWN"
+    }
+  },
+  "random_seed_scheme": {
+    "benchmark_and_worker_seeds": "seed = base + seedIdx*101 (base from run cfg, default 1)",
+    "connectome_brain_draw": "makeRng(9176 + seedIdx*37)",
+    "policy_gradient_readout": "makeRng(424243 + seedIdx*977)",
+    "e4_shuffled_connectome": "shuffle: true, seed 7",
+    "prng": "mulberry32 (32-bit, experiment_core.js makeRng)"
+  },
+  "generated_data_provenance": {
+    "fly_brain_circuit.json": "python extract_circuit.py  (from v783 feather tables; requires synapses table for optic position channels)",
+    "malecns_circuit_pruned.json": "pruned MCNS export (generator script not retained; see SCRIPT_ARCHIVE_INDEX.md)",
+    "fly_brain_positions.json/.bin, fly_brain_hulls*": "_rebuild_anatomy.py (anatomy pipeline; see SCRIPT_ARCHIVE_INDEX.md)",
+    "neuron_nt_classification.csv": "python classify_neurons.py",
+    "neuropil_matrix.csv": "python neuropil_matrix.py",
+    "report_v783.md": "python analyze_v783.py",
+    "research_data/": "node benchmark.js / experiment batch runners (seeded, per-run provenance inside each summary)",
+    "research_figures/": "python analysis/plot_research_figures.py + plot_experiment_figures.py",
+    "fly_demon_3d.html FAFB/MCNS slots": "python inject_3d_circuit.py (FAFB slot) / manual embed (MCNS slot)"
+  },
+  "files": {
+    "source": [
+      {
+        "path": "experiment_core.js",
+        "present": true,
+        "sha256": "e1a512bc2e63a72910dfd3fb4b5c6129b6e3dab66d9590e296e050730b9054d2",
+        "bytes": 98368,
+        "sha256_note": null
+      },
+      {
+        "path": "controllers.js",
+        "present": true,
+        "sha256": "a90441e19083776763c3f5427c6158e64f15c965c244eccfa01a644a788a4845",
+        "bytes": 55642,
+        "sha256_note": null
+      },
+      {
+        "path": "experiment_worker.js",
+        "present": true,
+        "sha256": "03ffe03eb14c46d65a344b52295a29a43daa54b6d564155b3f0034ef072a4a5a",
+        "bytes": 29682,
+        "sha256_note": null
+      },
+      {
+        "path": "benchmark.js",
+        "present": true,
+        "sha256": "5e0fd0ef83c674749ca6aee118445442719e6fd6575709c24c582079a4964d28",
+        "bytes": 8262,
+        "sha256_note": null
+      },
+      {
+        "path": "learning_test.js",
+        "present": true,
+        "sha256": "0f955f41dab6bd2cdd4766519ca36524cfe967330b400298bc580fd1bf680239",
+        "bytes": 5649,
+        "sha256_note": null
+      },
+      {
+        "path": "brain_worker.js",
+        "present": true,
+        "sha256": "72474f0b9a3ee22fbd7f3bfd55cec18736135f2d5d248a5ad4f8054e45d56b3f",
+        "bytes": 11114,
+        "sha256_note": null
+      },
+      {
+        "path": "fafb783.py",
+        "present": true,
+        "sha256": "fdf1089d72f0d6d7969c7253904a391ba69cd782b590c8dfbdc190a10b94f810",
+        "bytes": 4555,
+        "sha256_note": null
+      },
+      {
+        "path": "extract_circuit.py",
+        "present": true,
+        "sha256": "c2eba0f7b674112f7ed216e310005978d6c55e902c4c53122d94802c80bff4f3",
+        "bytes": 17661,
+        "sha256_note": null
+      },
+      {
+        "path": "inject_circuit.py",
+        "present": true,
+        "sha256": "9f610dee86d409e984585444d6bf7c754f14d1de47102fe659e36efdbca732db",
+        "bytes": 2090,
+        "sha256_note": null
+      },
+      {
+        "path": "inject_3d_circuit.py",
+        "present": true,
+        "sha256": "f91f4eeb605a2c80473fcc2bb39ba5fb0b86dd9787eb431dbe5ddf6e80a82186",
+        "bytes": 1244,
+        "sha256_note": null
+      },
+      {
+        "path": "neuropil_matrix.py",
+        "present": true,
+        "sha256": "f2e8491936fbc877fc88f9120e01f912357da966ad60c418c0088da65ee5cfbc",
+        "bytes": 11011,
+        "sha256_note": null
+      },
+      {
+        "path": "classify_neurons.py",
+        "present": true,
+        "sha256": "984af6a3b0fe864afbbf3f2d3807a99fa815adac60627d091590b03686a5cb52",
+        "bytes": 8989,
+        "sha256_note": null
+      },
+      {
+        "path": "analyze_v783.py",
+        "present": true,
+        "sha256": "8f8e9b925854507e72874b365448b903a29a2378364e99e52b7118d20fa79587",
+        "bytes": 4011,
+        "sha256_note": null
+      },
+      {
+        "path": "plot_experiment_figures.py",
+        "present": true,
+        "sha256": "3f5ec190f953b52d65461d596594941ae16a71f5f195b3ba0a7d58633c4fd507",
+        "bytes": 6461,
+        "sha256_note": null
+      },
+      {
+        "path": "analysis/plot_research_figures.py",
+        "present": true,
+        "sha256": "fb55b2c27eec8882484085cb4d20ccfaddcdbe5690023760bca0d0b38f2a20ff",
+        "bytes": 13886,
+        "sha256_note": null
+      },
+      {
+        "path": "launch_fly_demon_3d.py",
+        "present": true,
+        "sha256": "6132f750e1c99508a4dc4f86b0a3f5435593a97057261b2abe22265e33a31efb",
+        "bytes": 4089,
+        "sha256_note": null
+      },
+      {
+        "path": "build_nature_paper_docx.py",
+        "present": true,
+        "sha256": "639b5b0b5be7274110260960aa91ea9d18c0b6ad29b27028c2cf67d10ade143b",
+        "bytes": 41353,
+        "sha256_note": null
+      },
+      {
+        "path": "fly_demon_lab_template.html",
+        "present": true,
+        "sha256": "5fdda6c66b61b3799cd1c52741a4beddc70b084c15e555f40513555be5d4be1f",
+        "bytes": 30876,
+        "sha256_note": null
+      },
+      {
+        "path": "experiment_plots.html",
+        "present": true,
+        "sha256": "bbe453f945b831229d844a8de8844b4f4ccce21b63f81a6eebb5a9c2b2ce3ad4",
+        "bytes": 153512,
+        "sha256_note": null
+      }
+    ],
+    "hybrid_app": [
+      {
+        "path": "fly_demon_3d.html",
+        "present": true,
+        "sha256": "9bfc1cc8734700bb8e78c72d73051bc1dee37ba2e06a73d1d4f76b302412213a",
+        "bytes": 450320,
+        "sha256_note": null
+      },
+      {
+        "path": "fly_demon_lab.html",
+        "present": true,
+        "sha256": "4e447568e4d60acb23c9af7e9b0660a5ba21188465f7124a716090efbd7082d0",
+        "bytes": 31209,
+        "sha256_note": null
+      }
+    ],
+    "vendored_libs": [
+      {
+        "path": "three.module.js",
+        "present": true,
+        "sha256": "76dea8151bc9352aef3528b4262e249b2604f62543828328db978d060d61a495",
+        "bytes": 1272972,
+        "sha256_note": null
+      },
+      {
+        "path": "GLTFLoader.module.js",
+        "present": true,
+        "sha256": "1a94183dc2a662e17110c5c768401e8547a7a7d979cb307cdba7ae3cec55d4c1",
+        "bytes": 108534,
+        "sha256_note": null
+      },
+      {
+        "path": "BufferGeometryUtils.module.js",
+        "present": true,
+        "sha256": "3a6701d824adfe05dc28c09b6c1d64aeab9a183bc3b944d85f15f596e5c6c2b3",
+        "bytes": 31918,
+        "sha256_note": null
+      }
+    ],
+    "circuit_payloads": [
+      {
+        "path": "data/circuits/fafb_circuit.js",
+        "present": true,
+        "sha256": "42f5a80fda18e41366f56b07f63f01a8ff21b136cec6233a3245af167e390fbd",
+        "bytes": 50720412,
+        "sha256_note": null
+      },
+      {
+        "path": "data/circuits/mcns_circuit.js",
+        "present": true,
+        "sha256": "3d3e8fa094edb9b6976160d6da96fa2aaebb3be51c34a7ec4ef2610e91c6b423",
+        "bytes": 8715791,
+        "sha256_note": null
+      },
+      {
+        "path": "data/circuits/lab_circuit.js",
+        "present": true,
+        "sha256": "53d5c303d8bfd0431e68c7077fd93fd8e81232aca4abf6ccec5cf47d79560421",
+        "bytes": 6917996,
+        "sha256_note": null
+      },
+      {
+        "path": "fly_brain_circuit.json",
+        "present": true,
+        "sha256": "0eb64ba45135656360567fd1d73385c7b7a0be3c7d053ddbba1eda797de98671",
+        "bytes": 50720187,
+        "sha256_note": null
+      },
+      {
+        "path": "malecns_circuit_pruned.json",
+        "present": true,
+        "sha256": "140cb881af1d23d13947125adeae208085aecb42ecb7b1d1f603336c7b5d28c5",
+        "bytes": 8715602,
+        "sha256_note": null
+      },
+      {
+        "path": "malecns_circuit.json",
+        "present": true,
+        "sha256": "72d96c29e83a173f64e4db50f05a90268b2688012af9452a562bd96889872482",
+        "bytes": 138507515,
+        "sha256_note": null
+      },
+      {
+        "path": "fly_brain_positions.json",
+        "present": true,
+        "sha256": "fca5f504cb18542b84038cf3da9b493a27fbfc9e50093f801d01ea07492d3254",
+        "bytes": 4706316,
+        "sha256_note": null
+      },
+      {
+        "path": "fly_brain_positions.bin",
+        "present": true,
+        "sha256": "8ad8cb98314bedc4ea2f60ee8d7054a4311647b3d8b83cf937620dc5bf350c90",
+        "bytes": 747355,
+        "sha256_note": null
+      },
+      {
+        "path": "fly_brain_hulls.json",
+        "present": true,
+        "sha256": "24d2cd4ed759d7ec3a2d8b2d5d09a584f1f3efa3428e113d438d21c2a81ab401",
+        "bytes": 2708,
+        "sha256_note": null
+      },
+      {
+        "path": "fly_brain_hulls.bin",
+        "present": true,
+        "sha256": "b70db9c9528b812749be4317f832f0d066aff2a5295152660bbaf7b53d8b6a60",
+        "bytes": 849458,
+        "sha256_note": null
+      },
+      {
+        "path": "fly_brain_hulls_raw_frame.bin",
+        "present": true,
+        "sha256": "acc87630ce50667a3813db1337d0294f798abe38d8caab69557af7e44872c4b5",
+        "bytes": 375165,
+        "sha256_note": null
+      },
+      {
+        "path": "fly_brain_meta.json",
+        "present": true,
+        "sha256": "e2ab09f7e7f4d10c095b369f088a54b7cd3f1a30eb97a9cc9772375aa5b2ed48",
+        "bytes": 6680,
+        "sha256_note": null
+      },
+      {
+        "path": "devil_b64.txt",
+        "present": true,
+        "sha256": "6647d2b79a675c9be88d9e607d511215c7bc1f8b6cc930ff8fcf8d8294955a25",
+        "bytes": 4204,
+        "sha256_note": null
+      }
+    ],
+    "flywire_v783_data": [
+      {
+        "path": "proofread_root_ids_783.npy",
+        "present": true,
+        "sha256": "7c7b7e818e9232e5ab64793d52ba20574dbe9da3a6509fbc74193b0f259a01be",
+        "bytes": 1114168,
+        "sha256_note": null
+      },
+      {
+        "path": "proofread_connections_783.feather",
+        "present": true,
+        "sha256": null,
+        "bytes": 852022274,
+        "sha256_note": "file exceeds MAX_HASH_BYTES; verify against FlyWire codex export instead"
+      },
+      {
+        "path": "synapses_connections_783.feather",
+        "present": true,
+        "sha256": null,
+        "bytes": 9492998242,
+        "sha256_note": "file exceeds MAX_HASH_BYTES; verify against FlyWire codex export instead"
+      },
+      {
+        "path": "per_neuron_neuropil_count_pre_783.feather",
+        "present": true,
+        "sha256": "35442a46f076892dff91bd6e55fa1489b3acc64fda1d35cee7dbbbbc509a3dff",
+        "bytes": 16853770,
+        "sha256_note": null
+      },
+      {
+        "path": "per_neuron_neuropil_count_post_783.feather",
+        "present": true,
+        "sha256": "e2418f4794fe47984bb4bc15ffc194003ea8e349a428551f30af94947d85d712",
+        "bytes": 233843050,
+        "sha256_note": null
+      }
+    ],
+    "analysis_outputs": [
+      {
+        "path": "neuron_nt_classification.csv",
+        "present": true,
+        "sha256": "cb0f9abc9f56972ea9a77a1d8bc5e44c25dab851a4026fdbac9097fdb032b220",
+        "bytes": 17122421,
+        "sha256_note": null
+      },
+      {
+        "path": "neuron_nt_summary_by_neuropil.csv",
+        "present": true,
+        "sha256": "95fb5b4a79385d11651c28a2c8cce06dc44d31062a761c447b424ad4889bae20",
+        "bytes": 2695,
+        "sha256_note": null
+      },
+      {
+        "path": "neuron_nt_report.md",
+        "present": true,
+        "sha256": "636ad069b43000010bfda3a9298d51d7d4c6cb996069f099645bd866baa54c2b",
+        "bytes": 4411,
+        "sha256_note": null
+      },
+      {
+        "path": "neuropil_matrix.csv",
+        "present": true,
+        "sha256": "239604f16fef687c25635fd016021072dc5319227e799c6a86ac97e9599b34aa",
+        "bytes": 20568,
+        "sha256_note": null
+      },
+      {
+        "path": "neuropil_matrix_report.md",
+        "present": true,
+        "sha256": "7ad0df525541d6ee7fb2d2ea37bdfd6e79932386f597583065c9ca41d0becf46",
+        "bytes": 1671,
+        "sha256_note": null
+      },
+      {
+        "path": "report_v783.md",
+        "present": true,
+        "sha256": "4ef4e399f2212990f52eeaa7379680e72d287dc21d13aa5e3326051e12295869",
+        "bytes": 1654,
+        "sha256_note": null
+      },
+      {
+        "path": "maxwell_demon_experiment.md",
+        "present": true,
+        "sha256": "480d5150d6c6933e0dd0661ea2b762a7ce09acffb2cbc1e86ea8bac5d0c2dcf0",
+        "bytes": 11398,
+        "sha256_note": null
+      },
+      {
+        "path": "maxwell_demon_figure.pdf",
+        "present": true,
+        "sha256": "179a225759e2f6773c92368f955ab02119e67ae7225512d957a66e9e30b304ac",
+        "bytes": 66524,
+        "sha256_note": null
+      }
+    ],
+    "mesh_assets": [
+      {
+        "path": "drosophila_-_adult_fruit_fly_-_ct_scan.glb",
+        "present": true,
+        "sha256": "5eb20178a616222dd0497d4332c424513c2eaa33cd00d9473789d51852ede59f",
+        "bytes": 40171084,
+        "sha256_note": null
+      },
+      {
+        "path": "drosophila_larve_brain__axotactin_enhancer_axog.glb",
+        "present": true,
+        "sha256": "c9516f6aa0a5e04bc635aa7a002393b14d39e980cda2ef542da13aa66301931c",
+        "bytes": 19847452,
+        "sha256_note": null
+      },
+      {
+        "path": "fiji_sample_-_fly_brain_stl-binary_-_tarea_9.glb",
+        "present": true,
+        "sha256": "3625193f11ae815adfdf2e0e884264e60e7bf4573288e510e6f8ad1eb66b8653",
+        "bytes": 2556964,
+        "sha256_note": null
+      },
+      {
+        "path": "fly.glb",
+        "present": true,
+        "sha256": "7feaada9c725a2e780dbec697da28ae51e97d0172a2d774c3de33fdf230ea424",
+        "bytes": 729336,
+        "sha256_note": null
+      },
+      {
+        "path": "b7c7e51c-2912-4f77-bbdf-a440cfbb3527.glb",
+        "present": true,
+        "sha256": "913467f4c031b91a07040c4ee5c8cfae97615b0143ed3ff137772e49fb7db221",
+        "bytes": 164176,
+        "sha256_note": null
+      }
+    ],
+    "experiment_configs": [
+      {
+        "path": "experiments\\e1.json",
+        "present": true,
+        "sha256": "7b8295131b5b73c8d18cc85189280b8a0b31ee00a0c1a9c6ac3081a0f0a13d8f",
+        "bytes": 1819,
+        "sha256_note": null
+      },
+      {
+        "path": "experiments\\e10.json",
+        "present": true,
+        "sha256": "0ab7504e85f03f332aad683fc921c44b7b8805c06fceb630b9a47a7d4f563908",
+        "bytes": 2278,
+        "sha256_note": null
+      },
+      {
+        "path": "experiments\\e11.json",
+        "present": true,
+        "sha256": "abfbc1043e21e9f871d8959e1b0cf9d5bcf93bd90f9dfe573fc9e1233299b0c1",
+        "bytes": 2701,
+        "sha256_note": null
+      },
+      {
+        "path": "experiments\\e2.json",
+        "present": true,
+        "sha256": "6599e23c6cc19a113110a868555044269d7b66f378ad881164c8f7a5ca68f99a",
+        "bytes": 1805,
+        "sha256_note": null
+      },
+      {
+        "path": "experiments\\e3.json",
+        "present": true,
+        "sha256": "77c3745a3fd6ba3910374b2ad706142a2a4c3fc26c049661f8e97818047ea105",
+        "bytes": 1845,
+        "sha256_note": null
+      },
+      {
+        "path": "experiments\\e4.json",
+        "present": true,
+        "sha256": "e7450e694d8cfd696dfed4193c061decefc5e527f99b8d32bda7c384ae847993",
+        "bytes": 2789,
+        "sha256_note": null
+      },
+      {
+        "path": "experiments\\e5.json",
+        "present": true,
+        "sha256": "d10be4a975314ca7dcbe713deac39304af0d982b777f1f2f7135a16772295edd",
+        "bytes": 2667,
+        "sha256_note": null
+      },
+      {
+        "path": "experiments\\e6.json",
+        "present": true,
+        "sha256": "87c3769157d6e408ffc4da609b6f17d13bb6bf79240d3bda942fa84f5cfc7eb3",
+        "bytes": 1965,
+        "sha256_note": null
+      },
+      {
+        "path": "experiments\\e7.json",
+        "present": true,
+        "sha256": "b777266b730e4aae328fa7a816dee5511ab51877ca412f152923c670bf29c1b3",
+        "bytes": 2067,
+        "sha256_note": null
+      },
+      {
+        "path": "experiments\\e8.json",
+        "present": true,
+        "sha256": "955a6c326bf142b782f7f70c2de406d273915628f615e90d7f45ba8acf5ff8a3",
+        "bytes": 2084,
+        "sha256_note": null
+      },
+      {
+        "path": "experiments\\e9.json",
+        "present": true,
+        "sha256": "7f8f54365556f744e5d2afcb8b185718d6ac00411095001ec2653076d2dc3119",
+        "bytes": 2924,
+        "sha256_note": null
+      }
+    ]
+  },
+  "repository": {
+    "tracked_file_count": 196,
+    "note": "Large DATA (*.feather, malecns_circuit.json, s41586-024-07939-3.pdf) is git-ignored; hashed here when present.",
+    "missing_files": []
+  }
+}

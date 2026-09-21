@@ -1,0 +1,10 @@
+experiment,comparison,metric,hedges_g,rank_biserial,n_A,n_B,interpretation
+E3,primary: paired late-early goodBadRatio (drosophila),,,,5,5,large
+E3,secondary: drosophila vs random test goodBadRatio,,,,0,20,large
+E3,secondary: drosophila vs frozen test goodBadRatio,,,,0,5,large
+E3,secondary: dTfinal drosophila vs random (test) [DEGENERATE-PRONE: see note],,3.6770,1.0000,20,20,large
+E3,secondary: sortEntropy drosophila vs random (test) [DEGENERATE-PRONE: see note],,3.3200,0.9850,20,20,large
+E4,primary: 4A vs 4C(shuffle-draw means) test goodBadRatio,,-0.1140,-0.1667,12,10,negligible
+E4,secondary: 4A vs 4B test goodBadRatio,,0.3891,0.2083,12,12,small
+E4,secondary: 4A vs frozen test goodBadRatio,,0.0663,0.0833,12,12,negligible
+E4,secondary: 4A paired late-early goodBadRatio,,-0.0236,,12,12,negligible

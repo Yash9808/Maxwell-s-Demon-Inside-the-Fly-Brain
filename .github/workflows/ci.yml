@@ -1,0 +1,86 @@
+name: FAST CI
+
+# Fast, CPU-only validation on every push/PR. No GPU, no Python data jobs,
+# no large research benchmarks — see research-benchmark.yml for the FULL run.
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  smoke-tests:
+    name: Smoke suite (Node, CPU-only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Syntax-check Node sources
+        run: |
+          for f in experiment_core.js controllers.js experiment_worker.js \
+                   benchmark.js learning_test.js brain_worker.js; do
+            node --check "$f"
+          done
+
+      - name: Payload integrity (circuits byte/semantic-identical to JSONs)
+        run: node tests/run_smoke.js --quick
+        env:
+          SMOKE_NAME: full-quick
+
+      - name: Experiment manifests present and valid JSON
+        run: |
+          node -e '
+            const fs = require("fs");
+            for (const id of ["e1","e2","e3","e4","e5","e6","e7","e8","e9","e10","e11"]) {
+              const m = JSON.parse(fs.readFileSync(`experiments/${id}.json`, "utf8"));
+              if (m.id !== id) throw new Error(`manifest id mismatch: ${id}`);
+              if (!m.expected_outputs.conditions.length) throw new Error(`${id}: no conditions`);
+            }
+            console.log("11 experiment manifests OK");
+          '
+
+      - name: MANIFEST.json present and well-formed
+        run: |
+          node -e '
+            const m = require("./MANIFEST.json");
+            if (!m.application.git_commit) throw new Error("MANIFEST.json missing git commit");
+            const groups = Object.keys(m.files);
+            if (!groups.includes("circuit_payloads")) throw new Error("MANIFEST.json missing circuit_payloads group");
+            console.log("MANIFEST.json OK (groups: " + groups.join(", ") + ")");
+          '
+
+      - name: Artifact validation (app + payload files exist, HTML not bloated)
+        run: |
+          test -f fly_demon_3d.html
+          test -f data/circuits/fafb_circuit.js
+          test -f data/circuits/mcns_circuit.js
+          test -f data/circuits/lab_circuit.js
+          # the monolith must not silently re-grow past ~5 MB (payloads are external now)
+          BYTES=$(wc -c < fly_demon_3d.html)
+          if [ "$BYTES" -gt 5000000 ]; then
+            echo "fly_demon_3d.html grew to $BYTES bytes — did a payload get re-embedded?"
+            exit 1
+          fi
+          echo "app size OK ($BYTES bytes)"
+
+  python-tools:
+    name: Python tool syntax (CPU-only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile all production Python tools
+        run: |
+          python -m py_compile tools/make_manifest.py tools/inject_circuit_3d.py \
+            tools/gen_experiment_manifests.py tools/gen_archive_index.py \
+            tools/split_payloads.py tools/rebuild_anatomy.py \
+            fafb783.py extract_circuit.py inject_circuit.py \
+            analyze_v783.py classify_neurons.py neuropil_matrix.py \
+            plot_experiment_figures.py launch_fly_demon_3d.py
+          echo "python tools compile OK"

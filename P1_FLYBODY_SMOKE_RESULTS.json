@@ -1,0 +1,139 @@
+{
+ "meta": {
+  "tool": "p1_flybody_smoke",
+  "versions": {
+   "python": "3.11.9",
+   "mujoco": "3.13.0",
+   "dm_control": "1.0.46",
+   "flybody": "0.1.0",
+   "flybody_commit": null,
+   "platform": "Windows-10-10.0.26200-SP0"
+  },
+  "utc": "2026-09-21T06:23:24Z"
+ },
+ "params": [
+  {
+   "name": "physics_timestep",
+   "value": 0.0001,
+   "tag": "SOURCE-DERIVED",
+   "source": "flybody FruitFly._build default (Vaxenburg et al., Nature 2025)"
+  },
+  {
+   "name": "control_timestep",
+   "value": 0.002,
+   "tag": "SOURCE-DERIVED",
+   "source": "flybody FruitFly._build default; re-measured from data.time at runtime"
+  },
+  {
+   "name": "action_dimension",
+   "value": 59,
+   "tag": "SOURCE-DERIVED",
+   "source": "flybody README walking action dimension; asserted against action_spec at runtime"
+  },
+  {
+   "name": "smoke_episode_seconds",
+   "value": 0.2,
+   "tag": "MODEL-ASSUMED",
+   "source": "this test protocol"
+  },
+  {
+   "name": "sine_amplitude",
+   "value": 0.3,
+   "tag": "MODEL-ASSUMED",
+   "source": "this test protocol"
+  },
+  {
+   "name": "sine_frequency_hz",
+   "value": 2.0,
+   "tag": "MODEL-ASSUMED",
+   "source": "this test protocol"
+  },
+  {
+   "name": "feedback_gain",
+   "value": 1.0,
+   "tag": "MODEL-ASSUMED",
+   "source": "this test protocol (wiring check, not control performance)"
+  },
+  {
+   "name": "stability_tolerance_m",
+   "value": 0.005,
+   "tag": "MODEL-ASSUMED",
+   "source": "this test protocol"
+  },
+  {
+   "name": "velocity_bound",
+   "value": 1000.0,
+   "tag": "MODEL-ASSUMED",
+   "source": "divergence guard, this test protocol"
+  },
+  {
+   "name": "physics_response_eps_m",
+   "value": 1e-09,
+   "tag": "MODEL-ASSUMED",
+   "source": "this test protocol"
+  },
+  {
+   "name": "determinism_tol",
+   "value": 1e-12,
+   "tag": "MODEL-ASSUMED",
+   "source": "this test protocol"
+  }
+ ],
+ "env": {
+  "action_dim": 59,
+  "control_timestep_measured": 0.0020000000000000005,
+  "obs_source_key": "walker/joints_vel"
+ },
+ "checks": [
+  {
+   "name": "S1_build_reset_spec",
+   "passed": true,
+   "detail": "action_spec shape=(59,) (expect (59,)), reset obs finite=True",
+   "metrics": {
+    "action_dim": 59,
+    "n_obs_keys": 12
+   }
+  },
+  {
+   "name": "S2_passive_stability",
+   "passed": true,
+   "detail": "CoM drift 1.88e-03 m over 76 steps (tol 5e-03); max|qvel|=2; finite_obs=True",
+   "metrics": {
+    "com_z_initial": 0.11176543399553672,
+    "com_z_final": 0.11126477734257269,
+    "drift": 0.0018753038892016932,
+    "max_abs_qvel": 1.9999908495125343,
+    "steps": 76
+   }
+  },
+  {
+   "name": "S3_scripted_actions",
+   "passed": true,
+   "detail": "finite_obs=True; max|qvel|=4.51; mean_reward=1.000000",
+   "metrics": {
+    "mean_reward": 1.0,
+    "max_abs_qvel": 4.510242281210484,
+    "steps": 76
+   }
+  },
+  {
+   "name": "S4_feedback_loop_wiring",
+   "passed": true,
+   "detail": "recompute_err=0.00e+00; max|action|=1.000; |qpos_fb - qpos_zero|max=9.842e-01; src_obs='walker/joints_vel'",
+   "metrics": {
+    "recompute_err": 0.0,
+    "max_action": 1.0,
+    "qpos_delta_vs_zero": 0.9842316954043979
+   }
+  },
+  {
+   "name": "S5_determinism",
+   "passed": true,
+   "detail": "|dqpos|max between identical reruns = 0.000e+00 (tol 1e-12)",
+   "metrics": {
+    "determinism_delta": 0.0
+   }
+  }
+ ],
+ "verdict": "PASS"
+}

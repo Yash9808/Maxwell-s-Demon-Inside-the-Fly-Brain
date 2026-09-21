@@ -26,6 +26,10 @@ const clamp = (x, a, b) => (x < a ? a : x > b ? b : x);
 
 // ------------------------------------------------------------- constants
 const CH = { w: 760, h: 380, d: 300 };
+// NOTE: this file must stay require()-free — the smoke suite executes its
+// source in a hermetic determinism sandbox (tests/run_smoke.js S7-S10) that
+// forbids module loads. Stage F keeps the retinotopy coupling in
+// controllers.js (which owns the require edge to p1_retinotopy.js).
 const WALL_T = 8;
 const DOOR_GAP = 0.6;
 const DOOR_Z_HALF = CH.d * 0.35;
@@ -229,7 +233,10 @@ function makeEnvironment(cfg) {
     ];
   }
 
-  /** 8-bin visual field (4 horizontal x 2 vertical) — matches readVisualField(). */
+  /** 8-bin visual field (4 horizontal x 2 vertical) — matches readVisualField().
+   *  Stage F: the 800-bin retinotopic variant is computed by the CONSUMER
+   *  (connectomeController via p1_retinotopy.js) from env.particles + CH,
+   *  because this file must stay require()-free (see note at top). */
   function readVisualField() {
     const field = new Array(8).fill(0);
     for (const p of particles) {

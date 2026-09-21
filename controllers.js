@@ -10,6 +10,11 @@
  */
 "use strict";
 const { METRICS, makeRng, CH, DOOR_Z_HALF, clamp } = require("./experiment_core");
+const RT = require("./p1_retinotopy.js");   // Stage F hex-lattice optic input
+// (experiment_core.js must stay require()-free — the smoke determinism
+// sandbox forbids module loads there — so the field is computed HERE from
+// env.particles + the exported CH constants.)
+const RT_NODES = RT.hexLatticeNodes();
 
 // ------------------------------------------------------ 1. classical demon
 /**
@@ -418,6 +423,22 @@ function drosophilaController(rng, env, cfg) {
  * With shuffle=false it is the real topology; shuffle=true performs a seeded,
  * degree-preserving edge rewiring (PDF Model 4C control).
  */
+// --- P0 modulatory (third-factor) semantics ---------------------------------
+// Edge objects may carry nt / modulatory / modulatorType (schema 2, P0).
+// Legacy circuits (no modulatory field) keep the old behavior exactly:
+// an absent field means a fast, weight-bearing synapse, sign +1/-1.
+// Modulators (da/ser/oct) are NEVER weight-bearing: they are split out of the
+// propagation arrays at build time and re-enter only as per-modulator activity
+// channels that scale the dopamine-gated plasticity update (third factor).
+// Default modulation gains are structural and UNOPTIMIZED (no benchmark was
+// consulted to choose them); pass opts.modulation to override.
+const MOD_GAINS_DEFAULT = Object.freeze({ dopamine: 0.15, serotonin: 0.15, octopamine: 0.15 });
+
+function ntToModulator(nt) {                 // tolerant fallback for partial schema
+  return nt === "da" ? "dopamine" : nt === "ser" ? "serotonin"
+       : nt === "oct" ? "octopamine" : null;
+}
+
 function connectomeController(circuit, opts) {
   opts = opts || {};
   const shuffle = !!opts.shuffle;
@@ -428,6 +449,14 @@ function connectomeController(circuit, opts) {
   //   "restricted" = only sensory-pathway edges plastic (4B restricted)
   //   "none" = fixed connectome, no plasticity (4B fixed)
   const plasticity = opts.plasticity !== undefined ? opts.plasticity : "full";
+  // P0 third-factor channels: modulatory contacts split from the fast edges.
+  const MOD_GAINS = Object.assign({}, MOD_GAINS_DEFAULT, opts.modulation || {});
+  const hasModField = circuit.modulatory_edges !== undefined ||
+    (circuit.edges.length && circuit.edges[0].modulatory !== undefined);
+  const modEdgesRaw = hasModField && circuit.modulatory_edges
+    ? circuit.modulatory_edges
+    : (circuit.edges || []).filter(e => e.modulatory);   // tolerant fallback
+  const MOD = { dopamine: 0, serotonin: 0, octopamine: 0 }; // modulator activity (EMA)
   const layers = circuit.layers;
   const N = layers.reduce((a, l) => a + l.length, 0);
   const NE0 = circuit.edges.length;
@@ -435,7 +464,11 @@ function connectomeController(circuit, opts) {
   { let s = 0; for (const l of layers) { layerStart.push(s); s += l.length; } }
 
   // --- edge arrays (source -> dest, weight, sign) ---
-  let edges = circuit.edges.map(e => ({ s: e.s, t: e.t, w: e.w, sign: e.sign }));
+  // P0: modulatory edges are NOT propagation edges. They are filtered out
+  // here so spike propagation, weights and eligibility traces only ever see
+  // fast synapses; their activity feeds the third-factor channels instead.
+  let edges = circuit.edges.filter(e => !e.modulatory)
+                           .map(e => ({ s: e.s, t: e.t, w: e.w, sign: e.sign, nt: e.nt || null }));
   if (shuffle) {
     // degree-preserving rewiring: collect all endpoints, shuffle targets.
     const rng = makeRng(opts.seed || 7);
@@ -444,20 +477,47 @@ function connectomeController(circuit, opts) {
       const j = (rng() * (i + 1)) | 0;
       const tmp = targets[i]; targets[i] = targets[j]; targets[j] = tmp;
     }
-    edges = edges.map((e, i) => ({ s: e.s, t: targets[i], w: e.w, sign: e.sign }));
+    edges = edges.map((e, i) => ({ s: e.s, t: targets[i], w: e.w, sign: e.sign, nt: e.nt }));
   }
+  // P0: the shuffled-connectome control shuffles fast wiring AND reassigns
+  // modulatory contacts, so structure (not just weights) is randomized.
+  let modEdges = modEdgesRaw.map(e => ({ s: e.s, t: e.t, type: e.modulatorType || ntToModulator(e.nt) }));
+  if (shuffle) {
+    const modTargets = modEdges.map(e => e.t);
+    const rngMod = makeRng(opts.seed || 7);
+    for (let i = modTargets.length - 1; i > 0; i--) {
+      const j = (rngMod() * (i + 1)) | 0;
+      const tmp = modTargets[i]; modTargets[i] = modTargets[j]; modTargets[j] = tmp;
+    }
+    modEdges = modEdges.map((e, i) => ({ s: e.s, t: modTargets[i], type: e.type }));
+  }
+  const modByType = { dopamine: [], serotonin: [], octopamine: [] };
+  for (const m of modEdges) if (modByType[m.type]) modByType[m.type].push(m);
 
   const NE = edges.length;
   const src = new Int32Array(NE), dst = new Int32Array(NE);
   const W = new Float32Array(NE), W0 = new Float32Array(NE);
   const isExc = new Uint8Array(NE), plastic = new Uint8Array(NE);
+  const ntSign = new Float32Array(NE);   // +1 exc / -1 inh fast synapses
   const WS = 0.02;
   edges.forEach((e, i) => {
     src[i] = e.s; dst[i] = e.t; W0[i] = e.w;
     W[i] = e.w * (e.sign > 0 ? 1 : -1) * WS;
     isExc[i] = e.sign > 0 ? 1 : 0;
-    plastic[i] = e.sign > 0 ? 1 : 0;
+    ntSign[i] = e.sign > 0 ? 1 : -1;
+    // P0: eligibility is a property of the CONTACT (co-active pre/post), not
+    // of its sign. Inhibitory and excitatory synapses are both plastic; DA and
+    // the other modulators are no longer frozen negative weights — they are
+    // not weights at all (filtered above) and act through the third-factor
+    // channel in applyLearning instead.
+    plastic[i] = 1;
   });
+  const modulatorCount = modEdges.length;
+  const modCountByType = {
+    dopamine: modByType.dopamine.length,
+    serotonin: modByType.serotonin.length,
+    octopamine: modByType.octopamine.length,
+  };
   if (plasticity === "none") {
     plastic.fill(0);
   } else if (plasticity === "restricted") {
@@ -506,6 +566,10 @@ function connectomeController(circuit, opts) {
   const trialSpikeCount = new Uint32Array(N);   // cumulative per trial (MI)
   // per-trial layer spike counts for the brain-outcome heatmap (additive)
   const layerSpikeSums = new Float64Array(layers.length);
+  // P0: per-modulator activity EMAs (third-factor channels). Updated each
+  // brainTick from spiking modulatory-source neurons; consumed by applyLearning.
+  const modEma = { dopamine: 0, serotonin: 0, octopamine: 0 };
+  const MOD_EMA_DECAY = 0.99;                // per-tick retention of modulator tone
   const miBuf = new Uint8Array(256);            // binarized above-mean activity
   const miSampleIds = new Int32Array(256);      // even sample across layers
   for (let i = 0; i < 256; i++) miSampleIds[i] = Math.floor(i * N / 256);
@@ -520,11 +584,24 @@ function connectomeController(circuit, opts) {
   let layerRateSmooth = 0;
   const opticLayer = circuit.optic_layer !== undefined ? circuit.optic_layer : -1;
   const opticMap = circuit.optic_channels || {};
+  // Stage F optic input: "retinotopy" (default) drives each optic neuron by
+  // its SOURCE-DERIVED hex column (p1_retinotopy.js — the JS lattice is
+  // self-test-validated against the Python Stage E mapping); "legacy8bin"
+  // preserves the pre-F operating point bit-for-bit (8 coarse bins; the
+  // axis mislabel is documented in P1_BIOLOGY_AUDIT.md E1). The stimulus  // function (per-particle constants) is identical in both paths — only
+  // the sampling grid differs: 8 saturated bins -> ~256 occupied columns
+  // (sparse drive, the regime the preregistered hypothesis names).
+  const opticInput = opts.opticInput || "retinotopy";
+  let columnOf = null, opticByColumn = null;
   // precompute the visual channel per optic neuron once (String(i) lookups
   // every tick are the dominant cost of the old inner loop)
   const opticChannelOf = new Int8Array(N).fill(-1);
   const opticByChannel = [[], [], [], [], [], [], [], []];
-  if (opticLayer >= 0 && layers[opticLayer]) {
+  let opticNodes = null;
+  if (opticInput === "retinotopy") {
+    const b = RT.buildOpticColumns(circuit);
+    columnOf = b.columnOf; opticByColumn = b.byColumn; opticNodes = b.nodes;   // null when no optic layer
+  } else if (opticLayer >= 0 && layers[opticLayer]) {
     for (const i of layers[opticLayer]) {
       const field = opticMap[String(i)];
       const ch = field ? Math.min(7, (field[0] * 4 | 0) + ((field[1] * 2 | 0) * 4)) : -1;
@@ -546,6 +623,12 @@ function connectomeController(circuit, opts) {
   }
 
   let opticPhase = 0;
+  // P0 synaptic-delay knob: 0 = same-tick propagation (experiment-path default,
+  // documented); 1 = one-tick buffered relay (matches the browser mirror).
+  // Implemented via a copied source list; adds one Uint8Array, nothing else.
+  const synapticDelay = opts.synapticDelay !== undefined ? (opts.synapticDelay ? 1 : 0) : 0;
+  const prevSpikeSrc = synapticDelay ? new Int32Array(N) : null;
+  let prevSpikeSrcN = 0;
   // ---- trained policy-gradient readout (E9 credit assignment) -------------
   // A linear softmax readout on the motor population — one weight per motor
   // neuron — trained BY REINFORCE on the dopaminergic reward: Δr w_i ∝ r·(a
@@ -577,10 +660,27 @@ function connectomeController(circuit, opts) {
   }
   function brainTick(rng, sens, visual, motorDrive, opticScale) {
     injectLayerChannels(0, sens, 12, rng);
-    if (opticLists.length) {
-      // 4x stochastic decimation: each tick injects a rotating 1/4 subset
-      // of each channel's neurons with 4x the probability, preserving the
-      // mean drive while cutting rng calls and V-updates by ~4x.
+    if (opticInput === "retinotopy") {
+      if (opticByColumn) {
+        // Stage F retinotopic injection: per-column drive from the 800-bin
+        // hex field. Same p = drive*2 decimation probability, same 4x
+        // stochastic decimation and same kick (14) as the legacy path —
+        // only the neuron grouping changed.
+        opticPhase = (opticPhase + 1) & 3;
+        for (let col = 0; col < opticByColumn.length; col++) {
+          const drive = visual[col] || 0;
+          if (drive <= 0) continue;
+          const list = opticByColumn[col];
+          const p4 = drive * 2 * opticScale > 1 ? 1 : drive * 2 * opticScale;
+          for (let k = opticPhase; k < list.length; k += 4) {
+            if (rng() < p4) V[list[k]] += 14;         // mean(0.5+rng) = 1.0
+          }
+        }
+      }
+    } else if (opticLists.length) {
+      // legacy 8-bin injection: 4x stochastic decimation: each tick injects
+      // a rotating 1/4 subset of each channel's neurons with 4x the
+      // probability, preserving the mean drive while cutting rng calls.
       opticPhase = (opticPhase + 1) & 3;
       for (let ch = 0; ch < 8; ch++) {
         const drive = visual[ch] || 0;
@@ -607,15 +707,44 @@ function connectomeController(circuit, opts) {
     // collected here so updateTraces does not re-walk the rows.
     const tgtA = csrTarget, wA = csrW, rowA = csrRow, pla = csrPlastic;
     coActiveN = 0;
-    for (let s2 = 0; s2 < spikeSrcN; s2++) {
-      const r0 = rowA[spikeSrc[s2]], r1 = rowA[spikeSrc[s2] + 1];
-      for (let k = r0; k < r1; k++) {
-        V[tgtA[k]] += wA[k];
-        if (pla[k] && spikes[tgtA[k]]) coActive[coActiveN++] = k;
+    // P0 delay knob: synapticDelay=0 propagates from this tick's spikes
+    // (experiment-path default, same-tick); =1 propagates from the PREVIOUS
+    // tick's spike list, matching the browser mirror's _spikePrev semantics.
+    if (synapticDelay) {
+      for (let s2 = 0; s2 < prevSpikeSrcN; s2++) {
+        const r0 = rowA[prevSpikeSrc[s2]], r1 = rowA[prevSpikeSrc[s2] + 1];
+        for (let k = r0; k < r1; k++) {
+          V[tgtA[k]] += wA[k];
+          if (pla[k] && spikes[tgtA[k]]) coActive[coActiveN++] = k;
+        }
+      }
+      prevSpikeSrc.set(spikeSrc.subarray(0, spikeSrcN));
+      prevSpikeSrcN = spikeSrcN;
+    } else {
+      for (let s2 = 0; s2 < spikeSrcN; s2++) {
+        const r0 = rowA[spikeSrc[s2]], r1 = rowA[spikeSrc[s2] + 1];
+        for (let k = r0; k < r1; k++) {
+          V[tgtA[k]] += wA[k];
+          if (pla[k] && spikes[tgtA[k]]) coActive[coActiveN++] = k;
+        }
+      }
+    }
+    // P0 third-factor channels: per-modulator activity EMA from the spiking
+    // sources of that modulator's contact list. Deterministic given spikes;
+    // with no modulatory schema this loop never runs (gains stay 0) and the
+    // legacy behavior is bit-preserved.
+    if (modulatorCount) {
+      modEma.dopamine *= MOD_EMA_DECAY;
+      modEma.serotonin *= MOD_EMA_DECAY;
+      modEma.octopamine *= MOD_EMA_DECAY;
+      for (const type in modByType) {
+        const list = modByType[type];
+        let act = 0;
+        for (let mi = 0; mi < list.length; mi++) if (spikes[list[mi].s]) act++;
+        if (act) modEma[type] += act / Math.max(1, list.length) * (1 - MOD_EMA_DECAY);
       }
     }
     da.v *= 0.985;
-    // policy-gradient sampling (end of brainTick): P(open | motor population)
     // via the softmax readout; the Bernoulli action is drawn from the brain's
     // OWN rng so a seed fully determines the trajectory. The core consumes
     // both the probability (telemetry/rows) and the action (valve command).
@@ -703,8 +832,19 @@ function connectomeController(circuit, opts) {
   }
 
   function applyLearning(lr) {
-    const d = lr * da.v;
-    if (Math.abs(d) < 1e-5) return;
+    const d0 = lr * da.v;
+    if (Math.abs(d0) < 1e-5) return;
+    // P0 third-factor gain: modulator tone scales the dopamine-gated update.
+    // G = 1 + Σ_type γ_type · m_type. Defaults are structural (γ=0.15, unoptimized);
+    // with no modulatory schema all m_type stay 0 => G=1 => legacy bit-exact.
+    let G = 1;
+    if (modulatorCount) {
+      for (const type in modByType) {
+        const g = MOD_GAINS[type];
+        if (g && modEma[type] > 0) G += g * Math.min(1, modEma[type]);
+      }
+    }
+    const d = d0 * G;
     for (let idx = 0; idx < activeTraces.length; idx++) {
       const ek = activeTraces[idx];
       const age = tickCount - lastTouchTick[ek];
@@ -715,7 +855,9 @@ function connectomeController(circuit, opts) {
       }
       if (e < TRACE_FLOOR) continue;
       const i = ek;
-      if (!plastic[i] || !isExc[i]) continue;
+      if (!plastic[i]) continue;   // P0: eligibility no longer requires isExc —
+                                   // inhibitory synapses are plastic too; the sign
+                                   // of ΔW still follows the dopamine teaching signal.
       W[i] = clamp(W[i] + d * e * WS * W0[i], -W0[i] * WS, W0[i] * WS * 2);
       weightsDirty = true;
     }
@@ -726,7 +868,16 @@ function connectomeController(circuit, opts) {
     _N: N, _NE: NE,
     observe(env) {
       this._sens = env.readSensors();
-      this._visual = env.readVisualField();
+      // Stage F: retinotopic 800-bin field by default, computed from the
+      // env's live particles with the shared stimulus constants. Envs that
+      // only carry the 8-bin field (zero-field stubs, no particles) get a
+      // defined lift (each legacy bin fills the hex columns inside its
+      // rectangle) instead of silence.
+      this._visual = opticInput === "retinotopy"
+        ? (env.particles
+            ? RT.readVisualFieldRetinotopy(env.particles, CH.w, CH.h, RT_NODES)
+            : RT.liftLegacyField(env.readVisualField(), opticNodes))
+        : env.readVisualField();
     },
     step(dt, env) {
       const rng = this._rng;
@@ -772,10 +923,12 @@ function connectomeController(circuit, opts) {
         da.v = clamp(da.v + fb.reward * 0.6, -1.5, 3);
       }
     },
-    setLearning(on) { learning = on; if (!on) { for (const A of EW) A.fill(0); da.v = 0; pgR = 0; } },
+    setLearning(on) { learning = on; if (!on) { for (const A of EW) A.fill(0); da.v = 0; pgR = 0;
+                      modEma.dopamine = 0; modEma.serotonin = 0; modEma.octopamine = 0; } },
     resetForTrial() { V.fill(0); spikes.fill(0); refac.fill(0); for (const A of EW) A.fill(0); da.v = 0;
                       trialSpikeCount.fill(0); layerSpikeSums.fill(0);
                       motorRateSmooth = 0; layerRateSmooth = 0;
+                      modEma.dopamine = 0; modEma.serotonin = 0; modEma.octopamine = 0;
                       agreeCount = 0; decisions = 0;
                       activeTraces.length = 0; inActive.fill(0);
                       lastTouchTick.fill(-1e9);
@@ -807,6 +960,24 @@ function connectomeController(circuit, opts) {
       return s;
     },
     get dopamine() { return da.v; },
+    // ---- P0 modulatory-channel accessors (third factor; null/0 with legacy
+    // schema so telemetry consumers can feature-detect) ----
+    get modulatorTypes() { return modulatorCount ? Object.keys(modByType) : null; },
+    get modulatorTone() {
+      return modulatorCount ? { dopamine: modEma.dopamine, serotonin: modEma.serotonin,
+                                octopamine: modEma.octopamine }
+                            : { dopamine: 0, serotonin: 0, octopamine: 0 };
+    },
+    get modulatorCounts() {
+      return modulatorCount ? { dopamine: modCountByType.dopamine, serotonin: modCountByType.serotonin,
+                                octopamine: modCountByType.octopamine }
+                            : { dopamine: 0, serotonin: 0, octopamine: 0 };
+    },
+    // P0 synaptic-delay knob: documented extension point (see P0_AUDIT.md A2).
+    // The experiment path is same-tick today; setting synapticDelay=1 buffers
+    // spike sources one tick before propagation — for future biological-delay
+    // work. NOT enabled by any experiment; default preserves current dynamics.
+    get synapticDelay() { return synapticDelay; },
     // E9 policy-gradient readout (null unless opts.policyGradient): the core
     // drives the valve from lastPgAction() and routes each decision's reward
     // window into pgReward, closing the loop Δw_i ∝ r·(a − P_open).

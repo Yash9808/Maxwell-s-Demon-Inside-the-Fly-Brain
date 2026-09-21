@@ -1,0 +1,226 @@
+{
+  "schema": "maxwell-demon-preregistration/1.0",
+  "created": "2026-09-20T00:00:00Z",
+  "author": "Agent 3 (validation, statistics, controls, reproducibility)",
+  "status": "prospective",
+  "timing_declaration": {
+    "statement": "This specification was written and committed BEFORE running the Agent-3 multi-seed validation campaign and BEFORE any of its outcomes were observed. It supersedes no physics; it fixes analysis endpoints and decision rules in advance.",
+    "existing_artifacts_seen_before_preregistration": [
+      "research_data/e9_batch_2026-09-18T22-15-36_summary.json (Phase-2, 20 seeds)",
+      "research_data/e9_training_sweep_analysis.json (Phase-3, verdict criterion_not_met)",
+      "research_data/e11_validation_sweep.json (10 seeds; gain does NOT hold)",
+      "research_data/summary_2026-09-16T*.json (E1-E8 comparator runs, 2 seeds)",
+      "learning_curve.json (single-seed 9000-frame run: ratio 1.55 -> 4.56)"
+    ],
+    "consequence": "Existing criteria that were defined after Phase-1/2 results were seen are relabeled 'exploratory_confirmed'. All primary criteria below are NEW prospective criteria."
+  },
+  "statistics_convention": {
+    "independent_replicate_unit": "seed",
+    "note_on_trials": "Episodes/trials within one seed are repeated measures on one physical trajectory and one brain draw; they are NEVER counted as independent replicates.",
+    "seed_rule": "seed_k = seedBase + k*101, k = 0..n-1 (matches experiment_core.runBenchmark and apparatus batch runners)",
+    "ci": "mean +/- t(0.975, n-1) * sd/sqrt(n) over per-seed values (t-based, not normal approx)",
+    "bootstrap_ci": "BCa-style percentile bootstrap (10000 resamples of seeds) reported alongside for small n",
+    "permutation_test": "seeded label permutation on per-seed values; 10000 draws for unpaired, 10000 sign-flips for paired; exact for n<=8; PRNG seed 20260920",
+    "effect_size": "Hedges' g (small-sample corrected) for mean contrasts; rank-biserial r for the permutation framework",
+    "multiple_comparisons": "Benjamini-Hochberg FDR (q=0.05) within each experiment's primary+secondary family; Holm correction across the 5 flagship primary tests reported additionally",
+    "alpha": 0.05,
+    "directionality": "all tests two-sided; one-sided success requires the pre-declared sign"
+  },
+  "code_version": "8c5793d",
+  "campaign": {
+    "seeds_E3": 20,
+    "seeds_E4": 12,
+    "seeds_E4_shuffle": 10,
+    "seeds_E9": 20,
+    "seeds_E10": 12,
+    "seeds_E11": 12,
+    "physics_unchanged": true,
+    "no_seed_selection": true,
+    "no_outcome_exclusion": true
+  },
+  "experiments": {
+    "E3": {
+      "title": "Drosophila-inspired MB network on the door task",
+      "arms": {
+        "drosophila": "drosophilaController (learning on in train phase)",
+        "drosophila_frozen": "same controller, learning disabled from trial 0 (NEW control arm; wrapper forces setLearning(false))",
+        "random": "randomController (no-information control, matched seeds)",
+        "classical_demon": "classicalDemon (reference policy only, never the learning claim)"
+      },
+      "independent_replicate_unit": "seed (env PRNG seed+k*101, controller PRNG seed^0x5f5f)",
+      "training_window": "trials [0, 300) of train phase, 12 s episodes",
+      "test_window": "all test-phase trials (60), 12 s episodes, learning flag off",
+      "primary_endpoint": {
+        "metric": "goodBadRatio (per-trial good/bad crossings; trials with 0 bad crossings excluded, exclusion count reported per seed)",
+        "contrast": "paired learning gain: per-seed mean(late train block, last 20% of train trials) - mean(early train block, first 20%) for arm drosophila",
+        "declared_sign": "> 0"
+      },
+      "secondary_endpoints": [
+        "test-phase goodBadRatio, drosophila vs random (unpaired permutation)",
+        "test-phase goodBadRatio, drosophila vs drosophila_frozen (unpaired permutation)",
+        "test-phase dTfinal, drosophila vs random",
+        "test-phase sortEntropy (sorting delta, bits), drosophila vs random",
+        "test-phase openFraction, drosophila vs random"
+      ],
+      "control_condition": "random (no-information); drosophila_frozen (exposure-matched no-plasticity); classical_demon reference",
+      "reference_metric_warning": "demonAgree is REFERENCE-RELATIVE (self-referential for classical_demon, which agrees with itself by construction). It is reported as a secondary/reference metric only and can never support a learning claim.",
+      "success_criterion": "primary contrast > 0 AND BH-FDR-adjusted permutation p < 0.05 AND Hedges' g >= 0.5",
+      "failure_criterion": "primary contrast <= 0, or adjusted p >= 0.05, or g < 0.5 while adjusted p >= 0.05 (report as 'direction consistent, evidence insufficient')"
+    },
+    "E4": {
+      "title": "Connectome-constrained demon 4A/4B/4C (+frozen)",
+      "arms": {
+        "connectome_4A": "full connectome, plasticity full, opticDrive 0.25",
+        "connectome_4B": "restricted plasticity (sensory-pathway edges only), opticDrive 0.25",
+        "connectome_4C": "shuffled connectome (degree-preserving target permutation), plasticity full, opticDrive 0.25",
+        "connectome_frozen": "full connectome, plasticity none (NEW control arm)"
+      },
+      "independent_replicate_unit": "seed for 4A/4B/frozen; for 4C the unit is the (shuffle-draw, seed) cell - shuffle draws k=0..9 use shuffle seed 1000+k*17, seeds use seedBase+k*101; 4C condition-level inference uses shuffle-draw means",
+      "shuffle_control": {
+        "degree_preserving": "out-degree and per-source weight multiset exactly preserved; in-degree exactly preserved; edge SIGN travels with the edge (per-target sign composition NOT preserved - disclosed)",
+        "shuffle_seeds_target": ">= 10 independent shuffle draws"
+      },
+      "training_window": "trials [0, 120) train phase, 12 s episodes",
+      "test_window": "all 24 test trials, learning off",
+      "primary_endpoint": {
+        "metric": "test-phase goodBadRatio",
+        "contrast": "connectome_4A vs shuffle-mean of connectome_4C",
+        "question": "does the connectome itself contribute measurable performance beyond topology-free wiring?",
+        "declared_sign": "> 0"
+      },
+      "secondary_endpoints": [
+        "connectome_4A vs connectome_4B (plasticity scope effect) on test goodBadRatio",
+        "connectome_4A vs connectome_frozen (learning effect) on test goodBadRatio",
+        "connectome_4A learning gain (late-early train goodBadRatio, paired)",
+        "test dTfinal and sortEntropy, 4A vs 4C",
+        "test miNeural, 4A vs 4C (proxy; binarized spike-count MI)"
+      ],
+      "control_condition": "connectome_4C (degree-preserving shuffled) is THE control; connectome_frozen isolates plasticity",
+      "success_criterion": "primary contrast > 0 AND BH-FDR-adjusted permutation p < 0.05 AND Hedges' g >= 0.5",
+      "failure_criterion": "contrast <= 0 or adjusted p >= 0.05 => 'connectome structure contributes no measurable performance in this regime' (reported verbatim if it happens)"
+    },
+    "E9": {
+      "title": "Pressure demon (valve + piston)",
+      "arms": {
+        "demon_neural": "FAFB connectome brain, learning on during train episodes",
+        "demon_frozen": "same brain factory, learning off from episode 0",
+        "demon_speed": "classical speed-selective valve REFERENCE policy (never treated as a learned neural controller)",
+        "demon_random": "random valve p(open)=0.3, two-way passable (no-information control; NOTE: also differs in rectification direction - disclosed)",
+        "never_open": "valve never opens (zero-policy control)"
+      },
+      "independent_replicate_unit": "seed (one gas + one brain draw per seed); episodes are repeated measures (piston/gas persist across episodes within a variant)",
+      "training_window": "episodes [0, 12) train phase, 20 s each",
+      "test_window": "episodes [12, 24) test phase, learning off",
+      "primary_endpoint": {
+        "metric": "workJEp (per-episode spring work, signed units x 1e-21 J)",
+        "contrast": "paired per-seed test-phase mean: demon_neural - demon_frozen",
+        "declared_sign": "> 0"
+      },
+      "secondary_endpoints": [
+        "test-phase reward (neural - frozen)",
+        "test-phase decisionAccuracy (neural - frozen)",
+        "test-phase dPfinal (pressure differential proxy, neural - frozen)",
+        "test-phase pistonX and openFraction (neural - frozen)",
+        "test-phase goodCrossings - badCrossings (net selection, neural - frozen)",
+        "floor check: demon_neural workJEp vs never_open (loop-alive sanity, unpaired)",
+        "reference context: demon_speed on all metrics (not part of any learning claim)"
+      ],
+      "control_condition": "demon_frozen (exposure-matched, same brain draw); never_open and demon_random as policy-free floors",
+      "classical_policy_status": "reference only. It may exceed the neural controller; that is a benchmark of the fly brain, not evidence against the physics.",
+      "success_criterion": "primary paired contrast > 0 AND BH-FDR-adjusted sign-flip permutation p < 0.05 AND Hedges' g >= 0.5",
+      "failure_criterion": "contrast <= 0 or adjusted p >= 0.05 => 'no measurable plasticity benefit on useful work'; if the floor check also fails, flag 'loop not alive'"
+    },
+    "E10": {
+      "title": "Smoluchowski trapdoor",
+      "arms": {
+        "trapdoor_light": "physics-only light flap",
+        "trapdoor_heavy": "physics-only heavy flap",
+        "trapdoor_neural": "fly-brain gate (learning on in train)",
+        "trapdoor_frozen": "same brain draw, learning off from episode 0"
+      },
+      "independent_replicate_unit": "seed",
+      "training_window": "episodes [0, 10) train phase, 12 s each",
+      "test_window": "episodes [10, 20) test phase, learning off",
+      "primary_endpoint": {
+        "metric": "netSorted = crossLR - crossRL per test episode",
+        "contrast": "paired per-seed test-phase mean: trapdoor_neural - trapdoor_frozen",
+        "declared_sign": "> 0"
+      },
+      "secondary_endpoints": [
+        "test-phase directionalBias (neural - frozen)",
+        "test-phase decisionAccuracy (neural - frozen)",
+        "test-phase reward (neural - frozen)",
+        "test-phase densityDiff (neural - frozen)",
+        "test-phase holdFraction and pgReleaseP (mechanism descriptors)",
+        "back-leak accounting: crossRL per test episode (neural vs frozen)",
+        "physics context: trapdoor_light vs trapdoor_heavy crossingRate and directionalBias (flap mass matters)"
+      ],
+      "control_condition": "trapdoor_frozen (exposure-matched); physics variants quantify the uncontrolled flap",
+      "success_criterion": "primary paired contrast > 0 AND BH-FDR-adjusted sign-flip permutation p < 0.05 AND Hedges' g >= 0.5",
+      "failure_criterion": "contrast <= 0 or adjusted p >= 0.05 => 'no measurable plasticity benefit on net transport'"
+    },
+    "E11": {
+      "title": "Feynman ratchet & pawl (equilibrium bath)",
+      "arms": {
+        "ratchet_gradient": "Th>Tc physics reference (pawl NOT brain-controlled)",
+        "ratchet_equilibrium": "Th=Tc physics reference (pawl not brain-controlled)",
+        "ratchet_heavy_load": "gradient + heavier load",
+        "ratchet_neural": "fly-brain pawl operator (learning on in train)",
+        "ratchet_frozen": "same brain draw, learning off from episode 0"
+      },
+      "independent_replicate_unit": "seed",
+      "training_window": "episodes [0, 12) train phase, 24 s each",
+      "test_window": "episodes [12, 24) test phase, learning off",
+      "primary_endpoint": {
+        "metric": "workJEp (SIGNED per-episode work against the load; backward rotation pays work back)",
+        "contrast": "paired per-seed test-phase mean: ratchet_neural - ratchet_frozen",
+        "declared_sign": "> 0",
+        "prior_expectation_disclosure": "the earlier 10-seed sweep found the reward gain does NOT hold with seed-level CIs; a null result here is an expected possible outcome and will be reported as such"
+      },
+      "secondary_endpoints": [
+        "test-phase reward (neural - frozen)",
+        "test-phase forwardSteps - reverseSteps (hop asymmetry, neural - frozen)",
+        "test-phase liftFraction (mechanism descriptor)",
+        "test-phase entropyProduction (MODEL-DEPENDENT bookkeeping; classified, not interpreted as measured entropy)",
+        "PHYSICS FACT CHECK A: ratchet_gradient mean netPerEpisode > 0 with t-CI excluding 0",
+        "PHYSICS FACT CHECK B: ratchet_equilibrium mean netPerEpisode <= 0 (no work extraction from one bath; back-driving expected)",
+        "PHYSICS FACT CHECK C: ratchet_heavy_load signed work lower than ratchet_gradient"
+      ],
+      "control_condition": "ratchet_frozen (exposure-matched); equilibrium physics variant is the no-gradient control",
+      "success_criterion": "primary paired contrast > 0 AND BH-FDR-adjusted sign-flip permutation p < 0.05 AND Hedges' g >= 0.5",
+      "failure_criterion": "contrast <= 0 or adjusted p >= 0.05 => 'no measurable plasticity benefit on signed work at equilibrium'; physics fact checks failing => flag physics regression (blocks physics claims, not the learning claim)"
+    }
+  },
+  "thermodynamic_analysis_plan": {
+    "classification_levels": ["DIRECTLY_MEASURED", "DERIVED", "MODEL_DEPENDENT", "PROXY", "PLACEHOLDER"],
+    "rule": "A PROXY or MODEL_DEPENDENT quantity is never reported as direct information thermodynamics.",
+    "planned_metrics": [
+      {"experiment": "door task (E3/E4)", "metric": "workInJ (signed jet work)", "class": "DERIVED", "note": "sim units x 1e-21 J (arbitrary scale)"},
+      {"experiment": "door task (E3/E4)", "metric": "extractableJ = U_hot*(1-Tc/Th)", "class": "MODEL_DEPENDENT", "note": "finite-reservoir upper bound, no engine implemented"},
+      {"experiment": "door task (E3/E4)", "metric": "erasureCostJ (Landauer bill of metered bits)", "class": "MODEL_DEPENDENT", "note": "k_B*T_env*ln2*measuredBits; bits are decision flips + crossing evaluations"},
+      {"experiment": "door task (E3/E4)", "metric": "sortEntropy delta (bits)", "class": "PROXY", "note": "occupancy-histogram entropy, not thermodynamic entropy"},
+      {"experiment": "E9", "metric": "workJEp (spring work)", "class": "DERIVED", "note": "SPRING*x*dot{x} integrated; sim-unit Joules"},
+      {"experiment": "E9", "metric": "erasureCostJ = bits*kB*T*ln2", "class": "MODEL_DEPENDENT"},
+      {"experiment": "E10", "metric": "netSorted crossings / directionalBias", "class": "PROXY", "note": "transport directionality stands in for entropy change; no per-molecule entropy ledger"},
+      {"experiment": "E11", "metric": "entropyProduction = Qh/Th - Qc/Tc per episode", "class": "MODEL_DEPENDENT", "note": "barrier-energy bookkeeping in an event-rate model, not measured heat"},
+      {"experiment": "E11", "metric": "miNeural", "class": "PLACEHOLDER", "note": "structurally 0 (no spatial particles); excluded from all inference"}
+    ],
+    "feedback_efficacy": {
+      "definition": "Sagawa-Ueda style feedback efficacy eta = <W>_feedback / <W>_no-feedback evaluated on the preregistered primary work/transport metric: E9 workJEp, E10 netSorted, E11 workJEp. W_no-feedback = frozen arm (same brain draw, no plasticity); the never_open / equilibrium physics arm provides the no-policy floor.",
+      "interpretation": "eta > 1 (CI excludes 1) means feedback (reward-gated plasticity) extracts more work/transport than the no-feedback bound under matched conditions. eta is DIMENSIONLESS and defined only when the no-feedback denominator is positive; otherwise reported as NaN with the reason.",
+      "assumption_note": "This is the formally defined ratio-of-expectations version of the Sagawa-Ueda efficacy for a feedback-controlled engine; it is computed on SIMULATED, MODEL_DEPENDENT work units and carries no claim about a physical demon."
+    },
+    "no_feedback_comparison": "every experiment reports the feedback (learning) arm against its frozen arm on the primary metric - this is the no-feedback comparison the efficacy ratio consumes"
+  },
+  "regression_protection_plan": {
+    "file": "validation_tests.js (node:node --test)",
+    "invariants": [
+      "shuffled connectome remains degree-preserving and is actually wired into E4/E5 registries",
+      "connectome controller remains connected: brain output reaches the actuator (valve/door/pawl) in E9/E10/E11 and the door in E4",
+      "classical policy computes references only and never writes the actuator in neural arms",
+      "reward fields remain functions of physical state (work/crossings), not of success flags or phase",
+      "train/test separation: setLearning(false) is invoked for test phase in every learning arm",
+      "CI machinery aggregates per-seed values (never trial-level) and raises on single-seed input"
+    ]
+  }
+}

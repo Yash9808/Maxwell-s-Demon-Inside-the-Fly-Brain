@@ -25,8 +25,8 @@ let starved = 0;       // consecutive ticks with an empty publish pool
 const clampf = (x, a, b) => x < a ? a : x > b ? b : x;
 
 function buildSim(cfg) {
-  const { N, NE, members, layerOff, src, dst, w0, sign, opticChan, opticLayer,
-          stimLayers, state } = cfg;
+  const { N, NE, members, layerOff, src, dst, w0, sign, opticChan, opticCol, opticLayer,
+          stimLayers, state, modEdges } = cfg;
   // layer membership as typed subarray views (indexable + .length like arrays)
   const layers = [];
   for (let i = 0; i < layerOff.length - 1; i++)
@@ -36,15 +36,29 @@ function buildSim(cfg) {
   const V = new Float32Array(N), spikes = new Uint8Array(N), refac = new Uint8Array(N);
   const W = new Float32Array(NE), E = new Float32Array(NE);
   for (let i = 0; i < NE; i++) W[i] = w0[i] * (sign[i] ? 1 : -1) * WS;
+  // P0 NT semantics: modulators (da/ser/oct) are NOT fast weights. The main
+  // side filters modulatory edges out of src/dst/w0/sign before init and
+  // passes them here as {s, type}; their source activity feeds third-factor
+  // channels that scale the dopamine-gated update (mirrors controllers.js).
+  const modByType = { dopamine: [], serotonin: [], octopamine: [] };
+  for (const me of modEdges || []) if (modByType[me.type]) modByType[me.type].push(me);
+  // P0 parity (fixed during Stage F wiring): plasticity is NOT gated on the
+  // excitatory sign — eligibility is all-ones over fast edges, mirroring
+  // controllers.js (`plastic[i] = 1`). The previous `plastic: sign` alias
+  // silently froze every inhibitory synapse in this browser path.
+  const plasticAll = new Uint8Array(NE).fill(1);
   return {
     N, NE, layers, layerStart, V, spikes, refac,
-    src, dst, W, isExc: sign, plastic: sign, E, WS,
+    src, dst, W, isExc: sign, plastic: plasticAll, E, WS,
     DA: { v: 0 },
     motorRateSmooth: 0,
     motorBase: 0,
     _stimPulse: 0,
     _spikePrev: new Uint8Array(N),
-    opticChan, opticLayer, stimLayers: stimLayers || null,
+    opticChan, opticCol: opticCol || null, opticLayer, stimLayers: stimLayers || null,
+    modByType,
+    modulatorCount: (modEdges || []).length,
+    modEma: { dopamine: 0, serotonin: 0, octopamine: 0 },
   };
 }
 
@@ -75,14 +89,25 @@ function brainTick(sim, m) {
         if (Math.random() < frac) V[i] += 16 * (0.7 + Math.random() * 0.6);
     }
   }
-  // The optic layer is driven by particle positions; the u/v -> channel map
-  // was precomputed at init (opticChan) — identical to the old per-tick
-  // optic_channels[String(i)] lookup.
+  // The optic layer is driven by particle positions. Stage F: when the main
+  // page sends an 800-bin retinotopic field (m.visual.length > 8), each
+  // optic neuron reads its own SOURCE-DERIVED hex column (opticCol,
+  // precomputed at init from the same lattice as p1_retinotopy.py); with a
+  // legacy 8-bin array the old channel map (opticChan) is used unchanged.
   if (sim.opticLayer >= 0 && sim.layers[sim.opticLayer]) {
-    const optic = sim.layers[sim.opticLayer], chan = sim.opticChan;
-    for (let k = 0; k < optic.length; k++) {
-      const drive = (chan ? m.visual[chan[k]] : m.visual[k % 8]) || 0;
-      if (Math.random() < drive * 0.5) V[optic[k]] += 14 * (0.5 + Math.random());
+    const optic = sim.layers[sim.opticLayer];
+    if (m.visual && m.visual.length > 8 && sim.opticCol) {
+      const colOf = sim.opticCol;
+      for (let k = 0; k < optic.length; k++) {
+        const drive = m.visual[colOf[k]] || 0;
+        if (drive > 0 && Math.random() < drive * 0.5) V[optic[k]] += 14 * (0.5 + Math.random());
+      }
+    } else {
+      const chan = sim.opticChan;
+      for (let k = 0; k < optic.length; k++) {
+        const drive = (chan ? m.visual[chan[k]] : m.visual[k % 8]) || 0;
+        if (Math.random() < drive * 0.5) V[optic[k]] += 14 * (0.5 + Math.random());
+      }
     }
   }
   const motorLayer = sim.layers.length - 1;
@@ -99,6 +124,16 @@ function brainTick(sim, m) {
   const prev = sim._spikePrev;
   for (let i = 0; i < sim.NE; i++) if (prev[sim.src[i]]) V[sim.dst[i]] += sim.W[i];
   prev.set(spikes);
+  // P0 third-factor channels from modulatory source activity
+  if (sim.modulatorCount) {
+    for (const type in sim.modByType) {
+      const list = sim.modByType[type];
+      let act = 0;
+      for (let mi = 0; mi < list.length; mi++) if (spikes[list[mi].s]) act++;
+      sim.modEma[type] = sim.modEma[type] * MOD_EMA_DECAY
+        + act / Math.max(1, list.length) * (1 - MOD_EMA_DECAY);
+    }
+  }
   sim.DA.v *= 0.985;
 }
 
@@ -108,12 +143,27 @@ function updateTraces(sim) {
     if (plastic[i] && spikes[src[i]] && spikes[dst[i]]) E[i] = Math.min(E[i] + 0.15, 1); }
 }
 
+const MOD_GAINS = { dopamine: 0.15, serotonin: 0.15, octopamine: 0.15 };
+const MOD_EMA_DECAY = 0.99;
+
 function applyLearning(sim, lr) {
-  const d = lr * sim.DA.v;
-  if (Math.abs(d) < 1e-5) return;
+  const d0 = lr * sim.DA.v;
+  if (Math.abs(d0) < 1e-5) return;
+  // P0 third-factor gain (mirrors controllers.js)
+  let G = 1;
+  if (sim.modulatorCount) {
+    for (const type in sim.modByType) {
+      const g = MOD_GAINS[type];
+      if (g && sim.modEma[type] > 0) G += g * Math.min(1, sim.modEma[type]);
+    }
+  }
+  const d = d0 * G;
   const { E, plastic, isExc, W, W0b, NE } = sim;
   for (let i = 0; i < NE; i++) {
-    const e = E[i]; if (e < 0.01 || !plastic[i] || !isExc[i]) continue;
+    const e = E[i];
+    // P0: eligibility no longer requires isExc — inhibitory synapses are
+    // plastic too; DA and other modulators are never in these arrays.
+    if (e < 0.01 || !plastic[i]) continue;
     W[i] = clampf(W[i] + d * e * sim.WS * W0b[i], -W0b[i] * sim.WS, W0b[i] * sim.WS * 2);
   }
 }

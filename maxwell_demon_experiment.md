@@ -52,9 +52,12 @@ contains:
 
 The extracted circuit contains 106,765 neurons and 563,942 synapse-weighted
 edges. Edges are signed using the dominant predicted transmitter in the
-connection row: cholinergic, glutamatergic, and octopaminergic evidence is
-treated as excitatory; GABAergic, serotonergic, and dopaminergic evidence is
-treated as inhibitory for this simplified model.
+connection row (extraction v2.0-p0): cholinergic and glutamatergic evidence
+is treated as excitatory (glutamate's uniform-excitatory treatment is a
+documented approximation); GABAergic evidence is inhibitory. Dopamine,
+serotonin, and octopamine are NOT signed weights: they are extracted as
+separate modulatory channels (10,223 contacts) that feed the third-factor
+gain on dopamine-gated plasticity.
 
 ### Position-derived optic input
 
@@ -70,6 +73,14 @@ This is a spatially informed interface, not a validated visual receptive-field
 model. A synapse coordinate identifies where a synapse lies in the EM volume;
 it does not, by itself, establish the neuron's photoreceptor tuning, direction
 selectivity, or visual semantics.
+
+Since Stage F, the runtimes convert particle positions into an 800-column
+hexagonal retinotopic field (the Stage E lattice of `p1_retinotopy.py`,
+nearest-node binning, relative-contrast coded so the busiest occupied column
+maps to the drive a saturated legacy bin carried), and each optic neuron
+receives current from its own source-derived column. The pre-F eight-bin
+path remains available bit-for-bit (`opticInput: "legacy8bin"` in
+connectomeController; `window.USE_LEGACY_8BIN` in the 3D app).
 
 ## 3. Neural dynamics
 
@@ -176,7 +187,16 @@ current system does not provide:
 
 - membrane parameters, ion-channel dynamics, dendritic computation, synaptic
   delays, short-term plasticity, or neuromodulator release dynamics measured
-  for every neuron;
+  for every neuron; in particular there is **no explicit conduction delay** in
+  either runtime (experiment path: same-tick propagation; browser mirror:
+  1-tick buffered relay — see README, P0 audit A2),
+- a validated per-edge sign for glutamatergic synapses: glutamate is treated
+  **uniformly excitatory** as an approximation, while real-fly CNS glutamate
+  is mixed (P0 audit A13) — the assumption is recorded in the circuit JSON's
+  `provenance.assumptions` rather than silently enforced,
+- biologically calibrated neuromodulation: dopamine/serotonin/octopamine act
+  as third-factor channels that scale the dopamine-gated eligibility update
+  with fixed structural gains (0.15), not measured dose-response dynamics;
 - experimentally validated synaptic efficacies from the raw synapse counts;
 - a complete, causally validated mapping from particle motion to fly visual and
   mechanosensory receptors;

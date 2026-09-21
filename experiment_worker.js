@@ -38,10 +38,16 @@ function importAs(url, requireFn) {
   return mod.exports;
 }
 
+let RT = null;     // p1_retinotopy.js exports (Stage F hex-lattice optic input)
+
 try {
   CORE = importAs("experiment_core.js",
                   () => { throw new Error("experiment_core.js must not require()"); });
-  CTRL = importAs("controllers.js", () => CORE);
+  RT = importAs("p1_retinotopy.js",
+                () => { throw new Error("p1_retinotopy.js must not require()"); });
+  // controllers.js pulls in both: p1_retinotopy.js (Stage F) + experiment_core.js.
+  CTRL = importAs("controllers.js",
+                  (spec) => String(spec).includes("p1_retinotopy") ? RT : CORE);
 } catch (err) {
   postMessage({ type: "error", expId: null, message: "worker init failed: " + String(err) });
 }

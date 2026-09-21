@@ -1011,16 +1011,18 @@ const SIM = {};   // per-dataset simulation state
 function makeSim(circuit){
   const layers = circuit.layers;
   const N = layers.reduce((a,l)=>a+l.length,0);
-  const NE = circuit.edges.length;
+  // P0: modulators split out of the fast weight arrays (mirror of fly_demon_3d)
+  const fastEdges = circuit.edges.filter(e=>!e.modulatory);
+  const NE = fastEdges.length;
   const layerStart=[]; { let s=0; for(const l of layers){ layerStart.push(s); s+=l.length; } }
   const V = new Float32Array(N), spikes = new Uint8Array(N), refac = new Uint8Array(N);
   const src = new Int32Array(NE), dst = new Int32Array(NE);
   const W = new Float32Array(NE), W0 = new Float32Array(NE);
   const isExc = new Uint8Array(NE), plastic = new Uint8Array(NE);
   const E = new Float32Array(NE);
-  circuit.edges.forEach((e,i)=>{ src[i]=e.s; dst[i]=e.t; W0[i]=e.w;
+  fastEdges.forEach((e,i)=>{ src[i]=e.s; dst[i]=e.t; W0[i]=e.w;
     W[i]=e.w*(e.sign>0?1:-1); isExc[i]=e.sign>0?1:0;
-    plastic[i]= e.sign>0?1:0; });
+    plastic[i]=1; });   // P0: eligibility not gated on sign
   const WS = 0.02;
   for (let i=0;i<NE;i++) W[i]*=WS;
   const s = { circuit, layers, N, NE, layerStart, V, spikes, refac,
@@ -1192,7 +1194,7 @@ function applyLearning(lr){
   if (Math.abs(d)<1e-5) return;
   const { E, plastic, isExc, W, W0, NE } = sim;
   for (let i=0;i<NE;i++){
-    const e=E[i]; if (e<0.01 || !plastic[i] || !isExc[i]) continue;
+    const e=E[i]; if (e<0.01 || !plastic[i]) continue;   // P0: no isExc gate
     W[i]=clamp(W[i]+d*e*sim.WS*W0[i], -W0[i]*sim.WS, W0[i]*sim.WS*2);
   }
 }

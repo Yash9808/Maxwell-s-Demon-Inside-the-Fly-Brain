@@ -1,0 +1,1050 @@
+{
+  "generated": "2026-09-20T22-32-57",
+  "elapsedSeconds": 222.4,
+  "conditions": {
+    "classical_demon": {
+      "earlyAgreement": {
+        "mean": 1,
+        "ci": 0,
+        "n": 2
+      },
+      "lateAgreement": {
+        "mean": 1,
+        "ci": 0,
+        "n": 2
+      },
+      "testAgreement": {
+        "mean": 1,
+        "ci": 0,
+        "n": 2
+      },
+      "earlyGoodBadRatio": {
+        "mean": 1.2908730158730157,
+        "ci": 0.6245555555555552,
+        "n": 2
+      },
+      "lateGoodBadRatio": {
+        "mean": 1.015625,
+        "ci": 0.39812499999999984,
+        "n": 2
+      },
+      "testGoodBadRatio": {
+        "mean": 1.3312037037037037,
+        "ci": 0.14935925925925916,
+        "n": 2
+      },
+      "testSortEntropy": {
+        "mean": 0.019218279280288464,
+        "ci": 0.0007646096509519665,
+        "n": 2
+      },
+      "testDT": {
+        "mean": 0.02145499728219814,
+        "ci": 0.0038603377317234467,
+        "n": 2
+      },
+      "testOpenFraction": {
+        "mean": 0.5147916666666666,
+        "ci": 0.02858333333333323,
+        "n": 2
+      },
+      "testMiNeural": {
+        "mean": 0,
+        "ci": 0,
+        "n": 2
+      },
+      "testEnergyJ": {
+        "mean": 28340.70226651304,
+        "ci": 8684.079522283133,
+        "n": 2
+      },
+      "testWorkInJ": {
+        "mean": 9.843253353619874e-12,
+        "ci": 4.793001986310994e-13,
+        "n": 2
+      },
+      "testExtractableJ": {
+        "mean": 1.497663293175013e-16,
+        "ci": 3.1523414724035557e-17,
+        "n": 2
+      },
+      "testErasureCostJ": {
+        "mean": 1.8776201908414853e-19,
+        "ci": 6.7525423377051266e-21,
+        "n": 2
+      },
+      "testLandauerRatio": {
+        "mean": 868.4961825442552,
+        "ci": 262.73586469628634,
+        "n": 2
+      },
+      "testMeasuredBits": {
+        "mean": 65.4,
+        "ci": 2.3519999999999914,
+        "n": 2
+      },
+      "blocks": [
+        {
+          "block": 0,
+          "phase": "train",
+          "agree": 1,
+          "goodBadRatio": 0.6333333333333334,
+          "sortEntropy": 0.03449223384155756,
+          "miNeural": 0,
+          "energyJ": 33646.44969666088
+        },
+        {
+          "block": 1,
+          "phase": "train",
+          "agree": 1,
+          "goodBadRatio": 1.35,
+          "sortEntropy": 0.020567231082488018,
+          "miNeural": 0,
+          "energyJ": 32236.503789495346
+        },
+        {
+          "block": 2,
+          "phase": "train",
+          "agree": 1,
+          "goodBadRatio": 0.975,
+          "sortEntropy": 0.021754562874274165,
+          "miNeural": 0,
+          "energyJ": 31507.626645345408
+        },
+        {
+          "block": 3,
+          "phase": "train",
+          "agree": 1,
+          "goodBadRatio": 1.025,
+          "sortEntropy": 0.020742174696467063,
+          "miNeural": 0,
+          "energyJ": 18246.12638921898
+        },
+        {
+          "block": 4,
+          "phase": "test",
+          "agree": 1,
+          "goodBadRatio": 1.2666666666666668,
+          "sortEntropy": 0.01882817231551705,
+          "miNeural": 0,
+          "energyJ": 23910.049449021644
+        },
+        {
+          "block": 0,
+          "phase": "train",
+          "agree": 1,
+          "goodBadRatio": 1.1266666666666665,
+          "sortEntropy": 0.01966592126762861,
+          "miNeural": 0,
+          "energyJ": 36080.514100601846
+        },
+        {
+          "block": 1,
+          "phase": "train",
+          "agree": 1,
+          "goodBadRatio": 1.025,
+          "sortEntropy": 0.014351168654593054,
+          "miNeural": 0,
+          "energyJ": 26241.919420315196
+        },
+        {
+          "block": 2,
+          "phase": "train",
+          "agree": 1,
+          "goodBadRatio": 0.76,
+          "sortEntropy": 0.024339371840072975,
+          "miNeural": 0,
+          "energyJ": 26506.211659613917
+        },
+        {
+          "block": 3,
+          "phase": "train",
+          "agree": 1,
+          "goodBadRatio": 0.925,
+          "sortEntropy": 0.024684970615804415,
+          "miNeural": 0,
+          "energyJ": 23214.656850594816
+        },
+        {
+          "block": 4,
+          "phase": "test",
+          "agree": 1,
+          "goodBadRatio": 1.2550000000000001,
+          "sortEntropy": 0.019608386245059874,
+          "miNeural": 0,
+          "energyJ": 32771.35508400443
+        }
+      ]
+    },
+    "random": {
+      "earlyAgreement": {
+        "mean": 0.5080329241071428,
+        "ci": 0.09788211805555558,
+        "n": 2
+      },
+      "lateAgreement": {
+        "mean": 0.509153448737548,
+        "ci": 0.017296258439928564,
+        "n": 2
+      },
+      "testAgreement": {
+        "mean": 0.5118599310030876,
+        "ci": 0.002426199248575609,
+        "n": 2
+      },
+      "earlyGoodBadRatio": {
+        "mean": 0.4573412698412698,
+        "ci": 0.16527777777777772,
+        "n": 2
+      },
+      "lateGoodBadRatio": {
+        "mean": 1.052827380952381,
+        "ci": 0.6314583333333332,
+        "n": 2
+      },
+      "testGoodBadRatio": {
+        "mean": 1.0909722222222222,
+        "ci": 0.6274722222222221,
+        "n": 2
+      },
+      "testSortEntropy": {
+        "mean": 0.020739291682082134,
+        "ci": 0.00009735390576036415,
+        "n": 2
+      },
+      "testDT": {
+        "mean": 0.021439398728240487,
+        "ci": 0.0005790046276805249,
+        "n": 2
+      },
+      "testOpenFraction": {
+        "mean": 0.3972916666666667,
+        "ci": 0.01429166666666667,
+        "n": 2
+      },
+      "testMiNeural": {
+        "mean": 0,
+        "ci": 0,
+        "n": 2
+      },
+      "testEnergyJ": {
+        "mean": 35823.2574397097,
+        "ci": 14857.457961515645,
+        "n": 2
+      },
+      "testWorkInJ": {
+        "mean": 9.907045028779421e-12,
+        "ci": 4.0218971956239175e-13,
+        "n": 2
+      },
+      "testExtractableJ": {
+        "mean": 1.4295692328052622e-16,
+        "ci": 5.479721772079781e-18,
+        "n": 2
+      },
+      "testErasureCostJ": {
+        "mean": 2.741784835250181e-20,
+        "ci": 3.0949152381148607e-21,
+        "n": 2
+      },
+      "testLandauerRatio": {
+        "mean": 6720.466775561451,
+        "ci": 2130.3793631505328,
+        "n": 2
+      },
+      "testMeasuredBits": {
+        "mean": 9.55,
+        "ci": 1.0779999999999994,
+        "n": 2
+      },
+      "blocks": [
+        {
+          "block": 0,
+          "phase": "train",
+          "agree": 0.45991889880952386,
+          "goodBadRatio": 0.4611111111111111,
+          "sortEntropy": 0.026293587632239757,
+          "miNeural": 0,
+          "energyJ": 18881.916520620296
+        },
+        {
+          "block": 1,
+          "phase": "train",
+          "agree": 0.4840156714039744,
+          "goodBadRatio": 0.44000000000000006,
+          "sortEntropy": 0.023131483083276772,
+          "miNeural": 0,
+          "energyJ": 23177.745118947998
+        },
+        {
+          "block": 2,
+          "phase": "train",
+          "agree": 0.4874436467185155,
+          "goodBadRatio": 0.6825,
+          "sortEntropy": 0.017434680528467805,
+          "miNeural": 0,
+          "energyJ": 41880.93851696962
+        },
+        {
+          "block": 3,
+          "phase": "train",
+          "agree": 0.5005814420439626,
+          "goodBadRatio": 0.975,
+          "sortEntropy": 0.02288923822649212,
+          "miNeural": 0,
+          "energyJ": 29179.207885557706
+        },
+        {
+          "block": 4,
+          "phase": "test",
+          "agree": 0.5106220742436103,
+          "goodBadRatio": 1.27,
+          "sortEntropy": 0.020689621322000317,
+          "miNeural": 0,
+          "energyJ": 43403.59313436054
+        },
+        {
+          "block": 0,
+          "phase": "train",
+          "agree": 0.5498944279100529,
+          "goodBadRatio": 0.5083333333333333,
+          "sortEntropy": 0.017855634558414803,
+          "miNeural": 0,
+          "energyJ": 29216.372873543976
+        },
+        {
+          "block": 1,
+          "phase": "train",
+          "agree": 0.5260152865513257,
+          "goodBadRatio": 0.4947619047619048,
+          "sortEntropy": 0.02187467811682988,
+          "miNeural": 0,
+          "energyJ": 22639.39470884924
+        },
+        {
+          "block": 2,
+          "phase": "train",
+          "agree": 0.526377879894748,
+          "goodBadRatio": 0.6985714285714286,
+          "sortEntropy": 0.025839130568345043,
+          "miNeural": 0,
+          "energyJ": 15445.471202291625
+        },
+        {
+          "block": 3,
+          "phase": "train",
+          "agree": 0.5194922933420282,
+          "goodBadRatio": 0.7095238095238096,
+          "sortEntropy": 0.028823059459073153,
+          "miNeural": 0,
+          "energyJ": 31194.349329192464
+        },
+        {
+          "block": 4,
+          "phase": "test",
+          "agree": 0.513097787762565,
+          "goodBadRatio": 0.6166666666666666,
+          "sortEntropy": 0.020788962042163954,
+          "miNeural": 0,
+          "energyJ": 28242.92174505886
+        }
+      ]
+    },
+    "ann": {
+      "earlyAgreement": {
+        "mean": 0.48411458333333335,
+        "ci": 0.052062499999999866,
+        "n": 2
+      },
+      "lateAgreement": {
+        "mean": 0.46432291666666664,
+        "ci": 0.011229166666666677,
+        "n": 2
+      },
+      "testAgreement": {
+        "mean": 0.489375,
+        "ci": 0.020825000000000045,
+        "n": 2
+      },
+      "earlyGoodBadRatio": {
+        "mean": 0.826337031024531,
+        "ci": 0.028296085858585836,
+        "n": 2
+      },
+      "lateGoodBadRatio": {
+        "mean": 0.6910823551448552,
+        "ci": 0.14565282634032642,
+        "n": 2
+      },
+      "testGoodBadRatio": {
+        "mean": 0.8147240259740259,
+        "ci": 0.20625606060606072,
+        "n": 2
+      },
+      "testSortEntropy": {
+        "mean": 0.017414051111403386,
+        "ci": 0.00933060868461983,
+        "n": 2
+      },
+      "testDT": {
+        "mean": 0.01952873182524409,
+        "ci": 0.005559068034281673,
+        "n": 2
+      },
+      "testOpenFraction": {
+        "mean": 0.9916666666666669,
+        "ci": 0,
+        "n": 2
+      },
+      "testMiNeural": {
+        "mean": 0.03467818733793317,
+        "ci": 0.02793365680350971,
+        "n": 2
+      },
+      "testEnergyJ": {
+        "mean": 96443.72061288502,
+        "ci": 11290.316335187874,
+        "n": 2
+      },
+      "testWorkInJ": {
+        "mean": 1.0046377872999579e-11,
+        "ci": 8.147238008743304e-13,
+        "n": 2
+      },
+      "testExtractableJ": {
+        "mean": 1.3513887310796432e-16,
+        "ci": 4.766467178939673e-17,
+        "n": 2
+      },
+      "testErasureCostJ": {
+        "mean": 4.234693855491118e-20,
+        "ci": 8.440677922131437e-22,
+        "n": 2
+      },
+      "testLandauerRatio": {
+        "mean": 3427.833675232405,
+        "ci": 1108.9671474387994,
+        "n": 2
+      },
+      "testMeasuredBits": {
+        "mean": 14.75,
+        "ci": 0.29400000000000065,
+        "n": 2
+      },
+      "blocks": [
+        {
+          "block": 0,
+          "phase": "train",
+          "agree": 0.5756249999999999,
+          "goodBadRatio": 0.7792857142857144,
+          "sortEntropy": 0.017842581399730422,
+          "miNeural": 0.056796556599543656,
+          "energyJ": 80420.79081911381
+        },
+        {
+          "block": 1,
+          "phase": "train",
+          "agree": 0.5133333333333334,
+          "goodBadRatio": 0.6487878787878787,
+          "sortEntropy": 0.008701904329410948,
+          "miNeural": 0.04474403608298401,
+          "energyJ": 83912.15763773366
+        },
+        {
+          "block": 2,
+          "phase": "train",
+          "agree": 0.4852083333333333,
+          "goodBadRatio": 1.1503571428571429,
+          "sortEntropy": 0.0187040626214791,
+          "miNeural": 0.020676208244134076,
+          "energyJ": 75524.60519559504
+        },
+        {
+          "block": 3,
+          "phase": "train",
+          "agree": 0.43,
+          "goodBadRatio": 0.5892490842490843,
+          "sortEntropy": 0.014967165448547575,
+          "miNeural": 0.053340805813428836,
+          "energyJ": 103634.04999228902
+        },
+        {
+          "block": 4,
+          "phase": "test",
+          "agree": 0.47874999999999995,
+          "goodBadRatio": 0.91995670995671,
+          "sortEntropy": 0.022174565746413504,
+          "miNeural": 0.02042632162185678,
+          "energyJ": 102204.0860900217
+        },
+        {
+          "block": 0,
+          "phase": "train",
+          "agree": 0.4529166666666667,
+          "goodBadRatio": 0.7495202020202021,
+          "sortEntropy": 0.013178137606088852,
+          "miNeural": 0.049117559073583374,
+          "energyJ": 98636.41481491183
+        },
+        {
+          "block": 1,
+          "phase": "train",
+          "agree": 0.46520833333333345,
+          "goodBadRatio": 1.03991452991453,
+          "sortEntropy": 0.016618045008814426,
+          "miNeural": 0.06493967605157389,
+          "energyJ": 96519.7404929881
+        },
+        {
+          "block": 2,
+          "phase": "train",
+          "agree": 0.44000000000000006,
+          "goodBadRatio": 0.6647619047619048,
+          "sortEntropy": 0.010113871543920506,
+          "miNeural": 0.04056825220032836,
+          "energyJ": 79720.92102751267
+        },
+        {
+          "block": 3,
+          "phase": "train",
+          "agree": 0.48375,
+          "goodBadRatio": 0.9039826839826841,
+          "sortEntropy": 0.014575493018913921,
+          "miNeural": 0.02986211878567131,
+          "energyJ": 84434.93192068371
+        },
+        {
+          "block": 4,
+          "phase": "test",
+          "agree": 0.5,
+          "goodBadRatio": 0.7094913419913419,
+          "sortEntropy": 0.012653536476393269,
+          "miNeural": 0.04893005305400955,
+          "energyJ": 90683.35513574835
+        }
+      ]
+    },
+    "drosophila": {
+      "earlyAgreement": {
+        "mean": 0.5473958333333333,
+        "ci": 0.04287500000000006,
+        "n": 2
+      },
+      "lateAgreement": {
+        "mean": 0.5252604166666668,
+        "ci": 0.028072916666666704,
+        "n": 2
+      },
+      "testAgreement": {
+        "mean": 0.5335416666666666,
+        "ci": 0.005716666666666581,
+        "n": 2
+      },
+      "earlyGoodBadRatio": {
+        "mean": 0.6,
+        "ci": 0,
+        "n": 1
+      },
+      "lateGoodBadRatio": {
+        "mean": 0,
+        "ci": 0,
+        "n": 0
+      },
+      "testGoodBadRatio": {
+        "mean": 0,
+        "ci": 0,
+        "n": 0
+      },
+      "testSortEntropy": {
+        "mean": 0.01995392348194881,
+        "ci": 0.005291463544718263,
+        "n": 2
+      },
+      "testDT": {
+        "mean": 0.02041480647629549,
+        "ci": 0.0012416227527713508,
+        "n": 2
+      },
+      "testOpenFraction": {
+        "mean": 0,
+        "ci": 0,
+        "n": 2
+      },
+      "testMiNeural": {
+        "mean": 0.003312114326293825,
+        "ci": 0.001309288646043734,
+        "n": 2
+      },
+      "testEnergyJ": {
+        "mean": 0,
+        "ci": 0,
+        "n": 2
+      },
+      "testWorkInJ": {
+        "mean": 9.612749402878411e-12,
+        "ci": 3.7983299044296525e-13,
+        "n": 2
+      },
+      "testExtractableJ": {
+        "mean": 1.33479085144861e-16,
+        "ci": 1.4609985111292667e-17,
+        "n": 2
+      },
+      "testErasureCostJ": {
+        "mean": 0,
+        "ci": 0,
+        "n": 2
+      },
+      "testLandauerRatio": {
+        "mean": 0,
+        "ci": 0,
+        "n": 0
+      },
+      "testMeasuredBits": {
+        "mean": 0,
+        "ci": 0,
+        "n": 2
+      },
+      "blocks": [
+        {
+          "block": 0,
+          "phase": "train",
+          "agree": 0.49874999999999997,
+          "goodBadRatio": 0.06,
+          "sortEntropy": 0.026884477726743728,
+          "miNeural": 0.005139122339466606,
+          "energyJ": 7546.475378739293
+        },
+        {
+          "block": 1,
+          "phase": "train",
+          "agree": 0.5208333333333333,
+          "goodBadRatio": 0,
+          "sortEntropy": 0.022057306832649275,
+          "miNeural": 0.00532874631657676,
+          "energyJ": 0
+        },
+        {
+          "block": 2,
+          "phase": "train",
+          "agree": 0.5270833333333333,
+          "goodBadRatio": 0,
+          "sortEntropy": 0.02765388761998166,
+          "miNeural": 0.0057791237290756746,
+          "energyJ": 0
+        },
+        {
+          "block": 3,
+          "phase": "train",
+          "agree": 0.5472916666666665,
+          "goodBadRatio": 0,
+          "sortEntropy": 0.027509935306087967,
+          "miNeural": 0.0036467093888041145,
+          "energyJ": 0
+        },
+        {
+          "block": 4,
+          "phase": "test",
+          "agree": 0.5364583333333333,
+          "goodBadRatio": 0,
+          "sortEntropy": 0.017254197183623164,
+          "miNeural": 0.0026441099150470216,
+          "energyJ": 0
+        },
+        {
+          "block": 0,
+          "phase": "train",
+          "agree": 0.5845833333333335,
+          "goodBadRatio": 0,
+          "sortEntropy": 0.02369506668786856,
+          "miNeural": 0.0032873526582185564,
+          "energyJ": 0
+        },
+        {
+          "block": 1,
+          "phase": "train",
+          "agree": 0.471875,
+          "goodBadRatio": 0,
+          "sortEntropy": 0.02226193474376064,
+          "miNeural": 0.002118359017728455,
+          "energyJ": 0
+        },
+        {
+          "block": 2,
+          "phase": "train",
+          "agree": 0.47354166666666664,
+          "goodBadRatio": 0,
+          "sortEntropy": 0.018774014977894982,
+          "miNeural": 0.003747808553314891,
+          "energyJ": 0
+        },
+        {
+          "block": 3,
+          "phase": "train",
+          "agree": 0.51625,
+          "goodBadRatio": 0,
+          "sortEntropy": 0.031166824164615886,
+          "miNeural": 0.001685965614707774,
+          "energyJ": 0
+        },
+        {
+          "block": 4,
+          "phase": "test",
+          "agree": 0.530625,
+          "goodBadRatio": 0,
+          "sortEntropy": 0.022653649780274454,
+          "miNeural": 0.003980118737540628,
+          "energyJ": 0
+        }
+      ]
+    },
+    "connectome": {
+      "earlyAgreement": {
+        "mean": 0.47916666666666674,
+        "ci": 0.0719687500000001,
+        "n": 2
+      },
+      "lateAgreement": {
+        "mean": 0.48606770833333335,
+        "ci": 0.03088020833333337,
+        "n": 2
+      },
+      "testAgreement": {
+        "mean": 0.5364583333333334,
+        "ci": 0.04328333333333335,
+        "n": 2
+      },
+      "earlyGoodBadRatio": {
+        "mean": 0.2738095238095238,
+        "ci": 0.5366666666666665,
+        "n": 2
+      },
+      "lateGoodBadRatio": {
+        "mean": 0.9412499999999999,
+        "ci": 0.7423499999999997,
+        "n": 2
+      },
+      "testGoodBadRatio": {
+        "mean": 0.9476190476190476,
+        "ci": 1.0826666666666667,
+        "n": 2
+      },
+      "testSortEntropy": {
+        "mean": 0.028249863499480412,
+        "ci": 0.005576713472288681,
+        "n": 2
+      },
+      "testDT": {
+        "mean": 0.023598911593479682,
+        "ci": 0.0022502860501112457,
+        "n": 2
+      },
+      "testOpenFraction": {
+        "mean": 0.24083333333333334,
+        "ci": 0.06369999999999996,
+        "n": 2
+      },
+      "testMiNeural": {
+        "mean": 0.0046368140803147075,
+        "ci": 0.0031895083123620145,
+        "n": 2
+      },
+      "testEnergyJ": {
+        "mean": 14787.769282144089,
+        "ci": 12105.03758240793,
+        "n": 2
+      },
+      "testWorkInJ": {
+        "mean": 9.914936531373138e-12,
+        "ci": 5.856133484371032e-13,
+        "n": 2
+      },
+      "testExtractableJ": {
+        "mean": 1.60858535695976e-16,
+        "ci": 1.688848304552204e-17,
+        "n": 2
+      },
+      "testErasureCostJ": {
+        "mean": 1.8187651236973717e-19,
+        "ci": 5.345762684016583e-21,
+        "n": 2
+      },
+      "testLandauerRatio": {
+        "mean": 1435.7931422084187,
+        "ci": 886.9457180937754,
+        "n": 2
+      },
+      "testMeasuredBits": {
+        "mean": 63.349999999999994,
+        "ci": 1.8619999999999983,
+        "n": 2
+      },
+      "blocks": [
+        {
+          "block": 0,
+          "phase": "train",
+          "agree": 0.4229166666666666,
+          "goodBadRatio": 0,
+          "sortEntropy": 0.02606718318245229,
+          "miNeural": 0.00304939931234951,
+          "energyJ": 4733.201171927792
+        },
+        {
+          "block": 1,
+          "phase": "train",
+          "agree": 0.5339583333333333,
+          "goodBadRatio": 0.17952380952380953,
+          "sortEntropy": 0.02446911162197433,
+          "miNeural": 0.004041609488697406,
+          "energyJ": 29654.465683620063
+        },
+        {
+          "block": 2,
+          "phase": "train",
+          "agree": 0.4922916666666667,
+          "goodBadRatio": 0.475,
+          "sortEntropy": 0.026505006715088854,
+          "miNeural": 0.0021519729851799283,
+          "energyJ": 21433.4938552913
+        },
+        {
+          "block": 3,
+          "phase": "train",
+          "agree": 0.4864583333333333,
+          "goodBadRatio": 0.275,
+          "sortEntropy": 0.02940400131087787,
+          "miNeural": 0.0040473456371102005,
+          "energyJ": 15918.4354889165
+        },
+        {
+          "block": 4,
+          "phase": "test",
+          "agree": 0.5585416666666667,
+          "goodBadRatio": 0.27666666666666667,
+          "sortEntropy": 0.02540460152382292,
+          "miNeural": 0.0030095139209463328,
+          "energyJ": 20963.808865005278
+        },
+        {
+          "block": 0,
+          "phase": "train",
+          "agree": 0.5227083333333334,
+          "goodBadRatio": 0.5833333333333333,
+          "sortEntropy": 0.017758170919914634,
+          "miNeural": 0.003006633952899651,
+          "energyJ": 20034.532175290125
+        },
+        {
+          "block": 1,
+          "phase": "train",
+          "agree": 0.4499999999999999,
+          "goodBadRatio": 0.21666666666666665,
+          "sortEntropy": 0.015704735052730352,
+          "miNeural": 0.0023574419108885357,
+          "energyJ": 20998.70266237709
+        },
+        {
+          "block": 2,
+          "phase": "train",
+          "agree": 0.49395833333333333,
+          "goodBadRatio": 0.5866666666666667,
+          "sortEntropy": 0.02118530098067841,
+          "miNeural": 0.003316147064482722,
+          "energyJ": 18772.531343842234
+        },
+        {
+          "block": 3,
+          "phase": "train",
+          "agree": 0.46604166666666674,
+          "goodBadRatio": 0.7683333333333333,
+          "sortEntropy": 0.02311351265222785,
+          "miNeural": 0.0033671922576637204,
+          "energyJ": 24832.02814550252
+        },
+        {
+          "block": 4,
+          "phase": "test",
+          "agree": 0.514375,
+          "goodBadRatio": 0.6,
+          "sortEntropy": 0.031095125475137902,
+          "miNeural": 0.006264114239683083,
+          "energyJ": 8611.7296992829
+        }
+      ]
+    },
+    "shuffled_connectome": {
+      "earlyAgreement": {
+        "mean": 0.5460937499999999,
+        "ci": 0.047979166666666774,
+        "n": 2
+      },
+      "lateAgreement": {
+        "mean": 0.5325520833333333,
+        "ci": 0.08268749999999997,
+        "n": 2
+      },
+      "testAgreement": {
+        "mean": 0.48885416666666665,
+        "ci": 0.0010208333333331665,
+        "n": 2
+      },
+      "earlyGoodBadRatio": {
+        "mean": 0.44166666666666665,
+        "ci": 0.27766666666666656,
+        "n": 2
+      },
+      "lateGoodBadRatio": {
+        "mean": 0.8345238095238094,
+        "ci": 0.09566666666666664,
+        "n": 2
+      },
+      "testGoodBadRatio": {
+        "mean": 0.5324074074074074,
+        "ci": 0.4482592592592593,
+        "n": 2
+      },
+      "testSortEntropy": {
+        "mean": 0.024369059735243996,
+        "ci": 0.008227505980341932,
+        "n": 2
+      },
+      "testDT": {
+        "mean": 0.022612536135340817,
+        "ci": 0.0045395089206814844,
+        "n": 2
+      },
+      "testOpenFraction": {
+        "mean": 0.3382291666666667,
+        "ci": 0.03817916666666676,
+        "n": 2
+      },
+      "testMiNeural": {
+        "mean": 0.0024482740918156305,
+        "ci": 0.0007358033611171593,
+        "n": 2
+      },
+      "testEnergyJ": {
+        "mean": 27440.85126371777,
+        "ci": 9799.87254297584,
+        "n": 2
+      },
+      "testWorkInJ": {
+        "mean": 9.756338021015462e-12,
+        "ci": 4.76227181854961e-13,
+        "n": 2
+      },
+      "testExtractableJ": {
+        "mean": 1.5446686275825945e-16,
+        "ci": 3.0291096881038534e-17,
+        "n": 2
+      },
+      "testErasureCostJ": {
+        "mean": 2.0656693078141417e-19,
+        "ci": 6.274237255451043e-20,
+        "n": 2
+      },
+      "testLandauerRatio": {
+        "mean": 1004.0083157622828,
+        "ci": 409.78710019464035,
+        "n": 2
+      },
+      "testMeasuredBits": {
+        "mean": 71.94999999999999,
+        "ci": 21.853999999999996,
+        "n": 2
+      },
+      "blocks": [
+        {
+          "block": 0,
+          "phase": "train",
+          "agree": 0.5027083333333332,
+          "goodBadRatio": 0.5230952380952381,
+          "sortEntropy": 0.016637642328033213,
+          "miNeural": 0.0033805906104678205,
+          "energyJ": 50169.42169057259
+        },
+        {
+          "block": 1,
+          "phase": "train",
+          "agree": 0.4814583333333333,
+          "goodBadRatio": 0.13333333333333333,
+          "sortEntropy": 0.015962721439486342,
+          "miNeural": 0.0027264189200340793,
+          "energyJ": 46532.74961642125
+        },
+        {
+          "block": 2,
+          "phase": "train",
+          "agree": 0.5435416666666666,
+          "goodBadRatio": 0.35,
+          "sortEntropy": 0.02348886690240609,
+          "miNeural": 0.001887880577713119,
+          "energyJ": 17151.050394818943
+        },
+        {
+          "block": 3,
+          "phase": "train",
+          "agree": 0.5720833333333333,
+          "goodBadRatio": 1.05,
+          "sortEntropy": 0.025165306069582477,
+          "miNeural": 0.0019948798039980233,
+          "energyJ": 18684.530919984307
+        },
+        {
+          "block": 4,
+          "phase": "test",
+          "agree": 0.4893749999999999,
+          "goodBadRatio": 0.2733333333333333,
+          "sortEntropy": 0.028566766868071514,
+          "miNeural": 0.002072864213694631,
+          "energyJ": 22440.91629281173
+        },
+        {
+          "block": 0,
+          "phase": "train",
+          "agree": 0.5387500000000001,
+          "goodBadRatio": 0.2,
+          "sortEntropy": 0.019491379014781207,
+          "miNeural": 0.0028566173943856744,
+          "energyJ": 27844.4861055115
+        },
+        {
+          "block": 1,
+          "phase": "train",
+          "agree": 0.51875,
+          "goodBadRatio": 0.8119047619047619,
+          "sortEntropy": 0.018906693901112326,
+          "miNeural": 0.003813239528392326,
+          "energyJ": 22656.026848573492
+        },
+        {
+          "block": 2,
+          "phase": "train",
+          "agree": 0.5414583333333333,
+          "goodBadRatio": 0.55,
+          "sortEntropy": 0.024111017243168616,
+          "miNeural": 0.003978194987878203,
+          "energyJ": 19806.08198225403
+        },
+        {
+          "block": 3,
+          "phase": "train",
+          "agree": 0.46499999999999997,
+          "goodBadRatio": 0.45984848484848484,
+          "sortEntropy": 0.025024286486472824,
+          "miNeural": 0.004062105147182105,
+          "energyJ": 22158.662519315392
+        },
+        {
+          "block": 4,
+          "phase": "test",
+          "agree": 0.4883333333333334,
+          "goodBadRatio": 0.4566666666666667,
+          "sortEntropy": 0.02017135260241648,
+          "miNeural": 0.00282368396993663,
+          "energyJ": 32440.78623462381
+        }
+      ]
+    }
+  }
+}

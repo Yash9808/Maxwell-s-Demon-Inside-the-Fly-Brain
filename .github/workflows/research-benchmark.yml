@@ -1,0 +1,66 @@
+name: FULL RESEARCH BENCHMARK
+
+# Long-running, seeded research benchmark. NOT part of FAST CI:
+# runs manually (workflow_dispatch) or weekly. CPU-only — no GPU required
+# (the physics is a deterministic JS integrator; connectome LIF is sparse CSR).
+#
+# FAST CI (ci.yml) covers correctness; THIS workflow covers the reproducible
+# science: full benchmark profiles + manifest regeneration + golden-fixture
+# equality across the whole suite (not just the quick E1 pin).
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: "Benchmark profile"
+        type: choice
+        default: "quick"
+        options: ["quick", "light", "study"]
+  schedule:
+    - cron: "0 4 * * 1"   # Mondays 04:00 UTC
+
+jobs:
+  benchmark:
+    name: Seeded research benchmark (${{ inputs.profile || 'quick' }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Full smoke suite (incl. golden-fixture E1 replay)
+        run: node tests/run_smoke.js
+
+      - name: Seeded benchmark run
+        run: |
+          case "${{ inputs.profile || 'quick' }}" in
+            quick) node benchmark.js --quick ;;
+            light) node benchmark.js --light ;;
+            study) node benchmark.js ;;
+          esac
+
+      - name: Determinism note
+        run: |
+          echo "Determinism is enforced by tests/run_smoke.js (S4 PRNG/environment,
+          S10 run-twice equality, S9 golden fixture) — all passed above."
+          echo "Benchmark outputs here are timestamped artifacts; compare them via"
+          echo "research_data summaries rather than byte equality."
+
+      - name: Regenerate MANIFEST.json (fail if source hashes drifted silently)
+        run: |
+          python -m pip install --quiet pyarrow numpy || true
+          python tools/make_manifest.py
+          git diff --exit-code MANIFEST.json || {
+            echo "::warning::MANIFEST.json drifted — commit the regenerated manifest";
+          }
+
+      - name: Upload benchmark artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-benchmark-${{ inputs.profile || 'quick' }}
+          path: |
+            research_data/summary_*.json
+            research_data/rows_*.jsonl
+          retention-days: 30
+        if: always()

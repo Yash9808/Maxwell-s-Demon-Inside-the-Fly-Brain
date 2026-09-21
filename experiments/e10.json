@@ -1,0 +1,79 @@
+{
+  "id": "e10",
+  "manifest_version": 1,
+  "source_of_truth": "experiment_worker.js EXPERIMENTS.e10 + documented constants in experiment_core.js",
+  "label": "E10 \u00b7 Smoluchowski Trapdoor",
+  "question": "Does a spring trapdoor (passive or brain-gated) sort the gas? (Expected: no \u2014 equilibrium wins.)",
+  "needs_circuit": true,
+  "dataset": {
+    "connectome": "FlyWire FAFB v783 (proofread scope)",
+    "circuit_file": "fly_brain_circuit.json",
+    "circuit_sha256": "0eb64ba45135656360567fd1d73385c7b7a0be3c7d053ddbba1eda797de98671"
+  },
+  "physics": {
+    "chamber": {
+      "L": 760,
+      "H": 300,
+      "D": 300,
+      "slot_h": 120
+    },
+    "nParticles": 220,
+    "noise": 0,
+    "dt_s": 0.016666666666666666,
+    "open_threshold": 0.22,
+    "trapdoor_mass": {
+      "light": 0.02,
+      "heavy": 0.12
+    },
+    "thermo": {
+      "sim_to_joule": 1e-21,
+      "T_env_K": 300
+    }
+  },
+  "controllers": {
+    "trapdoor_light": {
+      "mode": "physics"
+    },
+    "trapdoor_heavy": {
+      "mode": "physics"
+    },
+    "trapdoor_neural": {
+      "brain": "connectomeController"
+    },
+    "trapdoor_frozen": {
+      "brain": "connectomeController",
+      "mode": "frozen weights"
+    }
+  },
+  "reward_parameters": {
+    "wWork": 0.5,
+    "wSelect": 0.3,
+    "wWrong": 0.15,
+    "W_NORM": 3,
+    "decisionInterval_s": 0.25,
+    "eventWindow_s": 0.6,
+    "PG_CREDIT_GAMMA": 0.99
+  },
+  "seed": {
+    "prng": "mulberry32 (experiment_core.js makeRng); seed = 1 + seedIdx*101",
+    "n_seeds": 1
+  },
+  "train_test_split": {
+    "train_trials": 8,
+    "test_trials": 8,
+    "episode_seconds": 16,
+    "learning_on": "train phase only"
+  },
+  "expected_outputs": {
+    "conditions": [
+      "trapdoor_light",
+      "trapdoor_heavy",
+      "trapdoor_neural",
+      "trapdoor_frozen"
+    ],
+    "rows": "one JSONL/row per condition\u00d7phase\u00d7trial\u00d7seed (schema identical to research_data/ rows; see run_smoke.js field assertions)",
+    "summary": "per-condition mean\u00b1CI block aggregates (early/late/test windows)",
+    "provenance": "run provenance echo (seeds, trials, physics, software tag, timestamps)"
+  },
+  "apparatus_core": "experiment_core.js.smoluchowskiCore"
+}

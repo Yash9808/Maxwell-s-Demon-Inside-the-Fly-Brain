@@ -1,0 +1,104 @@
+{
+  "id": "e9",
+  "manifest_version": 1,
+  "source_of_truth": "experiment_worker.js EXPERIMENTS.e9 + documented constants in experiment_core.js",
+  "label": "E9 \u00b7 Pressure Demon",
+  "question": "Can the FAFB fly brain, as the valve controller, build \u0394P and do net positive spring work against the Landauer bill?",
+  "needs_circuit": true,
+  "dataset": {
+    "connectome": "FlyWire FAFB v783 (proofread scope)",
+    "circuit_file": "fly_brain_circuit.json",
+    "circuit_sha256": "0eb64ba45135656360567fd1d73385c7b7a0be3c7d053ddbba1eda797de98671"
+  },
+  "physics": {
+    "chamber": {
+      "L": 900,
+      "H": 420,
+      "D": 420,
+      "door_h": 240,
+      "piston_ext": 160
+    },
+    "nParticles": 260,
+    "noise": 0,
+    "dt_s": 0.016666666666666666,
+    "spring_k": 0.002,
+    "drag": 0.35,
+    "piston_mass": 0.02,
+    "thermo": {
+      "sim_to_joule": 1e-21,
+      "T_env_K": 300,
+      "kB_J": 1.38e-23
+    }
+  },
+  "controllers": {
+    "demon_neural": {
+      "brain": "connectomeController",
+      "params": {
+        "eligibility": [
+          [
+            0.9,
+            0.45
+          ],
+          [
+            0.985,
+            0.35
+          ],
+          [
+            0.9995,
+            0.2
+          ]
+        ],
+        "policyGradient": true,
+        "pgRng": "makeRng(424243 + seedIdx*977)",
+        "motorDrive": 0.6,
+        "opticDrive": 0
+      }
+    },
+    "demon_frozen": {
+      "brain": "connectomeController",
+      "mode": "frozen weights"
+    },
+    "demon_speed": {
+      "type": "classical reference (selective valve)"
+    },
+    "demon_random": {
+      "type": "random valve"
+    },
+    "never_open": {
+      "type": "never-open control"
+    }
+  },
+  "reward_parameters": {
+    "wWork": 0.5,
+    "wSelect": 0.3,
+    "wWrong": 0.2,
+    "W_NORM": 0.02,
+    "hysteresis": 0.08,
+    "PG_CREDIT_GAMMA": 0.99,
+    "decisionInterval_s": 0.25
+  },
+  "seed": {
+    "prng": "mulberry32 (experiment_core.js makeRng); seed = 1 + seedIdx*101",
+    "n_seeds": 3
+  },
+  "train_test_split": {
+    "train_trials": 12,
+    "test_trials": 12,
+    "episode_seconds": 20,
+    "learning_on": "train phase only"
+  },
+  "expected_outputs": {
+    "conditions": [
+      "demon_neural",
+      "demon_frozen",
+      "demon_speed",
+      "demon_random",
+      "never_open"
+    ],
+    "rows": "one JSONL/row per condition\u00d7phase\u00d7trial\u00d7seed (schema identical to research_data/ rows; see run_smoke.js field assertions)",
+    "summary": "per-condition mean\u00b1CI block aggregates (early/late/test windows)",
+    "provenance": "run provenance echo (seeds, trials, physics, software tag, timestamps)"
+  },
+  "note": "Brain variants require the FAFB circuit at run time; ablation drops them (classical-only run stays intact).",
+  "apparatus_core": "experiment_core.js.pressureDemonCore"
+}

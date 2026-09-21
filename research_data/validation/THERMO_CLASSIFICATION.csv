@@ -1,0 +1,17 @@
+experiment,metric,classification,basis,reported_as_thermo
+E3/E4 (door task),workInJ (signed jet work),DERIVED,Σ step jetWorkNet × SIM_J (1e-21 J/sim-unit; scale is a convention),no — input energy bookkeeping only
+E3/E4 (door task),extractableJ = U_hot(1-Tc/Th),MODEL_DEPENDENT,finite-reservoir Carnot bound on the final state; no engine implemented,"no — upper bound, never a measured output"
+E3/E4 (door task),erasureCostJ (Landauer),MODEL_DEPENDENT,kB·300K·ln2 × meteredBits (decision flips + crossing evaluations),"no — memory-traffic meter, not a measured heat"
+E3/E4 (door task),measuredBits,DERIVED,counted decision-state flips + 1 bit per crossing evaluation,no
+E3/E4 (door task),sortEntropy delta (bits),PROXY,occupancy-histogram entropy of speed classes; not Gibbs entropy of the gas,no — sorting proxy
+E3/E4 (door task),miNeural,PROXY,"binarized trial-cumulative spike counts × speed class, 256 sampled neurons; not information flow",no
+E9,workJEp (spring work),DERIVED,∫ SPRING·x·ẋ dt on the piston ODE; sim-unit Joules,primary work metric (declared sim units)
+E9,"dPfinal, dTfinal",PROXY,kinetic ideal-gas pressure/temperature from mean v² per side,no — state descriptors
+E9,erasureCostJ,MODEL_DEPENDENT,kB·T·ln2 × decision bits,no
+E10,"crossLR/crossRL, netSortedProxy, directionalBias",PROXY,crossing counts as transport-directionality stand-in; no per-molecule entropy ledger exists,no — transport proxy
+E10,netWorkJ/workJ fields,PLACEHOLDER,E10 rows carry constant zeros (no work integrator in the trapdoor core),no — excluded from all inference
+E11,workJEp = net·load (SIGNED),DERIVED,net tooth hops × load energy bias per hop; backward hops pay work back,primary work metric (declared sim units)
+E11,entropyProduction = Qh/Th - Qc/Tc,MODEL_DEPENDENT,barrier-energy bookkeeping in an event-rate model; not measured heat,"no — classified, not interpreted"
+E11,heatJ (qh+qc),MODEL_DEPENDENT,cumulated barrier energies paid to baths,no
+E11,miNeural,PLACEHOLDER,structurally 0: particleSample is empty in the ratchet core (audit F-7),no — excluded from all inference
+E9/E10/E11,Sagawa-Ueda efficacy eta = <W>_fb / <W>_no-fb,MODEL_DEPENDENT,ratio of expectations on simulated work metrics; formally defined feedback efficacy (Sagawa-Ueda 2010 analogue),"yes — as MODEL-DEPENDENT feedback efficacy, never as measured thermodynamics"

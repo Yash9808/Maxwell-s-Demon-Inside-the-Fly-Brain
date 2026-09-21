@@ -6,17 +6,10 @@ __pycache__/
 *.log
 *.tmp
 
-# Scratch probes, patch scripts, and extracted module checks
-/_check_*
-/_extract_*
-/_fix_*
-/_inspect_*
-/_patch_*
-/_probe_*
+# One-off scratch scripts were audited and MOVED to archive/ (Stage 4, see
+# SCRIPT_ARCHIVE_INDEX.md); archive/untracked/ holds never-committed scratch.
+/archive/untracked/
 /_rebuild_anatomy.log
-/_time_*
-/_audit_*
-/_smoke_*
 
 # Large source exports and derived tables; keep the loaders and compact fixtures
 *.feather
@@ -31,3 +24,10 @@ isolate-*.log
 *.zip
 *.tar
 s41586-024-07939-3.pdf
+# Embodiment track: venv, physics logs, scratch
+.venv-embodiment/
+.venv-flybody/
+.venv-flyvis/
+.flyvis_data/
+embodiment/logs/
+embodiment/__pycache__/

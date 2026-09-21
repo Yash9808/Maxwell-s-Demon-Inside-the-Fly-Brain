@@ -1,0 +1,19 @@
+{
+  "generated": "2026-09-20T22:19:55.768Z",
+  "stamp": "2026-09-20T22-19-55",
+  "codeVersion": "8c5793d",
+  "seeds": {
+    "e4": 12
+  },
+  "shuffles": {
+    "e4": 10
+  },
+  "rowCounts": {
+    "e4": 22464
+  },
+  "runtimeS": {
+    "e4": 26749
+  },
+  "physicsUnchanged": true,
+  "note": "Preregistered campaign (PRE_REGISTERED_CRITERIA.json). All seeds run; no outcome exclusion. Parallel driver; per-job outputs merged into raw_{exp}.csv."
+}
