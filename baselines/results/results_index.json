@@ -1,0 +1,97 @@
+{
+  "artifact": "phase01_validation_results_index",
+  "created_utc": "2026-09-21T18:09:09.620Z",
+  "commit_sha": "efb56903749de238d7956a821493f019137c7843",
+  "suites": {
+    "p0": {
+      "command": "node --test test_p0.js",
+      "result": "14/14 PASS",
+      "evidence_sha256": "1afbdcfc8e2f90a033d65fae92e7748509405e610c1bf787a1fb467d80b88bd0"
+    },
+    "e9": {
+      "command": "node e9_learning_test.js",
+      "result": "all causal gates PASS",
+      "evidence_sha256": "c425710c3fa9754ff5f4272dd56d136c0b1e14f184bf56161fb5e8eedd8954c0"
+    },
+    "validation": {
+      "command": "node --test validation_tests.js",
+      "result": "15/15 PASS",
+      "evidence_sha256": "1de2c959c77997dbcb640996fa7ce648c9fe218ea33626e90dc3822a4c92b066"
+    },
+    "p1": {
+      "command": "node p1_tests.js",
+      "result": "55/55 PASS",
+      "flyvis_parity": {
+        "checkpoint": "flow/0000/000",
+        "types": 65,
+        "r1_on_delta": 0.8505,
+        "note": "bit-identical to audited value"
+      },
+      "evidence_sha256": "698d12a89d75fc021185b8073e29b856a5890148297f5708c46f20ea1242a9c4"
+    },
+    "smoke": {
+      "command": "node tests/run_smoke.js",
+      "result": "41/41 PASS (ALL GREEN)",
+      "evidence_sha256": "2e6f10bb2a9b686bcdcd95b2992d5670c74465bfeb9a052cfc84b2474a780696"
+    },
+    "worker_sandbox": {
+      "command": "node --test tests/worker_sandbox.test.js",
+      "result": "5/5 PASS",
+      "evidence_sha256": "bbdbc3b0ae1350b94d96ebf6d92fe4df7f304750097cec38c01ed9c536de0d62"
+    },
+    "benchmark_quick": {
+      "command": "node benchmark.js --quick",
+      "result": "bit-exact vs P0-era report",
+      "headline": {
+        "connectome": {
+          "agree": 0.536,
+          "entropy": 0.0282,
+          "goodBad": 0.95
+        },
+        "shuffled": {
+          "agree": 0.489,
+          "entropy": 0.0244,
+          "goodBad": 0.53
+        },
+        "drosophila": {
+          "goodBad": 0,
+          "note": "archived P0-era value"
+        }
+      },
+      "evidence_sha256": "a4a11610c1373795cdff69f4a97bef3f98344fe7f6b04f925e6026dc23780e27"
+    },
+    "embodiment": {
+      "command": "python embodiment/smoke_test.py --mode flybody",
+      "result": "7/7 PASS — EMBODIMENT FOUNDATION READY",
+      "env": ".venv-embodiment",
+      "evidence_sha256": "007bf76ebb4a35f6d22b1cdfada06a754137f28e3c69509353358e51b93e6a0c"
+    },
+    "embodiment_mock": {
+      "command": "python embodiment/smoke_test.py --mode mock",
+      "result": "7/7 PASS",
+      "evidence_sha256": "71ee9df0e42bf3741dc53a70ef10bf85bd5038ccf5eadef8f7af8740cfee8124"
+    },
+    "closed_loop": {
+      "command": "node --test tests/closed_loop.test.js",
+      "result": "11/11 PASS",
+      "evidence_sha256": "1e46874cf389578cd52425788a4b7513261dc59ba47c3e38eb953a62cef26890"
+    },
+    "flyvis_probe": {
+      "command": ".venv-flyvis/Scripts/python.exe p1_flyvis_probe.py",
+      "result": "ALL PROBES PASS",
+      "evidence_sha256": "9e83d3ab73715d851ddb924df20a1c2a4cc3243085e2b30ddce6c78a5e8723b0"
+    }
+  },
+  "canonical_trajectory": {
+    "path": "baselines/closed_loop/trajectory_seed11.jsonl",
+    "meta": "baselines/closed_loop/trajectory_meta.json",
+    "seed": 11,
+    "steps": 240,
+    "sha256": "05c47753fe56af3de12d5fa3b209e6c3ef20f88a74952154977b1c568bac204b",
+    "replay_verdict": "BYTE-IDENTICAL"
+  },
+  "protocol": {
+    "record": "baselines/protocol/state_contract_v1.json",
+    "contract_version": 1
+  }
+}

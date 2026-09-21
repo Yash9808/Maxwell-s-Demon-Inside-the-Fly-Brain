@@ -17,7 +17,11 @@ const { spawn } = require('child_process');
 const path = require('path');
 const readline = require('readline');
 
-const PY = process.env.PYTHON_EMBODIMENT || 'python';
+// Resolve the embodiment python: explicit env override, else the project's
+// pinned venv when present (tests/CI run from a bare shell), else PATH python.
+const VENV_PY = path.join(__dirname, '..', '.venv-embodiment', 'Scripts', 'python.exe');
+const PY = process.env.PYTHON_EMBODIMENT
+  || (require('fs').existsSync(VENV_PY) ? VENV_PY : 'python');
 const SIDECAR = path.join(__dirname, 'sidecar.py');
 
 /** Minimal JSON-lines client for one sidecar process. */

@@ -1,0 +1,38 @@
+{
+  "created_utc": "2026-09-21T17:54:53.487Z",
+  "commit_sha": "efb56903749de238d7956a821493f019137c7843",
+  "contract_version": 1,
+  "source_sha256": "a6b47964e8593c919f4fd2bc6bddc067f817683e24c6d8536ba705b6d2032ef2",
+  "action_dim": 59,
+  "observation_dim": 15,
+  "neural_max_dim": 512,
+  "canonical_neural_dim": 200,
+  "message_types": [
+    "hello",
+    "welcome",
+    "reset",
+    "reset_ack",
+    "step",
+    "step_result",
+    "observe_env",
+    "learning_signal",
+    "tap",
+    "tap_state",
+    "bye",
+    "bye_ack",
+    "error"
+  ],
+  "error_codes": [
+    "contract_violation",
+    "missing_neural",
+    "stale_episode",
+    "stale_time",
+    "neural_dim_changed"
+  ],
+  "stale_behavior": "rejected (error, stale_time/stale_episode); never applied",
+  "malformed_behavior": "rejected fail-closed (error, contract_violation); never patched or defaulted",
+  "episode_ids": "integer >= 0, must equal receiver's current episode",
+  "timestep_semantics": "t_neural monotone non-decreasing per episode; t_phys increments per sidecar step",
+  "sequence_numbers": "worker cl_state stream: seq strictly increasing; page drops seq <= lastSeq",
+  "transport": "stdio JSON-lines (CLI/CI) or WebSocket JSON-lines (browser, port 8795)"
+}

@@ -52,7 +52,10 @@ const {
   buildBrain, driveBrain, sensoryTransform, runEpisode, blakeObs,
 } = require("../tools/closed_loop_runner");
 
-const PYTHON = process.env.PYTHON_EMBODIMENT || "python";
+const PYTHON = process.env.PYTHON_EMBODIMENT
+  || (fs.existsSync(path.join(__dirname, "..", ".venv-embodiment", "Scripts", "python.exe"))
+        ? path.join(__dirname, "..", ".venv-embodiment", "Scripts", "python.exe")
+        : "python");
 const CIRCUIT_PATH = process.env.E9_CIRCUIT_PATH ||
   path.join(__dirname, "..", "fly_brain_circuit.json");
 const MODE = process.env.CL_MODE === "mock" ? "mock" : "flybody";

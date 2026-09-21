@@ -1,0 +1,8 @@
+{
+  "created_utc": "2026-09-21T17:54:53.482Z",
+  "commit_sha": "efb56903749de238d7956a821493f019137c7843",
+  "suite": "e9_learning_test",
+  "runner": "e9_learning_test.js",
+  "seed_pin": "see baselines/results/e9.json (self-seeded, deterministic)",
+  "note": "gates re-run by validation battery; results hash-frozen in baselines/results/"
+}
