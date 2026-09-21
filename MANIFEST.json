@@ -1,13 +1,13 @@
 {
   "manifest_version": 1,
-  "generated_utc": "2026-09-21T14:15:16Z",
+  "generated_utc": "2026-09-21T14:40:17Z",
   "application": {
     "name": "Maxwell's Demon: Inside the Fly Brain",
     "version": "0.9.0",
     "version_note": "First engineering-manifest release; pre-1.0 research code.",
-    "git_commit": "c3e2bfc321d86b29c3f40b27a3b05d17e7338e40",
+    "git_commit": "fc7272c0cbfc7bab03ed7b95b8db6432f33bc31e",
     "git_branch": "stabilization/pre-phase01",
-    "git_dirty": false,
+    "git_dirty": true,
     "git_remote": "https://github.com/Yash9808/Maxwell-s-Demon-Inside-the-Fly-Brain.git"
   },
   "connectome_provenance": {
@@ -22,10 +22,17 @@
     },
     "mcns": {
       "source": "FlyWire male CNS (MCNS) connectome",
-      "materialization": "payload dataset field: mcns_v1.0; app UI label: v0.9 (discrepancy flagged, unresolved)",
+      "materialization": "payload dataset field: mcns_v1.0; app UI label aligned to v1.0 (2026-09-21); upstream official version is MaleCNS v1.0 (Janelia/FlyWire codex)",
       "url": "https://codex.flywire.ai/?dataset=mcns",
       "DOI": "DOI: UNKNOWN",
-      "reference": "Berg et al., Sexual dimorphism in the complete connectome of the Drosophila male CNS (PMC12636603, preprint 2025; Cell 2026) - exact DOI not verified at generation time; NOT fabricated."
+      "reference": "Berg et al., Sexual dimorphism in the complete connectome of the Drosophila male CNS (PMC12636603, preprint 2025; Cell 2026) - exact DOI not verified at generation time; NOT fabricated.",
+      "raw_payload_integrity_target": {
+        "path": "malecns_circuit.json",
+        "sha256": "72d96c29e83a173f64e4db50f05a90268b2688012af9452a562bd96889872482",
+        "bytes": 138507515,
+        "status": "NOT PRESENT (deleted in the 2026-09-21 stabilization incident; never tracked by git). Regeneration from the authoritative upstream (FlyWire codex MCNS export -> documented pruning) must reproduce this hash; the hash was recorded by the manifest while the file was present at commit 6ec0e9bf.",
+        "note": "Runtime does not consume this raw file: data/circuits/mcns_circuit.js is a byte-exact embed of malecns_circuit_pruned.json (pruned sha256 140cb881af1d23d13947125adeae208085aecb42ecb7b1d1f603336c7b5d28c5, 8,715,602 bytes), verified by tools/split_payloads.py design and tests/run_smoke.js S3."
+      }
     },
     "neurotransmitter_predictions": {
       "source": "Buhmann et al. synapse-type prediction model (two-stage automated NT classification)",
@@ -309,8 +316,8 @@
       {
         "path": "tools/make_manifest.py",
         "present": true,
-        "sha256": "4637c85f584130af5454e4dd4989871b2cb40427f5c7cd3629be9de164e9bf63",
-        "bytes": 11821,
+        "sha256": "027f43cc5fe256a2ada15a3754b2f3c8e3ed22d5fa0ee620be0cfe0f2f0566dc",
+        "bytes": 12790,
         "sha256_note": null
       },
       {
@@ -325,7 +332,7 @@
       {
         "path": "fly_demon_3d.html",
         "present": true,
-        "sha256": "9bfc1cc8734700bb8e78c72d73051bc1dee37ba2e06a73d1d4f76b302412213a",
+        "sha256": "601604f07f7428a202adebbe7ae7368b905ce3b0b22d7f05f24f8b87b1d38011",
         "bytes": 450320,
         "sha256_note": null
       },
