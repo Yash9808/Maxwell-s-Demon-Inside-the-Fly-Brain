@@ -1,0 +1,19 @@
+✔ closed loop end-to-end: 12 causal links on real physics (6844.4845ms)
+✔ determinism: two identical episodes are byte-identical (Step 8) (13193.9945ms)
+✔ R1 no synthetic path: step without canonical neural is rejected (5933.9241ms)
+✔ R2 wrong action dimensionality is rejected at the boundary (1.8574ms)
+✔ R3 stale t_neural is rejected (0.2695ms)
+✔ R4 stale episode is rejected (0.13ms)
+✔ R5 neural dimension change is rejected mid-episode (0.1677ms)
+✔ R6 non-finite neural values are rejected (0.1289ms)
+✔ R7 contract version mismatch is rejected (0.1361ms)
+✔ R9 the loop carries updated brain state (not a reflex arc) (146.5477ms)
+✔ R10 frozen control: learning=false ⇒ zero plasticity, DA still responds (6409.5887ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 32733.1702

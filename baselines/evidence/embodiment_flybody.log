@@ -1,0 +1,10 @@
+EMBODIMENT SMOKE TEST - mode: flybody
+T1 neural->action        PASS (silent vs driven trajectories diverge: final |dx| 0.0863 m, mean per-step 5.67e-02 m (collapse-aware, causality = sensitivity))
+T2 action->body          PASS (x -0.0690 -> -25.6982 mm, net |dx| 2.56e-02 m (causal motion; walking is future RL work))
+T3 body->sensory         PASS (obs changed 119/119 moving steps; deterministic re-run identical=True (body->sensory is a state FUNCTION))
+T4 no-decoder-bypass     PASS (direct-projection displacement 2.38e-01 m; decoder |a59|max 1.000)
+T5 env->reward           PASS (reward==dx/target identity max err 4.8e-07; 0 zero-motion steps earned 0.0e+00 total (0 had large actions))
+T6 reward->learning      PASS (delivery 100.0%, decoder learned_steps=300, joint drift 0.003)
+T7 determinism           PASS (200-step trajectories identical across 2 runs: True)
+
+EMBODIMENT FOUNDATION READY

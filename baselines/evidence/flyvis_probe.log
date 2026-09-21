@@ -1,0 +1,14 @@
+[2026-09-21 20:07:47] network_view:122 Initialized network view at C:\Users\3059942\Downloads\Fly\.flyvis_data\results\flow\0000\000
+[2026-09-21 20:07:47] logging_utils:23 epe not in C:\Users\3059942\Downloads\Fly\.flyvis_data\results\flow\0000\000\validation, but 'loss' is. Falling back to 'loss'. You can rerun the ensemble validation to make appropriate recordings of the losses.
+[2026-09-21 20:08:02] network:222 Initialized network with NumberOfParams(free=734, fixed=2959) parameters.
+[2026-09-21 20:08:02] chkpt_utils:36 Recovered network state.
+P0 import flyvis 1.2.0: 9.9s root=C:\Users\3059942\Downloads\Fly\.flyvis_data\results
+P1 loaded flow/0000/000: 22.0s (n_nodes=45669, n_edges=1513231, params=NumberOfParams(free=734, fixed=2959))
+P2 input elements=721; cell types=65; input types=['R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8']
+P3 simulate OK (1, 80, 45669) in 1.39s (57.4 frames/s incl. steady-state)
+P4 T4a: central trace dim=(1, 80) on-response delta=-0.0062
+P4 T4c: central trace dim=(1, 80) on-response delta=-0.0833
+P4 T5a: central trace dim=(1, 80) on-response delta=+0.0687
+P5 HexEye render OK shape=(2, 721) (frames=2, hexels=721)
+
+ALL PROBES PASS (45.5s total)
