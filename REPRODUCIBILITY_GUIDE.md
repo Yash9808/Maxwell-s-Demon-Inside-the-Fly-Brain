@@ -83,6 +83,22 @@ by S10 and the S9 golden fixture).
 | GLB meshes | External assets (CT-scan fly, larval brain, Fiji sample) — source URLs not recorded in-repo; see MANIFEST gap list |
 
 Full hashes: `MANIFEST.json` (regenerate with `python tools/make_manifest.py`).
+
+### Python environments (locked)
+
+Two locked environments exist as **exact-pinned lock files** (created from the
+audited working installations; hashes recorded in each header):
+
+- `requirements-embodiment.txt` — MuJoCo/FlyBody embodiment track. Install:
+  `python -m venv .venv-embodiment && .venv-embodiment/Scripts/pip install -r requirements-embodiment.txt`
+- `requirements-flyvis.txt` — FlyVis connectome-neural-prediction track.
+  Install: `python -m venv .venv-flyvis && .venv-flyvis/Scripts/pip install -r requirements-flyvis.txt`
+
+`flybody` and `flyvis` are pinned to the exact commits used by the audited
+runs (`d015e9bf…` and `92b3845c…` respectively, recorded in the lock headers
+with their installed hashes). Verified: a clean venv built from
+`requirements-embodiment.txt` runs `embodiment/smoke_test.py --mode flybody`
+with bit-identical results to the audited environment.
 Known DOI: none recorded — everything external is cited by URL + reference string
 (`DOI: UNKNOWN` policy; no fabricated identifiers).
 
@@ -109,6 +125,25 @@ benchmark.js             CLI benchmark runner
 brain_worker.js          3D-app brain worker
 fafb783.py, extract_circuit.py, classify_neurons.py, neuropil_matrix.py,
 analyze_v783.py          Python data pipeline (needs raw FlyWire tables)
+
+### Source-of-truth citations (verify before citing)
+
+- Circuit (FAFB v783): Dorkenwald et al., *Neuron* 2024 — FlyWire full adult
+  female brain connectome. Root-ID materialization: **v783**.
+- Cell types: Schlegel et al., *Nature* 630:199–209 (2024),
+  DOI 10.1038/s41586-024-07686-5 — `flyconnectome/flywire_annotations`
+  `Supplemental_file1_neuron_annotations.tsv` (v783-matched root_ids).
+  Imported via `tools/import_cell_types.js` → `p1_celltypes.importRows`;
+  download verified by byte-size + sha256 recorded in
+  `data/annotations/PROVENANCE.md`.
+- FlyVis: Lappalainen et al., *Nature* 634:1132–1140 (2024),
+  DOI 10.1038/s41586-024-07939-3. (The vendored PDF named
+  `s41586-024-07939-3` is this paper — not the Dorkenwald wiring-diagram
+  paper, a former manifest mis-citation now corrected.)
+- Male CNS: Berg et al. 2025 (PMC12636603) — exact DOI UNKNOWN; recorded by
+  stable identifiers, not invented.
+- Every UNKNOWN and MODEL-ASSUMED provenance flag is enumerated in the
+  manifest's `provenance` block (see `MANIFEST.json`).
 tools/                   manifest/injection/archive/index generators + rebuild_anatomy
 experiments/e*.json      machine-readable experiment manifests (Stage 6)
 data/circuits/*.js       circuit payloads (FAFB, MCNS, 2D-lab)

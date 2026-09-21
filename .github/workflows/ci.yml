@@ -30,6 +30,9 @@ jobs:
         env:
           SMOKE_NAME: full-quick
 
+      - name: Worker sandbox loading regression (Stage F)
+        run: node --test tests/worker_sandbox.test.js
+
       - name: Experiment manifests present and valid JSON
         run: |
           node -e '

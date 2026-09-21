@@ -588,10 +588,19 @@ function connectomeController(circuit, opts) {
   // its SOURCE-DERIVED hex column (p1_retinotopy.js — the JS lattice is
   // self-test-validated against the Python Stage E mapping); "legacy8bin"
   // preserves the pre-F operating point bit-for-bit (8 coarse bins; the
-  // axis mislabel is documented in P1_BIOLOGY_AUDIT.md E1). The stimulus  // function (per-particle constants) is identical in both paths — only
-  // the sampling grid differs: 8 saturated bins -> ~256 occupied columns
-  // (sparse drive, the regime the preregistered hypothesis names).
-  const opticInput = opts.opticInput || "retinotopy";
+  // axis mislabel is documented in P1_BIOLOGY_AUDIT.md E1). The stimulus
+  // function (per-particle constants) is identical in both paths — only
+  // the sampling grid differs: 8 saturated bins -> ~256 occupied columns.
+  // DEFAULT = "legacy8bin" (stabilization pass, 2026-09-21): the documented
+  // operating point (opticDrive 0.25; "sparsest sensory regime where
+  // real-vs-shuffled wiring diverges", verified by the pre-registered sweep)
+  // was calibrated on the 8-bin interface. The retinotopic grid collapses
+  // expected optic injection ~9x at the same drive (measured: ~8374 vs ~945
+  // kicks/tick, tools/diagnose_optic_input.js A/B), which silences the
+  // motor pool ratio policy (door never opens, DA = 0, plasticity = 0) —
+  // an operating-point shift, not an integration defect. Retinotopy remains
+  // available via { opticInput: "retinotopy" } until its own operating  // point is calibrated and pre-registered (P1_RETINOTOPY_REPORT.md follow-up).
+  const opticInput = opts.opticInput || "legacy8bin";
   let columnOf = null, opticByColumn = null;
   // precompute the visual channel per optic neuron once (String(i) lookups
   // every tick are the dominant cost of the old inner loop)

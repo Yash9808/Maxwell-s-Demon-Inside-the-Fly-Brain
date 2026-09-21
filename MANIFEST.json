@@ -1,12 +1,12 @@
 {
   "manifest_version": 1,
-  "generated_utc": "2026-09-21T10:38:50Z",
+  "generated_utc": "2026-09-21T13:39:57Z",
   "application": {
     "name": "Maxwell's Demon: Inside the Fly Brain",
     "version": "0.9.0",
     "version_note": "First engineering-manifest release; pre-1.0 research code.",
-    "git_commit": "76bb7875f4b5fce97eb90a67e3af680c6f59e08e",
-    "git_branch": "Ver2(Split-code-fastframe)",
+    "git_commit": "6ec0e9bfa88011f6eba518317fac764acd291d46",
+    "git_branch": "HEAD",
     "git_dirty": true,
     "git_remote": "https://github.com/Yash9808/Maxwell-s-Demon-Inside-the-Fly-Brain.git"
   },
@@ -16,20 +16,27 @@
       "materialization": "v783",
       "scope": "proofread (both partners proofread)",
       "url": "https://codex.flywire.ai/?dataset=fafb",
-      "DOI": "DOI: UNKNOWN",
-      "reference": "Dorkenwald et al., Neuronal wiring diagram of an adult brain, bioRxiv 2023 / Nature 2024 (see s41586-024-07939-3.pdf)",
+      "DOI": "10.1038/s41586-024-07558-y",
+      "reference": "Dorkenwald et al., Neuronal wiring diagram of an adult brain, Nature 644:1312-1322 (2024). NOTE: the vendored s41586-024-07939-3.pdf is a DIFFERENT paper (flyvis, Lappalainen et al.) - kept because the flyvis sidecar cites it.",
       "caveat": "Root IDs are stable only within materialization v783."
     },
     "mcns": {
       "source": "FlyWire male CNS (MCNS) connectome",
       "materialization": "payload dataset field: mcns_v1.0; app UI label: v0.9 (discrepancy flagged, unresolved)",
       "url": "https://codex.flywire.ai/?dataset=mcns",
-      "DOI": "DOI: UNKNOWN"
+      "DOI": "DOI: UNKNOWN",
+      "reference": "Berg et al., Sexual dimorphism in the complete connectome of the Drosophila male CNS (PMC12636603, preprint 2025; Cell 2026) - exact DOI not verified at generation time; NOT fabricated."
     },
     "neurotransmitter_predictions": {
       "source": "Buhmann et al. synapse-type prediction model (two-stage automated NT classification)",
       "note": "Scores are predictions (0-1), not experimental measurements; *_avg > 0.5 is a soft call.",
       "DOI": "DOI: UNKNOWN"
+    },
+    "cell_type_annotations": {
+      "source": "flyconnectome/flywire_annotations Supplemental_file1_neuron_annotations.tsv (Schlegel et al., Whole-brain annotation and multi-connectome cell typing of Drosophila, Nature 634:139-152, 2024)",
+      "DOI": "10.1038/s41586-024-07686-5",
+      "root_id_materialization": "v783 (same as circuit)",
+      "imported_via": "tools/import_cell_types.js (sha256-pinned TSV; report stored in fly_brain_celltypes.json meta.cell_type_import)"
     }
   },
   "random_seed_scheme": {
@@ -40,9 +47,11 @@
     "prng": "mulberry32 (32-bit, experiment_core.js makeRng)"
   },
   "generated_data_provenance": {
+    "fly_brain_celltypes.json": "python p1_build_celltypes.py, then node tools/import_cell_types.js (Schlegel et al. 2024 v783 cell-type annotations; provenance + import report in meta)",
+    "fly_brain_retinotopy.json": "python p1_retinotopy.py (Stage E hex-column assignment from optic_channels)",
     "fly_brain_circuit.json": "python extract_circuit.py  (from v783 feather tables; requires synapses table for optic position channels)",
     "malecns_circuit_pruned.json": "pruned MCNS export (generator script not retained; see SCRIPT_ARCHIVE_INDEX.md)",
-    "fly_brain_positions.json/.bin, fly_brain_hulls*": "_rebuild_anatomy.py (anatomy pipeline; see SCRIPT_ARCHIVE_INDEX.md)",
+    "fly_brain_hulls*": "_rebuild_anatomy.py (anatomy pipeline; see SCRIPT_ARCHIVE_INDEX.md)",
     "neuron_nt_classification.csv": "python classify_neurons.py",
     "neuropil_matrix.csv": "python neuropil_matrix.py",
     "report_v783.md": "python analyze_v783.py",
@@ -55,15 +64,15 @@
       {
         "path": "experiment_core.js",
         "present": true,
-        "sha256": "e1a512bc2e63a72910dfd3fb4b5c6129b6e3dab66d9590e296e050730b9054d2",
-        "bytes": 98368,
+        "sha256": "f070e6ab750e205420c93fbbf2e786836e36c08c8ae7ada23496db8e8f5aa4c3",
+        "bytes": 100241,
         "sha256_note": null
       },
       {
         "path": "controllers.js",
         "present": true,
-        "sha256": "a90441e19083776763c3f5427c6158e64f15c965c244eccfa01a644a788a4845",
-        "bytes": 55642,
+        "sha256": "debdcc2503065a75debe1fe236cafd95218deca90831d2b78bff3aab5dd1b694",
+        "bytes": 56340,
         "sha256_note": null
       },
       {
@@ -90,8 +99,8 @@
       {
         "path": "brain_worker.js",
         "present": true,
-        "sha256": "72474f0b9a3ee22fbd7f3bfd55cec18736135f2d5d248a5ad4f8054e45d56b3f",
-        "bytes": 11114,
+        "sha256": "28fc80889c70c8ee47d50403782461d23569ecea735afaa42a0a8abd12a49b89",
+        "bytes": 11359,
         "sha256_note": null
       },
       {
@@ -104,15 +113,15 @@
       {
         "path": "extract_circuit.py",
         "present": true,
-        "sha256": "c2eba0f7b674112f7ed216e310005978d6c55e902c4c53122d94802c80bff4f3",
-        "bytes": 17661,
+        "sha256": "826d1461ba914d92ae15ac54c26fc4ab5ee572838a7c994e091441edfea2987a",
+        "bytes": 18044,
         "sha256_note": null
       },
       {
         "path": "inject_circuit.py",
         "present": true,
-        "sha256": "9f610dee86d409e984585444d6bf7c754f14d1de47102fe659e36efdbca732db",
-        "bytes": 2090,
+        "sha256": "b668b4ae9c2142c537c8af31b7d4bb3853f3a070a952b73bb401e5cd5c5b97e8",
+        "bytes": 2141,
         "sha256_note": null
       },
       {
@@ -183,6 +192,132 @@
         "present": true,
         "sha256": "bbe453f945b831229d844a8de8844b4f4ccce21b63f81a6eebb5a9c2b2ce3ad4",
         "bytes": 153512,
+        "sha256_note": null
+      },
+      {
+        "path": "p1_celltypes.js",
+        "present": true,
+        "sha256": "4c490b15ee50ba185bfea47a463939ff38256ad5e443299567e8670a944340a1",
+        "bytes": 7006,
+        "sha256_note": null
+      },
+      {
+        "path": "p1_dynamics.js",
+        "present": true,
+        "sha256": "7d1601fa1f7f12c07cf80607343ba011ed2f63477d1b05b53083ce4eaaed1341",
+        "bytes": 10717,
+        "sha256_note": null
+      },
+      {
+        "path": "p1_sim.js",
+        "present": true,
+        "sha256": "869ce3d300cd24b62945296130ae4e2f4a006a450cab7b64a3bbbb9ca9012a67",
+        "bytes": 19792,
+        "sha256_note": null
+      },
+      {
+        "path": "p1_retinotopy.js",
+        "present": true,
+        "sha256": "31765c5a30bbe9e9974212e5ef08ae8021d3d496bf3484094210828189769162",
+        "bytes": 9732,
+        "sha256_note": null
+      },
+      {
+        "path": "p1_flyvis_client.js",
+        "present": true,
+        "sha256": "aaecc203ef46f76bb1cde4c35632eb53d27066c0ded8a9461b49c8bf776d0a8d",
+        "bytes": 5139,
+        "sha256_note": null
+      },
+      {
+        "path": "p1_tests.js",
+        "present": true,
+        "sha256": "97f68681501e71a59450afc2b6473b957f6ed5c5f13575dfa027115e65738482",
+        "bytes": 19522,
+        "sha256_note": null
+      },
+      {
+        "path": "flyvis_sidecar.py",
+        "present": true,
+        "sha256": "834dfae4fe485299a04f9ba8c63663c4cbca750ab51f42193b2fb75d397d87fa",
+        "bytes": 18590,
+        "sha256_note": null
+      },
+      {
+        "path": "p1_flyvis_winfix.py",
+        "present": true,
+        "sha256": "a359b1eb4489c19d0ed823e0cebd2aa41693d7af42148a5153f3f10f8d67b029",
+        "bytes": 2863,
+        "sha256_note": null
+      },
+      {
+        "path": "p1_flybody_smoke.py",
+        "present": true,
+        "sha256": "25f186e54b5a27818dc9851f7ce256573474efc97d31bd0e815904a1408dec2a",
+        "bytes": 12503,
+        "sha256_note": null
+      },
+      {
+        "path": "p1_flybody_benchmark.py",
+        "present": true,
+        "sha256": "a0b78af7063cf88a0efa0298f0daf48afcf7767fa3208eaba04322567ffacec9",
+        "bytes": 19876,
+        "sha256_note": null
+      },
+      {
+        "path": "stats_utils.js",
+        "present": true,
+        "sha256": "0526fcd6d2de306d0a2d41d92ddb9e7d82c525988ed5d6759bbdc3f295670e09",
+        "bytes": 12579,
+        "sha256_note": null
+      },
+      {
+        "path": "validation_tests.js",
+        "present": true,
+        "sha256": "545642f629d068c0d57d87c3803da3a26ad046d9663d81662495f5596bfb53f4",
+        "bytes": 11676,
+        "sha256_note": null
+      },
+      {
+        "path": "embodiment/sidecar.py",
+        "present": true,
+        "sha256": "29e3a09a563d0e2727fc6159f56cd9d43b06bf2bddb2b7256f4b12d18bc676a9",
+        "bytes": 18454,
+        "sha256_note": null
+      },
+      {
+        "path": "embodiment/motor_decoder.py",
+        "present": true,
+        "sha256": "753012b5609a3d9cc5390f0fbccae9816a06c93e839e4a8b40f1c412193593c3",
+        "bytes": 9328,
+        "sha256_note": null
+      },
+      {
+        "path": "embodiment/smoke_test.py",
+        "present": true,
+        "sha256": "f9745a497c555acea199c9b3d3fd1ac647888b5cc44e235fbee5b270da32a936",
+        "bytes": 14485,
+        "sha256_note": null
+      },
+      {
+        "path": "embodiment/embodiment_client.js",
+        "present": true,
+        "sha256": "09f84fdf1cc881cc0ccb219edcc3938c9718a17fa8e1b55bd648e53c0c881b38",
+        "bytes": 7369,
+        "sha256_note": null
+      },
+      {
+        "path": "tools/make_manifest.py",
+        "present": true,
+        "sha256": "4637c85f584130af5454e4dd4989871b2cb40427f5c7cd3629be9de164e9bf63",
+        "bytes": 11821,
+        "sha256_note": null
+      },
+      {
+        "path": "tools/import_cell_types.js",
+        "present": true,
+        "sha256": "6be0e6ef40a9f537b195474e9977f883ae67170bccf77fd5fa4d19987addb25d",
+        "bytes": 5958,
         "sha256_note": null
       }
     ],
@@ -263,10 +398,9 @@
       },
       {
         "path": "malecns_circuit.json",
-        "present": true,
-        "sha256": "72d96c29e83a173f64e4db50f05a90268b2688012af9452a562bd96889872482",
-        "bytes": 138507515,
-        "sha256_note": null
+        "present": false,
+        "sha256": null,
+        "bytes": null
       },
       {
         "path": "fly_brain_positions.json",
@@ -308,6 +442,20 @@
         "present": true,
         "sha256": "e2ab09f7e7f4d10c095b369f088a54b7cd3f1a30eb97a9cc9772375aa5b2ed48",
         "bytes": 6680,
+        "sha256_note": null
+      },
+      {
+        "path": "fly_brain_celltypes.json",
+        "present": true,
+        "sha256": "123190664b0e5dc1baf0b492078b56280729a8bd384683274144c9bccf1ad4ee",
+        "bytes": 53804833,
+        "sha256_note": null
+      },
+      {
+        "path": "fly_brain_retinotopy.json",
+        "present": true,
+        "sha256": "164f7f37460fb5266fe111f43ac378123146c74331d41fa297c462efcc97bacf",
+        "bytes": 14231401,
         "sha256_note": null
       },
       {
@@ -401,8 +549,8 @@
       {
         "path": "maxwell_demon_experiment.md",
         "present": true,
-        "sha256": "480d5150d6c6933e0dd0661ea2b762a7ce09acffb2cbc1e86ea8bac5d0c2dcf0",
-        "bytes": 11398,
+        "sha256": "0028049e805d7f27eb002b91301f75d1259333af70d8450fb1b0d7765b112ab6",
+        "bytes": 12343,
         "sha256_note": null
       },
       {
@@ -530,9 +678,14 @@
       }
     ]
   },
+  "mesh_assets_provenance": {
+    "note": "source URLs UNKNOWN (not recorded at acquisition; flagged in ENGINEERING_READINESS_REPORT.md) - never fabricated"
+  },
   "repository": {
-    "tracked_file_count": 196,
+    "tracked_file_count": 335,
     "note": "Large DATA (*.feather, malecns_circuit.json, s41586-024-07939-3.pdf) is git-ignored; hashed here when present.",
-    "missing_files": []
+    "missing_files": [
+      "malecns_circuit.json"
+    ]
   }
 }

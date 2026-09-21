@@ -31,3 +31,8 @@ s41586-024-07939-3.pdf
 .flyvis_data/
 embodiment/logs/
 embodiment/__pycache__/
+data/annotations/*.tsv
+# Timestamped benchmark/diagnostic outputs (regenerable; repo tracks only _-prefixed fixtures)
+research_data/summary_20*.json
+research_data/trials_20*.jsonl
+research_data/ab_optic_input_20*.json

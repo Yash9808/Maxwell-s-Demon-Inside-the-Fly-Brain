@@ -81,6 +81,14 @@ SOURCE_FILES = [
     "analysis/plot_research_figures.py", "launch_fly_demon_3d.py",
     "build_nature_paper_docx.py",
     "fly_demon_lab_template.html", "experiment_plots.html",
+    # P0/P1 runtime modules + bridges (previously absent from the manifest)
+    "p1_celltypes.js", "p1_dynamics.js", "p1_sim.js", "p1_retinotopy.js",
+    "p1_flyvis_client.js", "p1_tests.js", "flyvis_sidecar.py",
+    "p1_flyvis_winfix.py", "p1_flybody_smoke.py", "p1_flybody_benchmark.py",
+    "stats_utils.js", "validation_tests.js", "embodiment/sidecar.py",
+    "embodiment/motor_decoder.py", "embodiment/smoke_test.py",
+    "embodiment/embodiment_client.js", "tools/make_manifest.py",
+    "tools/import_cell_types.js",
 ]
 
 HYBRID_APP_FILES = [
@@ -104,6 +112,7 @@ CIRCUIT_PAYLOADS = [
     "fly_brain_positions.json", "fly_brain_positions.bin",
     "fly_brain_hulls.json", "fly_brain_hulls.bin",
     "fly_brain_hulls_raw_frame.bin", "fly_brain_meta.json",
+    "fly_brain_celltypes.json", "fly_brain_retinotopy.json",
     "devil_b64.txt",
 ]
 
@@ -129,6 +138,14 @@ MESH_ASSETS = [
     "fly.glb", "b7c7e51c-2912-4f77-bbdf-a440cfbb3527.glb",
 ]
 
+# Provenance for the GLB mesh assets: acquisition sources were never recorded
+# (flagged in ENGINEERING_READINESS_REPORT.md). Recorded as UNKNOWN - never
+# fabricated.
+MESH_ASSETS_PROVENANCE = {
+    "note": ("source URLs UNKNOWN (not recorded at acquisition; flagged in "
+             "ENGINEERING_READINESS_REPORT.md) - never fabricated"),
+}
+
 EXPERIMENT_CONFIGS = sorted(
     str(p.relative_to(ROOT)) for p in (ROOT / "experiments").glob("*.json")
 ) if (ROOT / "experiments").exists() else []
@@ -153,8 +170,8 @@ def main() -> int:
                 "materialization": "v783",
                 "scope": "proofread (both partners proofread)",
                 "url": "https://codex.flywire.ai/?dataset=fafb",
-                "DOI": "DOI: UNKNOWN",
-                "reference": "Dorkenwald et al., Neuronal wiring diagram of an adult brain, bioRxiv 2023 / Nature 2024 (see s41586-024-07939-3.pdf)",
+                "DOI": "10.1038/s41586-024-07558-y",
+                "reference": "Dorkenwald et al., Neuronal wiring diagram of an adult brain, Nature 644:1312-1322 (2024). NOTE: the vendored s41586-024-07939-3.pdf is a DIFFERENT paper (flyvis, Lappalainen et al.) - kept because the flyvis sidecar cites it.",
                 "caveat": "Root IDs are stable only within materialization v783.",
             },
             "mcns": {
@@ -162,11 +179,18 @@ def main() -> int:
                 "materialization": "payload dataset field: mcns_v1.0; app UI label: v0.9 (discrepancy flagged, unresolved)",
                 "url": "https://codex.flywire.ai/?dataset=mcns",
                 "DOI": "DOI: UNKNOWN",
+                "reference": "Berg et al., Sexual dimorphism in the complete connectome of the Drosophila male CNS (PMC12636603, preprint 2025; Cell 2026) - exact DOI not verified at generation time; NOT fabricated.",
             },
             "neurotransmitter_predictions": {
                 "source": "Buhmann et al. synapse-type prediction model (two-stage automated NT classification)",
                 "note": "Scores are predictions (0-1), not experimental measurements; *_avg > 0.5 is a soft call.",
                 "DOI": "DOI: UNKNOWN",
+            },
+            "cell_type_annotations": {
+                "source": "flyconnectome/flywire_annotations Supplemental_file1_neuron_annotations.tsv (Schlegel et al., Whole-brain annotation and multi-connectome cell typing of Drosophila, Nature 634:139-152, 2024)",
+                "DOI": "10.1038/s41586-024-07686-5",
+                "root_id_materialization": "v783 (same as circuit)",
+                "imported_via": "tools/import_cell_types.js (sha256-pinned TSV; report stored in fly_brain_celltypes.json meta.cell_type_import)",
             },
         },
         "random_seed_scheme": {
@@ -177,11 +201,15 @@ def main() -> int:
             "prng": "mulberry32 (32-bit, experiment_core.js makeRng)",
         },
         "generated_data_provenance": {
+            "fly_brain_celltypes.json":
+                "python p1_build_celltypes.py, then node tools/import_cell_types.js (Schlegel et al. 2024 v783 cell-type annotations; provenance + import report in meta)",
+            "fly_brain_retinotopy.json":
+                "python p1_retinotopy.py (Stage E hex-column assignment from optic_channels)",
             "fly_brain_circuit.json":
                 "python extract_circuit.py  (from v783 feather tables; requires synapses table for optic position channels)",
             "malecns_circuit_pruned.json":
                 "pruned MCNS export (generator script not retained; see SCRIPT_ARCHIVE_INDEX.md)",
-            "fly_brain_positions.json/.bin, fly_brain_hulls*":
+            "fly_brain_hulls*":
                 "_rebuild_anatomy.py (anatomy pipeline; see SCRIPT_ARCHIVE_INDEX.md)",
             "neuron_nt_classification.csv": "python classify_neurons.py",
             "neuropil_matrix.csv": "python neuropil_matrix.py",
@@ -191,6 +219,7 @@ def main() -> int:
             "fly_demon_3d.html FAFB/MCNS slots": "python inject_3d_circuit.py (FAFB slot) / manual embed (MCNS slot)",
         },
         "files": {},
+        "mesh_assets_provenance": MESH_ASSETS_PROVENANCE,
     }
 
     groups = {

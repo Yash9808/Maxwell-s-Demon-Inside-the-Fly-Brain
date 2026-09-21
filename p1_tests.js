@@ -33,8 +33,15 @@ console.log("— Stage B: cell-type metadata —");
     table.stats.nt_classified === N, `${table.stats.nt_classified}`);
   check("B3: post-neuropil mapped >= 99% (89 unmapped disclosed)",
     table.stats.post_mapped / N > 0.999, `${table.stats.post_mapped}`);
-  check("B4: cell_type reserved UNKNOWN (nothing invented)",
-    table.stats.cell_type_known === 0, `${table.stats.cell_type_known}`);
+  check("B4: every typed cell_type carries provenance (no fabrication)",
+    table.records.every(r => !r.cell_type || r.cell_type === "UNKNOWN"
+      || (r.cell_type_source && r.cell_type_source !== "UNKNOWN")),
+    `${table.stats.cell_type_known} typed`);
+  check("B4b: import provenance recorded (Schlegel et al. 2024, v783)",
+    ct.loadCellTypes().meta.cell_type_import
+    && ct.loadCellTypes().meta.cell_type_import.root_id_materialization.includes("v783")
+    && ct.loadCellTypes().meta.n_cell_type_known === table.stats.cell_type_known,
+    `${ct.loadCellTypes().meta.n_cell_type_known} via ${ct.loadCellTypes().meta.cell_type_import.source}`);
   // backward compatibility: legacy fields untouched (structure-level;
   // edge COUNT is not asserted because the P0 file was revised mid-P1 by the
   // parallel agent — see P1_BIOLOGY_AUDIT.md revision note)
