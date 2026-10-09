@@ -1,0 +1,746 @@
+{
+ "aabb": {
+  "browser_glb_units": {
+   "centre": [
+    -0.019801,
+    -0.006282,
+    0.001462
+   ],
+   "size": [
+    0.547727,
+    0.245266,
+    0.222131
+   ]
+  },
+  "browser_world_units": {
+   "centre": [
+    -641.46238,
+    29.29529,
+    5.209126
+   ],
+   "size": [
+    166.659512,
+    67.588807,
+    74.62826
+   ]
+  },
+  "mujoco_model_units": {
+   "bounding_radius": 0.17962324833511215,
+   "centre": [
+    -0.0533741923215292,
+    -0.0008968968627365119,
+    -0.03497060617108856
+   ],
+   "hi": [
+    0.10347483905043632,
+    0.04964361387979465,
+    0.03650351134020105
+   ],
+   "lo": [
+    -0.21022322369349472,
+    -0.051437407605267674,
+    -0.10644472368237817
+   ],
+   "size": [
+    0.313698062743931,
+    0.10108102148506232,
+    0.14294823502257922
+   ]
+  },
+  "note": "each capture framed ITS OWN measured AABB (fill 0.80, fovy 45.0 deg), so a raw size difference between the two images can be framing, not geometry - that is why the aligned IoU is reported as well",
+  "size_ratio_browser_over_mujoco_sorted": [
+   1.746,
+   1.7158,
+   2.1976
+  ]
+ },
+ "frames": {
+  "browser": "rig frame: nose +X, dorsal +Y, lateral +/-Z (model frame: nose +X, dorsal +Z, lateral +/-Y)",
+  "mujoco": "model frame: nose +X, dorsal +Z, lateral +/-Y (app rig frame: nose +X, dorsal +Y, lateral +/-Z)"
+ },
+ "landmarks": [
+  "thorax",
+  "head",
+  "abdomen",
+  "wing_left",
+  "wing_right",
+  "claw_T1_left",
+  "claw_T3_left",
+  "claw_T1_right"
+ ],
+ "sources": {
+  "browser_facts": {
+   "asset": "NeuroMechFly 2.0 (nmf_fly.glb)",
+   "file": "browser_facts.json",
+   "glb_sha256": "6612e18517d1f3c5f8ba411e4d2bbd46bbd564e402d6378fbfc54dff12aff02d",
+   "glb_sha256_on_disk_now": "6612e18517d1f3c5f8ba411e4d2bbd46bbd564e402d6378fbfc54dff12aff02d",
+   "glb_unchanged_since_capture": true,
+   "page": "http://127.0.0.1:8765/fly_demon_3d.html?cdp=1",
+   "page_sha256": "008b5072756c13fbe9b25e29eb336cdaa50dfb44e5c56a5ac88f9c55cf208951",
+   "sha256": "9e85fda86b65bab1b37434e41f32daebb2014baf1d58a56765a22b0312510be2"
+  },
+  "mujoco_facts": {
+   "file": "mujoco_facts.json",
+   "mujoco_version": "3.13.0",
+   "pose": "qpos = qpos_spring (passive rest) \u2014 the pose baked into nmf_fly.glb",
+   "sha256": "96e2334cf1e6a5e8d18a7f71989875e132aa834e14ae79b804010489dce965c6",
+   "xml": ".venv-embodiment/Lib/site-packages/flybody/fruitfly/assets/fruitfly.xml",
+   "xml_sha256": "342d2517f461c3b88586e7ca133a0c4dd5f9bc805ed7a4f3867b607d92555934"
+  }
+ },
+ "views": {
+  "dorsal": {
+   "alignment_from_landmarks": {
+    "mirror": true,
+    "residual_px": [
+     1.63,
+     9.45,
+     5.17,
+     7.75,
+     6.99,
+     6.9,
+     5.56,
+     6.94
+    ],
+    "rms_px": 6.6541643359105285,
+    "rotation_deg": -0.31256617615953536,
+    "scale": 0.4825504851866185,
+    "translation_px": [
+     468.64,
+     180.933
+    ]
+   },
+   "background_rgb": {
+    "browser": [
+     7,
+     11,
+     18
+    ],
+    "mujoco": [
+     0,
+     0,
+     0
+    ]
+   },
+   "iou_after_alignment": 0.153,
+   "iou_as_rendered": 0.4089,
+   "landmark_px": {
+    "abdomen": {
+     "browser": [
+      314.65,
+      335.3
+     ],
+     "mujoco": [
+      320.03,
+      307.48
+     ]
+    },
+    "claw_T1_left": {
+     "browser": [
+      310.94,
+      306.91
+     ],
+     "mujoco": [
+      329.52,
+      245.04
+     ]
+    },
+    "claw_T1_right": {
+     "browser": [
+      317.8,
+      305.2
+     ],
+     "mujoco": [
+      314.28,
+      241.44
+     ]
+    },
+    "claw_T3_left": {
+     "browser": [
+      303.64,
+      449.59
+     ],
+     "mujoco": [
+      346.17,
+      566.32
+     ]
+    },
+    "head": {
+     "browser": [
+      314.25,
+      254.68
+     ],
+     "mujoco": [
+      320.81,
+      170.67
+     ]
+    },
+    "thorax": {
+     "browser": [
+      314.23,
+      299.62
+     ],
+     "mujoco": [
+      320.79,
+      247.54
+     ]
+    },
+    "wing_left": {
+     "browser": [
+      279.4,
+      304.95
+     ],
+     "mujoco": [
+      377.76,
+      257.7
+     ]
+    },
+    "wing_right": {
+     "browser": [
+      348.95,
+      304.95
+     ],
+     "mujoco": [
+      263.78,
+      257.72
+     ]
+    }
+   },
+   "pngs": {
+    "browser": "browser_dorsal.png",
+    "mujoco": "mujoco_dorsal.png",
+    "sha256": {
+     "browser": "7da3da491ca069934d2c22d08028c8de44775d4fb22423a76a07b56159118410",
+     "mujoco": "1b40caa9c8c699ea76f772f96ddcc6629f99bb370c1506bfc54928d411cc587a"
+    }
+   },
+   "silhouette": {
+    "browser": {
+     "area_px": 34477,
+     "bbox_xyxy": [
+      215,
+      105,
+      414,
+      555
+     ],
+     "centroid_px": [
+      337.42,
+      313.85
+     ]
+    },
+    "mujoco": {
+     "area_px": 65910,
+     "bbox_xyxy": [
+      226,
+      105,
+      415,
+      588
+     ],
+     "centroid_px": [
+      320.68,
+      361.32
+     ]
+    }
+   },
+   "silhouette_best_case_fit": {
+    "iou": 0.544,
+    "scale": 1.35,
+    "shift_px": [
+     -143,
+     -38
+    ],
+    "what": "uniform scale + whole-pixel shift of the browser mask that maximises IoU with the MuJoCo mask (no rotation, no mirror) - the shape-only agreement"
+   }
+  },
+  "front": {
+   "alignment_from_landmarks": {
+    "mirror": true,
+    "residual_px": [
+     0.99,
+     2.05,
+     0.78,
+     7.37,
+     6.15,
+     14.28,
+     23.79,
+     14.41
+    ],
+    "rms_px": 11.595020959736598,
+    "rotation_deg": 0.2684638006813113,
+    "scale": 0.5068117174472618,
+    "translation_px": [
+     487.283,
+     185.156
+    ]
+   },
+   "background_rgb": {
+    "browser": [
+     7,
+     11,
+     18
+    ],
+    "mujoco": [
+     0,
+     0,
+     0
+    ]
+   },
+   "iou_after_alignment": 0.1472,
+   "iou_as_rendered": 0.2274,
+   "landmark_px": {
+    "abdomen": {
+     "browser": [
+      325.24,
+      319.11
+     ],
+     "mujoco": [
+      319.08,
+      264.39
+     ]
+    },
+    "claw_T1_left": {
+     "browser": [
+      330.2,
+      401.87
+     ],
+     "mujoco": [
+      311.46,
+      401.09
+     ]
+    },
+    "claw_T1_right": {
+     "browser": [
+      322.48,
+      401.24
+     ],
+     "mujoco": [
+      323.86,
+      399.45
+     ]
+    },
+    "claw_T3_left": {
+     "browser": [
+      335.32,
+      392.33
+     ],
+     "mujoco": [
+      287.26,
+      455.89
+     ]
+    },
+    "head": {
+     "browser": [
+      326.33,
+      325.42
+     ],
+     "mujoco": [
+      318.48,
+      281.63
+     ]
+    },
+    "thorax": {
+     "browser": [
+      325.95,
+      322.58
+     ],
+     "mujoco": [
+      318.39,
+      274.08
+     ]
+    },
+    "wing_left": {
+     "browser": [
+      361.15,
+      315.14
+     ],
+     "mujoco": [
+      261.67,
+      261.6
+     ]
+    },
+    "wing_right": {
+     "browser": [
+      290.66,
+      315.14
+     ],
+     "mujoco": [
+      375.08,
+      261.59
+     ]
+    }
+   },
+   "pngs": {
+    "browser": "browser_front.png",
+    "mujoco": "mujoco_front.png",
+    "sha256": {
+     "browser": "e4a7ec85e884f3cdd7ba05e06841e2bbfcd71ae8fd9f2d9c743fa2495841b8a7",
+     "mujoco": "de2f650b3132749f5936dba8fd200c3bf05ec24eb977dff32f7ec14c8b5e9714"
+    }
+   },
+   "silhouette": {
+    "browser": {
+     "area_px": 13786,
+     "bbox_xyxy": [
+      204,
+      179,
+      420,
+      639
+     ],
+     "centroid_px": [
+      312.58,
+      328.35
+     ]
+    },
+    "mujoco": {
+     "area_px": 51296,
+     "bbox_xyxy": [
+      184,
+      117,
+      451,
+      473
+     ],
+     "centroid_px": [
+      317.82,
+      244.61
+     ]
+    }
+   },
+   "silhouette_best_case_fit": {
+    "iou": 0.5283,
+    "scale": 2.0,
+    "shift_px": [
+     -332,
+     -421
+    ],
+    "what": "uniform scale + whole-pixel shift of the browser mask that maximises IoU with the MuJoCo mask (no rotation, no mirror) - the shape-only agreement"
+   }
+  },
+  "lateral": {
+   "alignment_from_landmarks": {
+    "mirror": false,
+    "residual_px": [
+     0.18,
+     0.34,
+     0.29,
+     3.59,
+     3.35,
+     0.4,
+     0.21,
+     0.38
+    ],
+    "rms_px": 1.7578843074518073,
+    "rotation_deg": 0.04928509775273874,
+    "scale": 0.561042504161154,
+    "translation_px": [
+     163.078,
+     171.432
+    ]
+   },
+   "background_rgb": {
+    "browser": [
+     7,
+     11,
+     18
+    ],
+    "mujoco": [
+     0,
+     0,
+     0
+    ]
+   },
+   "iou_after_alignment": 0.2214,
+   "iou_as_rendered": 0.2685,
+   "landmark_px": {
+    "abdomen": {
+     "browser": [
+      335.4,
+      319.08
+     ],
+     "mujoco": [
+      307.12,
+      263.35
+     ]
+    },
+    "claw_T1_left": {
+     "browser": [
+      304.65,
+      401.31
+     ],
+     "mujoco": [
+      252.13,
+      409.08
+     ]
+    },
+    "claw_T1_right": {
+     "browser": [
+      302.93,
+      399.7
+     ],
+     "mujoco": [
+      250.0,
+      406.09
+     ]
+    },
+    "claw_T3_left": {
+     "browser": [
+      466.46,
+      407.78
+     ],
+     "mujoco": [
+      541.47,
+      420.89
+     ]
+    },
+    "head": {
+     "browser": [
+      253.67,
+      324.99
+     ],
+     "mujoco": [
+      162.29,
+      273.74
+     ]
+    },
+    "thorax": {
+     "browser": [
+      299.37,
+      322.53
+     ],
+     "mujoco": [
+      243.27,
+      269.4
+     ]
+    },
+    "wing_left": {
+     "browser": [
+      304.26,
+      314.97
+     ],
+     "mujoco": [
+      247.45,
+      250.99
+     ]
+    },
+    "wing_right": {
+     "browser": [
+      305.62,
+      315.4
+     ],
+     "mujoco": [
+      258.07,
+      261.02
+     ]
+    }
+   },
+   "pngs": {
+    "browser": "browser_lateral.png",
+    "mujoco": "mujoco_lateral.png",
+    "sha256": {
+     "browser": "36fc5cb300976b96b4cd54b3fd67d165f4ff5cf0f15b74b99a18691bcf816fac",
+     "mujoco": "73b7400e06bc8b94a254f3eaab603fc973d962b2a18b11419f559c768d5053c0"
+    }
+   },
+   "silhouette": {
+    "browser": {
+     "area_px": 26418,
+     "bbox_xyxy": [
+      78,
+      193,
+      531,
+      549
+     ],
+     "centroid_px": [
+      356.68,
+      315.73
+     ]
+    },
+    "mujoco": {
+     "area_px": 63164,
+     "bbox_xyxy": [
+      82,
+      188,
+      639,
+      431
+     ],
+     "centroid_px": [
+      334.86,
+      285.96
+     ]
+    }
+   },
+   "silhouette_best_case_fit": {
+    "iou": 0.5948,
+    "scale": 1.6,
+    "shift_px": [
+     -220,
+     -235
+    ],
+    "what": "uniform scale + whole-pixel shift of the browser mask that maximises IoU with the MuJoCo mask (no rotation, no mirror) - the shape-only agreement"
+   }
+  },
+  "quarter": {
+   "alignment_from_landmarks": {
+    "mirror": false,
+    "residual_px": [
+     3.91,
+     14.14,
+     7.93,
+     47.71,
+     46.88,
+     12.85,
+     2.78,
+     9.34
+    ],
+    "rms_px": 25.029661046021992,
+    "rotation_deg": -1.4007738608819813,
+    "scale": 0.45848121515276763,
+    "translation_px": [
+     183.445,
+     201.485
+    ]
+   },
+   "background_rgb": {
+    "browser": [
+     7,
+     11,
+     18
+    ],
+    "mujoco": [
+     0,
+     0,
+     0
+    ]
+   },
+   "iou_after_alignment": 0.1481,
+   "iou_as_rendered": 0.2776,
+   "landmark_px": {
+    "abdomen": {
+     "browser": [
+      334.48,
+      316.76
+     ],
+     "mujoco": [
+      310.71,
+      271.4
+     ]
+    },
+    "claw_T1_left": {
+     "browser": [
+      316.41,
+      400.39
+     ],
+     "mujoco": [
+      266.75,
+      415.75
+     ]
+    },
+    "claw_T1_right": {
+     "browser": [
+      309.87,
+      397.92
+     ],
+     "mujoco": [
+      274.54,
+      416.97
+     ]
+    },
+    "claw_T3_left": {
+     "browser": [
+      419.5,
+      363.96
+     ],
+     "mujoco": [
+      500.09,
+      365.76
+     ]
+    },
+    "head": {
+     "browser": [
+      274.86,
+      343.37
+     ],
+     "mujoco": [
+      222.59,
+      314.99
+     ]
+    },
+    "thorax": {
+     "browser": [
+      309.39,
+      328.9
+     ],
+     "mujoco": [
+      269.15,
+      292.96
+     ]
+    },
+    "wing_left": {
+     "browser": [
+      338.92,
+      329.35
+     ],
+     "mujoco": [
+      230.98,
+      262.94
+     ]
+    },
+    "wing_right": {
+     "browser": [
+      289.4,
+      312.25
+     ],
+     "mujoco": [
+      315.82,
+      294.4
+     ]
+    }
+   },
+   "pngs": {
+    "browser": "browser_quarter.png",
+    "mujoco": "mujoco_quarter.png",
+    "sha256": {
+     "browser": "9c15ee8985424ca23db5f4fe765b9050c34de3e5f5e777d4cbdfc4526ab87cbb",
+     "mujoco": "63e0b21919ad4bf6474f09857c00ce7da1c0d3be34baf1a9d53bc55faa3d1e6f"
+    }
+   },
+   "silhouette": {
+    "browser": {
+     "area_px": 26047,
+     "bbox_xyxy": [
+      96,
+      203,
+      448,
+      624
+     ],
+     "centroid_px": [
+      314.39,
+      313.86
+     ]
+    },
+    "mujoco": {
+     "area_px": 74885,
+     "bbox_xyxy": [
+      149,
+      59,
+      616,
+      425
+     ],
+     "centroid_px": [
+      392.91,
+      237.95
+     ]
+    }
+   },
+   "silhouette_best_case_fit": {
+    "iou": 0.6178,
+    "scale": 1.75,
+    "shift_px": [
+     -198,
+     -288
+    ],
+    "what": "uniform scale + whole-pixel shift of the browser mask that maximises IoU with the MuJoCo mask (no rotation, no mirror) - the shape-only agreement"
+   }
+  }
+ },
+ "what": "MuJoCo (qpos_spring, its own renderer) vs the live app's render of the shipped nmf_fly.glb, same four named views"
+}

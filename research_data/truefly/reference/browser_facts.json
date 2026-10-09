@@ -1,0 +1,571 @@
+{
+ "aabb": {
+  "flyGroup_local": {
+   "centre": [
+    0.784638,
+    -2.054987,
+    0.432728
+   ],
+   "size": [
+    111.106342,
+    45.059204,
+    49.752173
+   ]
+  },
+  "glb_units": {
+   "centre": [
+    -0.019801,
+    -0.006282,
+    0.001462
+   ],
+   "size": [
+    0.547727,
+    0.245266,
+    0.222131
+   ]
+  },
+  "world": {
+   "centre": [
+    -641.46238,
+    29.29529,
+    5.209126
+   ],
+   "size": [
+    166.659512,
+    67.588807,
+    74.62826
+   ]
+  }
+ },
+ "asset": "NeuroMechFly 2.0 (nmf_fly.glb)",
+ "fill_fraction": 0.8,
+ "fovy_deg": 45.0,
+ "frames": "rig frame: nose +X, dorsal +Y, lateral +/-Z (model frame: nose +X, dorsal +Z, lateral +/-Y)",
+ "framing": {
+  "aspect": 1,
+  "distance_world": 293.7987037784906,
+  "fill": 0.8,
+  "fov_y_deg": 45,
+  "radius_world": 97.35632617014905
+ },
+ "glb_sha256": "6612e18517d1f3c5f8ba411e4d2bbd46bbd564e402d6378fbfc54dff12aff02d",
+ "harness": {
+  "buffer": {
+   "at_capture": [
+    640,
+    640
+   ],
+   "before": [
+    640,
+    640
+   ],
+   "gl_renderer": "ANGLE (Intel, Intel(R) UHD Graphics (0x0000A788) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "gl_version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+   "pixelRatio_before": 1,
+   "requested": 640
+  },
+  "camera": "harness-framed (not the app director): glb-subtree AABB centre, distance = R/(fill*tan(fovy/2)), square 1:1, the app's own WebGLRenderer/scene/materials; director yaw+lean zeroed and both wings put back on their baked rest quaternion",
+  "director_neutralized": {
+   "flyGroup_rotation_xyz_before": [
+    -0.06274902756427655,
+    0.36900417582370887,
+    0.15
+   ],
+   "wing_rest_applied": [
+    "wing_left",
+    "wing_right"
+   ]
+  },
+  "frozen": "window.requestAnimationFrame replaced by a no-op so the harness render is the last presented frame",
+  "hidden": {
+   "flyGroup": [],
+   "scene": [
+    "Group",
+    "Line",
+    "Group"
+   ]
+  },
+  "image_source": "WebGL readPixels from the drawing buffer (no DOM, no HUD)",
+  "lights_kept": 2,
+  "warnings": []
+ },
+ "image_size_px": 640,
+ "landmarks": [
+  "thorax",
+  "head",
+  "abdomen",
+  "wing_left",
+  "wing_right",
+  "claw_T1_left",
+  "claw_T3_left",
+  "claw_T1_right"
+ ],
+ "landmarks_missing": [],
+ "landmarks_node_type": {
+  "abdomen": [
+   "Object3D"
+  ],
+  "claw_T1_left": [
+   "Object3D"
+  ],
+  "claw_T1_right": [
+   "Object3D"
+  ],
+  "claw_T3_left": [
+   "Object3D"
+  ],
+  "head": [
+   "Object3D"
+  ],
+  "thorax": [
+   "Object3D"
+  ],
+  "wing_left": [
+   "Object3D"
+  ],
+  "wing_right": [
+   "Object3D"
+  ]
+ },
+ "landmarks_world": {
+  "abdomen": [
+   -649.038368,
+   30.152783,
+   3.466557
+  ],
+  "claw_T1_left": [
+   -637.459745,
+   -0.716787,
+   1.696815
+  ],
+  "claw_T1_right": [
+   -636.752357,
+   -0.409202,
+   4.57611
+  ],
+  "claw_T3_left": [
+   -697.610633,
+   -2.791215,
+   -1.403849
+  ],
+  "head": [
+   -618.184932,
+   27.922451,
+   3.297568
+  ],
+  "thorax": [
+   -635.437297,
+   28.850488,
+   3.297684
+  ],
+  "wing_left": [
+   -637.548962,
+   31.619386,
+   -9.846975
+  ],
+  "wing_right": [
+   -637.548962,
+   31.619386,
+   16.442343
+  ]
+ },
+ "page": "http://127.0.0.1:8765/fly_demon_3d.html?cdp=1",
+ "page_sha256": "008b5072756c13fbe9b25e29eb336cdaa50dfb44e5c56a5ac88f9c55cf208951",
+ "projection_self_check": {
+  "analytic_px": [
+   [
+    76.8,
+    512
+   ],
+   [
+    563.2,
+    512
+   ],
+   [
+    320,
+    128
+   ]
+  ],
+  "max_error_px": 0.743,
+  "note": "three markers welded into the scene at known rig-frame offsets, projected analytically with the same camera that rendered them",
+  "png": "browser_probe.png",
+  "rendered_px": [
+   [
+    76.35,
+    511.53,
+    191
+   ],
+   [
+    319.49,
+    127.46,
+    181
+   ],
+   [
+    562.75,
+    511.56,
+    191
+   ]
+  ]
+ },
+ "state_before": {
+  "conform_quaternion_xyzw": [
+   -0.7071067811865475,
+   0,
+   0,
+   0.7071067811865476
+  ],
+  "flyGroup_position_xyz": [
+   -642.639337529681,
+   32.3777712150032,
+   4.560033508927581
+  ],
+  "flyGroup_rotation_xyz": [
+   -0.06274902756427655,
+   0.36900417582370887,
+   0.15
+  ],
+  "flyGroup_scale": 1.5,
+  "inner_position_xyz": [
+   4.8013602053160165,
+   -2.3515220177072975,
+   -0.841566227728513
+  ],
+  "inner_quaternion_xyzw": [
+   0,
+   0,
+   0,
+   1
+  ],
+  "inner_scale": 202.84967347019906
+ },
+ "views": {
+  "dorsal": {
+   "buffer": [
+    640,
+    640
+   ],
+   "camera": {
+    "az_mujoco": 180,
+    "distance": 293.7987037784906,
+    "el_mujoco": 89.5,
+    "eye_dir": [
+     -0.008726535,
+     0.999961923,
+     0
+    ],
+    "fov_y_deg": 45,
+    "lookat": [
+     -641.46238,
+     29.29529,
+     5.209126
+    ],
+    "position": [
+     -644.026225,
+     323.082807,
+     5.209126
+    ],
+    "up": [
+     1,
+     0,
+     0
+    ]
+   },
+   "landmark_px": {
+    "abdomen": [
+     314.65,
+     335.3
+    ],
+    "claw_T1_left": [
+     310.94,
+     306.91
+    ],
+    "claw_T1_right": [
+     317.8,
+     305.2
+    ],
+    "claw_T3_left": [
+     303.64,
+     449.59
+    ],
+    "head": [
+     314.25,
+     254.68
+    ],
+    "thorax": [
+     314.23,
+     299.62
+    ],
+    "wing_left": [
+     279.4,
+     304.95
+    ],
+    "wing_right": [
+     348.95,
+     304.95
+    ]
+   },
+   "png": "browser_dorsal.png",
+   "silhouette": {
+    "bbox_xyxy": [
+     215,
+     105,
+     414,
+     555
+    ],
+    "centroid_px": [
+     337.42,
+     313.85
+    ],
+    "fill_fraction_of_frame": 0.0842,
+    "height_px": 450,
+    "width_px": 199
+   }
+  },
+  "front": {
+   "buffer": [
+    640,
+    640
+   ],
+   "camera": {
+    "az_mujoco": 0,
+    "distance": 293.7987037784906,
+    "el_mujoco": 0,
+    "eye_dir": [
+     1,
+     0,
+     0
+    ],
+    "fov_y_deg": 45,
+    "lookat": [
+     -641.46238,
+     29.29529,
+     5.209126
+    ],
+    "position": [
+     -347.663676,
+     29.29529,
+     5.209126
+    ],
+    "up": [
+     0,
+     1,
+     0
+    ]
+   },
+   "landmark_px": {
+    "abdomen": [
+     325.24,
+     319.11
+    ],
+    "claw_T1_left": [
+     330.2,
+     401.87
+    ],
+    "claw_T1_right": [
+     322.48,
+     401.24
+    ],
+    "claw_T3_left": [
+     335.32,
+     392.33
+    ],
+    "head": [
+     326.33,
+     325.42
+    ],
+    "thorax": [
+     325.95,
+     322.58
+    ],
+    "wing_left": [
+     361.15,
+     315.14
+    ],
+    "wing_right": [
+     290.66,
+     315.14
+    ]
+   },
+   "png": "browser_front.png",
+   "silhouette": {
+    "bbox_xyxy": [
+     204,
+     179,
+     420,
+     639
+    ],
+    "centroid_px": [
+     312.58,
+     328.35
+    ],
+    "fill_fraction_of_frame": 0.0337,
+    "height_px": 460,
+    "width_px": 216
+   }
+  },
+  "lateral": {
+   "buffer": [
+    640,
+    640
+   ],
+   "camera": {
+    "az_mujoco": 270,
+    "distance": 293.7987037784906,
+    "el_mujoco": 0,
+    "eye_dir": [
+     0,
+     0,
+     -1
+    ],
+    "fov_y_deg": 45,
+    "lookat": [
+     -641.46238,
+     29.29529,
+     5.209126
+    ],
+    "position": [
+     -641.46238,
+     29.29529,
+     -288.589578
+    ],
+    "up": [
+     0,
+     1,
+     0
+    ]
+   },
+   "landmark_px": {
+    "abdomen": [
+     335.4,
+     319.08
+    ],
+    "claw_T1_left": [
+     304.65,
+     401.31
+    ],
+    "claw_T1_right": [
+     302.93,
+     399.7
+    ],
+    "claw_T3_left": [
+     466.46,
+     407.78
+    ],
+    "head": [
+     253.67,
+     324.99
+    ],
+    "thorax": [
+     299.37,
+     322.53
+    ],
+    "wing_left": [
+     304.26,
+     314.97
+    ],
+    "wing_right": [
+     305.62,
+     315.4
+    ]
+   },
+   "png": "browser_lateral.png",
+   "silhouette": {
+    "bbox_xyxy": [
+     78,
+     193,
+     531,
+     549
+    ],
+    "centroid_px": [
+     356.68,
+     315.73
+    ],
+    "fill_fraction_of_frame": 0.0645,
+    "height_px": 356,
+    "width_px": 453
+   }
+  },
+  "quarter": {
+   "buffer": [
+    640,
+    640
+   ],
+   "camera": {
+    "az_mujoco": 315,
+    "distance": 293.7987037784906,
+    "el_mujoco": 20,
+    "eye_dir": [
+     0.664463024,
+     0.342020143,
+     -0.664463024
+    ],
+    "fov_y_deg": 45,
+    "lookat": [
+     -641.46238,
+     29.29529,
+     5.209126
+    ],
+    "position": [
+     -446.244005,
+     129.780365,
+     -190.009249
+    ],
+    "up": [
+     0,
+     1,
+     0
+    ]
+   },
+   "landmark_px": {
+    "abdomen": [
+     334.48,
+     316.76
+    ],
+    "claw_T1_left": [
+     316.41,
+     400.39
+    ],
+    "claw_T1_right": [
+     309.87,
+     397.92
+    ],
+    "claw_T3_left": [
+     419.5,
+     363.96
+    ],
+    "head": [
+     274.86,
+     343.37
+    ],
+    "thorax": [
+     309.39,
+     328.9
+    ],
+    "wing_left": [
+     338.92,
+     329.35
+    ],
+    "wing_right": [
+     289.4,
+     312.25
+    ]
+   },
+   "png": "browser_quarter.png",
+   "silhouette": {
+    "bbox_xyxy": [
+     96,
+     203,
+     448,
+     624
+    ],
+    "centroid_px": [
+     314.39,
+     313.86
+    ],
+    "fill_fraction_of_frame": 0.0636,
+    "height_px": 421,
+    "width_px": 352
+   }
+  }
+ }
+}

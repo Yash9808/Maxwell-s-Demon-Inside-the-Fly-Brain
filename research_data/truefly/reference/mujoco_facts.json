@@ -1,0 +1,442 @@
+{
+ "aabb": {
+  "bounding_radius": 0.17962324833511215,
+  "centre": [
+   -0.0533741923215292,
+   -0.0008968968627365119,
+   -0.03497060617108856
+  ],
+  "hi": [
+   0.10347483905043632,
+   0.04964361387979465,
+   0.03650351134020105
+  ],
+  "lo": [
+   -0.21022322369349472,
+   -0.051437407605267674,
+   -0.10644472368237817
+  ],
+  "size": [
+   0.313698062743931,
+   0.10108102148506232,
+   0.14294823502257922
+  ]
+ },
+ "distance": 0.5420611028101727,
+ "fill_fraction": 0.8,
+ "fovy_deg": 45.0,
+ "frames": "model frame: nose +X, dorsal +Z, lateral +/-Y (app rig frame: nose +X, dorsal +Y, lateral +/-Z)",
+ "image_size_px": 640,
+ "landmarks": [
+  "thorax",
+  "head",
+  "abdomen",
+  "wing_left",
+  "wing_right",
+  "claw_T1_left",
+  "claw_T3_left",
+  "claw_T1_right"
+ ],
+ "landmarks_world": {
+  "abdomen": [
+   -0.0447,
+   -0.000555,
+   0.00428
+  ],
+  "claw_T1_left": [
+   -0.006646788073302107,
+   0.005261265109828729,
+   -0.09717302665993023
+  ],
+  "claw_T1_right": [
+   -0.004321951773427617,
+   -0.004201554576354076,
+   -0.0961621464165255
+  ],
+  "claw_T3_left": [
+   -0.20433303969995406,
+   0.01545161587962484,
+   -0.1039906482858381
+  ],
+  "head": [
+   0.0567,
+   3.81e-07,
+   -0.00305
+  ],
+  "thorax": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "wing_left": [
+   -0.00694,
+   0.0432,
+   0.0091
+  ],
+  "wing_right": [
+   -0.00694,
+   -0.0432,
+   0.0091
+  ]
+ },
+ "model_units": "MJCF units; glb packer scale = 0.1 (build_nmf_fly_glb.js SCALE)",
+ "mujoco_version": "3.13.0",
+ "pose": "qpos = qpos_spring (passive rest) \u2014 the pose baked into nmf_fly.glb",
+ "source": "flybody fruitfly.xml",
+ "views": {
+  "dorsal": {
+   "calibration_markers_dropped": {
+    "offscreen_or_occluded": 1,
+    "partly_occluded": 0
+   },
+   "calibration_markers_used": 11,
+   "camera": {
+    "azimuth": 180.0,
+    "distance": 0.5420611028101727,
+    "elevation": 89.5,
+    "fovy_deg": 45.0,
+    "lookat": [
+     -0.0533741923215292,
+     -0.0008968968627365119,
+     -0.03497060617108856
+    ]
+   },
+   "dlt_residual_px": {
+    "max": 0.055,
+    "mean": 0.041
+   },
+   "landmark_on_fly_px": {
+    "abdomen": true,
+    "claw_T1_left": true,
+    "claw_T1_right": true,
+    "claw_T3_left": true,
+    "head": true,
+    "thorax": true,
+    "wing_left": true,
+    "wing_right": true
+   },
+   "landmark_px": {
+    "abdomen": [
+     320.03,
+     307.48
+    ],
+    "claw_T1_left": [
+     329.52,
+     245.04
+    ],
+    "claw_T1_right": [
+     314.28,
+     241.44
+    ],
+    "claw_T3_left": [
+     346.17,
+     566.32
+    ],
+    "head": [
+     320.81,
+     170.67
+    ],
+    "thorax": [
+     320.79,
+     247.54
+    ],
+    "wing_left": [
+     377.76,
+     257.7
+    ],
+    "wing_right": [
+     263.78,
+     257.72
+    ]
+   },
+   "marker_radius": 0.007184929933404486,
+   "png": "mujoco_dorsal.png",
+   "presentation": {
+    "nose_screen_deg": 89.67,
+    "note": "0 deg = screen right, 90 deg = screen up (y up)",
+    "wing_axis_screen_deg": -179.99
+   },
+   "silhouette": {
+    "bbox_xyxy": [
+     226,
+     105,
+     415,
+     588
+    ],
+    "centroid_px": [
+     320.68,
+     361.32
+    ],
+    "fill_fraction_of_frame": 0.1609,
+    "height_px": 483,
+    "width_px": 189
+   }
+  },
+  "front": {
+   "calibration_markers_dropped": {
+    "offscreen_or_occluded": 0,
+    "partly_occluded": 0
+   },
+   "calibration_markers_used": 12,
+   "camera": {
+    "azimuth": 0.0,
+    "distance": 0.5420611028101727,
+    "elevation": 0.0,
+    "fovy_deg": 45.0,
+    "lookat": [
+     -0.0533741923215292,
+     -0.0008968968627365119,
+     -0.03497060617108856
+    ]
+   },
+   "dlt_residual_px": {
+    "max": 0.116,
+    "mean": 0.055
+   },
+   "landmark_on_fly_px": {
+    "abdomen": true,
+    "claw_T1_left": true,
+    "claw_T1_right": true,
+    "claw_T3_left": true,
+    "head": true,
+    "thorax": true,
+    "wing_left": true,
+    "wing_right": true
+   },
+   "landmark_px": {
+    "abdomen": [
+     319.08,
+     264.39
+    ],
+    "claw_T1_left": [
+     311.46,
+     401.09
+    ],
+    "claw_T1_right": [
+     323.86,
+     399.45
+    ],
+    "claw_T3_left": [
+     287.26,
+     455.89
+    ],
+    "head": [
+     318.48,
+     281.63
+    ],
+    "thorax": [
+     318.39,
+     274.08
+    ],
+    "wing_left": [
+     261.67,
+     261.6
+    ],
+    "wing_right": [
+     375.08,
+     261.59
+    ]
+   },
+   "marker_radius": 0.007184929933404486,
+   "png": "mujoco_front.png",
+   "presentation": {
+    "nose_screen_deg": -91.99,
+    "note": "0 deg = screen right, 90 deg = screen up (y up)",
+    "wing_axis_screen_deg": 0.01
+   },
+   "silhouette": {
+    "bbox_xyxy": [
+     184,
+     117,
+     451,
+     473
+    ],
+    "centroid_px": [
+     317.82,
+     244.61
+    ],
+    "fill_fraction_of_frame": 0.1252,
+    "height_px": 356,
+    "width_px": 267
+   }
+  },
+  "lateral": {
+   "calibration_markers_dropped": {
+    "offscreen_or_occluded": 1,
+    "partly_occluded": 1
+   },
+   "calibration_markers_used": 10,
+   "camera": {
+    "azimuth": 270.0,
+    "distance": 0.5420611028101727,
+    "elevation": 0.0,
+    "fovy_deg": 45.0,
+    "lookat": [
+     -0.0533741923215292,
+     -0.0008968968627365119,
+     -0.03497060617108856
+    ]
+   },
+   "dlt_residual_px": {
+    "max": 0.189,
+    "mean": 0.112
+   },
+   "landmark_on_fly_px": {
+    "abdomen": true,
+    "claw_T1_left": true,
+    "claw_T1_right": true,
+    "claw_T3_left": true,
+    "head": true,
+    "thorax": true,
+    "wing_left": true,
+    "wing_right": true
+   },
+   "landmark_px": {
+    "abdomen": [
+     307.12,
+     263.35
+    ],
+    "claw_T1_left": [
+     252.13,
+     409.08
+    ],
+    "claw_T1_right": [
+     250.0,
+     406.09
+    ],
+    "claw_T3_left": [
+     541.47,
+     420.89
+    ],
+    "head": [
+     162.29,
+     273.74
+    ],
+    "thorax": [
+     243.27,
+     269.4
+    ],
+    "wing_left": [
+     247.45,
+     250.99
+    ],
+    "wing_right": [
+     258.07,
+     261.02
+    ]
+   },
+   "marker_radius": 0.007184929933404486,
+   "png": "mujoco_lateral.png",
+   "presentation": {
+    "nose_screen_deg": -175.9,
+    "note": "0 deg = screen right, 90 deg = screen up (y up)",
+    "wing_axis_screen_deg": -43.36
+   },
+   "silhouette": {
+    "bbox_xyxy": [
+     82,
+     188,
+     639,
+     431
+    ],
+    "centroid_px": [
+     334.86,
+     285.96
+    ],
+    "fill_fraction_of_frame": 0.1542,
+    "height_px": 243,
+    "width_px": 557
+   }
+  },
+  "quarter": {
+   "calibration_markers_dropped": {
+    "offscreen_or_occluded": 1,
+    "partly_occluded": 1
+   },
+   "calibration_markers_used": 10,
+   "camera": {
+    "azimuth": 315.0,
+    "distance": 0.5420611028101727,
+    "elevation": 20.0,
+    "fovy_deg": 45.0,
+    "lookat": [
+     -0.0533741923215292,
+     -0.0008968968627365119,
+     -0.03497060617108856
+    ]
+   },
+   "dlt_residual_px": {
+    "max": 0.064,
+    "mean": 0.041
+   },
+   "landmark_on_fly_px": {
+    "abdomen": true,
+    "claw_T1_left": true,
+    "claw_T1_right": true,
+    "claw_T3_left": true,
+    "head": true,
+    "thorax": true,
+    "wing_left": true,
+    "wing_right": true
+   },
+   "landmark_px": {
+    "abdomen": [
+     310.71,
+     271.4
+    ],
+    "claw_T1_left": [
+     266.75,
+     415.75
+    ],
+    "claw_T1_right": [
+     274.54,
+     416.97
+    ],
+    "claw_T3_left": [
+     500.09,
+     365.76
+    ],
+    "head": [
+     222.59,
+     314.99
+    ],
+    "thorax": [
+     269.15,
+     292.96
+    ],
+    "wing_left": [
+     230.98,
+     262.94
+    ],
+    "wing_right": [
+     315.82,
+     294.4
+    ]
+   },
+   "marker_radius": 0.007184929933404486,
+   "png": "mujoco_quarter.png",
+   "presentation": {
+    "nose_screen_deg": -153.68,
+    "note": "0 deg = screen right, 90 deg = screen up (y up)",
+    "wing_axis_screen_deg": -20.35
+   },
+   "silhouette": {
+    "bbox_xyxy": [
+     149,
+     59,
+     616,
+     425
+    ],
+    "centroid_px": [
+     392.91,
+     237.95
+    ],
+    "fill_fraction_of_frame": 0.1828,
+    "height_px": 366,
+    "width_px": 467
+   }
+  }
+ },
+ "xml": ".venv-embodiment/Lib/site-packages/flybody/fruitfly/assets/fruitfly.xml",
+ "xml_sha256": "342d2517f461c3b88586e7ca133a0c4dd5f9bc805ed7a4f3867b607d92555934"
+}
