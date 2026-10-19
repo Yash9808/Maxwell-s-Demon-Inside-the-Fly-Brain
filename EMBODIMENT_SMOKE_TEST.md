@@ -122,3 +122,38 @@ LOG: embodiment/logs/run_20260920_…_ep7.jsonl (600 records)
 
 followed by the final verdict line (`EMBODIMENT FOUNDATION READY` /
 `EMBODIMENT PARTIAL` / `EMBODIMENT BLOCKED`).
+
+## 8. T8 — real visual feedback (post-Phase-02, ADDITIVE)
+
+With real visual feedback implemented (FLYBODY_ARCHITECTURE.md §7), a fourth
+causal assertion runs in **flybody mode only** (mock mode has no MuJoCo
+scene; T8 reports `skipped` there and the mock T-series gate is unchanged):
+
+```
+T8 visual→scene .......... PASS (visual bins track the moving body: rest [...]
+                            -> moved [...] (L1 0.297, sensor deterministic=True))
+```
+
+T8 asserts (a) the 8 visual bins of `observation()` change when the body
+moves through 120 driven steps (L1 > 0.01), and (b) the sensor is a pure
+state function (byte-identical recomputation between steps). Run:
+
+```bash
+MUJOCO_GL=disable .venv-embodiment/Scripts/python.exe embodiment/smoke_test.py --mode flybody
+```
+
+(`MUJOCO_GL` is irrelevant to T8 — the geometric sensor needs no GL — and is
+honored in whatever setting the caller chose.)
+
+## 9. STAGE 5 task causality suite (post-smoke, ADDITIVE)
+
+The physical task (pillar; FLYBODY_ARCHITECTURE.md §9) has its own causality
+suite — `node --test tests/stage5_task.test.js` — which runs the AGENT TASK
+§13 chain (T1 target→vision, T2 vision→brain, T3 brain→motor, T4
+motor→Flybody via a calibrated intent contrast, T5 fly→environment,
+T6 environment→vision closure, T7 reward→DA, T8 proprio no-regress, T9 motor
+contract, T10 protocol, T11 determinism) on REAL flybody physics, skipping
+loudly when the flybody stack is absent. `CL_MODE=mock` runs the proxy
+telemetry chain only (mock smoke gate unchanged); legacy closed-loop behavior
+and its replay anchors are unchanged (task-mode record fields are additive
+and task-gated).

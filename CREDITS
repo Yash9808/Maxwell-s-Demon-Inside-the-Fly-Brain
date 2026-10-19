@@ -1,0 +1,49 @@
+# CREDITS — third-party assets
+
+## nmf_fly.glb — NeuroMechFly 2.0 adult fruit-fly morphology (TrueFly-glb button)
+
+- **Citation:** Wang-Chen, A. et al. *NeuroMechFly 2.0, a framework for
+  simulating embodied sensorimotor control in adult Drosophila.* Nature
+  (2025), https://doi.org/10.1038/s41586-025-09029-4 (preprint: bioRxiv
+  2023.09.18.556649).
+- **Asset source:** MuJoCo MJCF body model (`fruitfly.xml`) + 85 body-segment
+  OBJ meshes as published by the NeuroMechFly 2.0 / flybody project —
+  https://github.com/NeLy-EPFL/flygym (assets under
+  `src/flygym/assets/model/flybody/`; identical copies shipped in the
+  `flybody==0.1.0` pip package at
+  `.venv-embodiment/Lib/site-packages/flybody/fruitfly/assets/`, from which
+  this build reads them). No assets were fabricated; no meshes were
+  decimated (the packer is lossless OBJ→GLB).
+- **License:** Apache License 2.0 (flygym repo `LICENSE`; flybody PyPI
+  metadata "License: Apache License" — copies at
+  `research_data/nmf_assets/LICENSE_flygym` and the package dist-info
+  METADATA).
+- **Build pipeline (render-only, offline):** `node tools/build_nmf_fly_glb.js`
+  parses the MJCF `<body>` tree (joint pivots pos/quat per node, geoms with
+  local pos/quat + material) and packs each referenced OBJ into a glTF 2.0
+  binary scene: 151 nodes, 84 meshes, 270,734 triangles, 8 materials.
+  MuJoCo default mesh scale 0.1 applied; units meters→scene handled by the
+  runtime normalization (wingspan → 170 world units, matching the avatar it
+  replaces; scale factor printed to console at load).
+- **Runtime use:** fly_demon_3d.html TrueFly-glb button (render-only);
+  `?fly=legacy` renders the previous Sketchfab fly (CC-BY-4.0, author
+  victorberdugo1, https://sketchfab.com/3d-models/fly-6a4470f884554864827d848718b2b6bc)
+  for side-by-side comparison and zero-code rollback. This mode changes
+  nothing in simulation, physics, learning, or exports.
+
+### sha256 of every asset consumed by the build
+
+Full list: `research_data/nmf_assets/SHA256SUMS` (87 entries — 85 OBJ +
+fruitfly.xml + a trailing dirent). Key files:
+
+```
+fruitfly.xml            342d2517f461c3b88586e7ca133a0c4dd5f9bc805ed7a4f3867b607d92555934
+thorax_body.obj         385ffd2b7e8a81cc602c586c40c4e7f3b8530c1192ae1f8d478d200149095bbc
+wing_left_membrane.obj  6119af49be241ac260ea1386fe2ceb48d29399c0d1e03ec5c75ad85f7d486cbe
+```
+
+Built artifact: `nmf_fly.glb`
+sha256 `58bcccb53d69b23d1703f22ad2de0ddf1cc6dcd5189ad8ac3c0c9b72fd9eaf28`
+
+Regenerate the checksums any time with:
+`cd .venv-embodiment/Lib/site-packages/flybody/fruitfly/assets && sha256sum * > <repo>/research_data/nmf_assets/SHA256SUMS`

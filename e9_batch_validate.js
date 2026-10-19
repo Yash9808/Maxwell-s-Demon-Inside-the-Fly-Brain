@@ -24,6 +24,12 @@
  *                                   mean line + 95% CI band per panel,
  *                                   TRAIN | TEST divider on every panel
  *
+ * C-8: Welch t tests delegated to the canonical stats_utils.welchT (one
+ * implementation project-wide; the selftest still pins it against the
+ * independent Simpson-integration anchor), C-3 dataset export, and an
+ * import-safe main() guard (require.main === module) so tests can load
+ * this script as a module without side effects.
+ *
  * CLI:
  *   node e9_batch_validate.js [--seeds 20] [--base 1] [--b 4]
  *        [--train 12] [--test 12] [--episode 20] [--particles 260]
@@ -35,6 +41,13 @@ const fs = require("fs");
 const path = require("path");
 const CORE = require("./experiment_core.js");
 const CTRL = require("./controllers.js");
+const SU = require("./stats_utils.js");
+// C-8: Welch t tests are delegated to the canonical stats_utils.welchT —
+// the identical algorithm (Welch-Satterthwaite df + two-sided regularized
+// incomplete-beta p) that this file previously carried a private copy of.
+// The --selftest block still verifies the implementation against its own
+// independent Simpson-integration anchor, so nothing is trusted on faith.
+const welchT = SU.welchT;
 
 // ---- CLI -------------------------------------------------------------------
 const args = process.argv.slice(2);
@@ -147,65 +160,30 @@ if (hasFlag("selftest")) {
   process.exit(0);
 }
 
-// ---- brain factory: IDENTICAL to the worker's e9BrainFactory ---------------
+// ---- brain factory: identical feature set to the worker's e9BrainFactory ---
+// (eligibility windows + trained PG readout). --pairing selects the credit
+// delivery mode:
+//   legacy     - deferred tick update paired with decPend (historical E9
+//                behavior; byte-comparable with previous batch runs)
+//   corrected  - pgBaseline: REINFORCE applied at reward-DELIVERY time, so
+//                window-k credit pairs with decision k (the core writes
+//                pgReward BEFORE lastPgAction() re-latches the next sample),
+//                reward centered by an EMA baseline, zero-reward windows
+//                included as correct rejections. Same fix verified on E10.
+const PAIRING = argVal("pairing", "legacy");
+if (PAIRING !== "legacy" && PAIRING !== "corrected") {
+  console.error("--pairing must be legacy or corrected"); process.exit(1);
+}
 const CIRCUIT = JSON.parse(fs.readFileSync(path.join(__dirname, "fly_brain_circuit.json"), "utf8"));
 function e9BrainFactory(seedIdx) {
   return CTRL.connectomeController(CIRCUIT, {
     shuffle: false, rng: CORE.makeRng(9176 + (seedIdx || 0) * 37), seed: 1,
     opticDrive: 0, motorDrive: 0.6, plasticity: "full",
+    eligibility: [{ tau: 0.90, w: 0.45 }, { tau: 0.985, w: 0.35 }, { tau: 0.9995, w: 0.20 }],
+    policyGradient: true,
+    pgBaseline: PAIRING === "corrected",
+    pgRng: CORE.makeRng(424243 + (seedIdx || 0) * 977),
   });
-}
-
-// ---- run all seeds ----------------------------------------------------------
-const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-const rows = [];
-const perSeed = {};                       // variant -> [{seed, phase, rec}]
-for (const v of VARIANTS) perSeed[v] = [];
-console.log(`E9 Phase-2 batch validation: ${SEEDS} seeds x ${VARIANTS.length} variants, ` +
-            `${TRAIN}+${TEST} trials x ${EPISODE}s x ${NPART} particles`);
-console.log(`variants: ${VARIANTS.join(", ")}`);
-const t0 = Date.now();
-for (let s = 0; s < SEEDS; s++) {
-  const seed = BASE + s * 101;            // same stride as the worker
-  const tS = Date.now();
-  CORE.pressureDemonCore({
-    seed, seedTag: s + 1,                 // row seed tag = replicate id
-    trials: TRAIN + TEST, trainTrials: TRAIN,
-    episodeSeconds: EPISODE, nParticles: NPART,
-    variants: VARIANTS,
-    brainFactory: (tag) => e9BrainFactory(tag),
-    onTrialData: (cond, phase, tr) => rows.push(Object.assign({ condition: cond, phase }, tr)),
-  });
-  // final-phase record for this seed: last TRAIN and last TEST trial per variant
-  for (const v of VARIANTS) {
-    const vr = rows.filter(r => r.condition === v && r.seed === s + 1);
-    const lastTrain = [...vr].reverse().find(r => r.phase === "train");
-    const lastTest  = [...vr].reverse().find(r => r.phase === "test");
-    if (lastTrain) perSeed[v].push({ seed: s + 1, phase: "train", rec: lastTrain });
-    if (lastTest)  perSeed[v].push({ seed: s + 1, phase: "test",  rec: lastTest });
-  }
-  console.log(`  seed ${s + 1}/${SEEDS} (rng ${seed}) done in ${((Date.now() - tS) / 1000).toFixed(1)} s`);
-}
-const elapsed = (Date.now() - t0) / 1000;
-
-// ---- reproducibility gate: same seed -> identical trajectory ----------------
-{
-  const rerun = [];
-  CORE.pressureDemonCore({
-    seed: BASE, seedTag: 1, trials: TRAIN + TEST, trainTrials: TRAIN,
-    episodeSeconds: EPISODE, nParticles: NPART, variants: VARIANTS,
-    brainFactory: (tag) => e9BrainFactory(tag),
-    onTrialData: (cond, phase, tr) => rerun.push(Object.assign({ condition: cond, phase }, tr)),
-  });
-  const first = rows.filter(r => r.seed === 1 && r.condition === "demon_neural");
-  const again = rerun.filter(r => r.condition === "demon_neural");
-  const fields = ["reward", "decisionAccuracy", "demonAgree", "workJ", "dPfinal",
-                  "pistonX", "spikeRate", "dopamine", "weightDrift", "sensorDecisionBits"];
-  const same = first.length === again.length && first.length > 0 &&
-    first.every((r, i) => fields.every(f =>
-      Math.abs((r[f] || 0) - (again[i][f] || 0)) < 1e-12));
-  console.log(`\nreproducibility: same seed -> ${same ? "IDENTICAL trajectory" : "DIVERGENT (BUG)"}`);
-  if (!same) { console.error("reproducibility gate FAILED"); process.exit(1); }
 }
 
 // ---- statistics: independent replicate = SEED -------------------------------
@@ -261,60 +239,62 @@ function trialStats(rowsIn, B) {
   return out;
 }
 
-// Welch's two-sided t test over per-seed values (n1 = n2 = seeds here, but
-// implemented generally; df by Welch–Satterthwaite).
-function welchT(a, b) {
-  const n1 = a.length, n2 = b.length;
-  const m1 = a.reduce((x, y) => x + y, 0) / n1, m2 = b.reduce((x, y) => x + y, 0) / n2;
-  const v1 = a.reduce((x, y) => x + (y - m1) ** 2, 0) / (n1 - 1);
-  const v2 = b.reduce((x, y) => x + (y - m2) ** 2, 0) / (n2 - 1);
-  const se = Math.sqrt(v1 / n1 + v2 / n2);
-  const t = (m1 - m2) / (se || 1e-12);
-  const df = (v1 / n1 + v2 / n2) ** 2 /
-             ((v1 / n1) ** 2 / (n1 - 1) + (v2 / n2) ** 2 / (n2 - 1));
-  // two-sided p = I_{df/(df+t^2)}(df/2, 1/2) — regularized incomplete beta
-  const p = betai(df / 2, 0.5, df / (df + t * t));
-  return { t, df, p: Math.min(1, Math.max(0, p)) };
-
-  function betacf(a, b, x) {
-    const MAXIT = 200, EPS = 3e-12, FPMIN = 1e-300;
-    const qab = a + b, qap = a + 1, qam = a - 1;
-    let c = 1, d = 1 - qab * x / qap;
-    if (Math.abs(d) < FPMIN) d = FPMIN;
-    d = 1 / d; let h = d;
-    for (let m = 1; m <= MAXIT; m++) {
-      const m2 = 2 * m;
-      let aa = m * (b - m) * x / ((qam + m2) * (a + m2));
-      d = 1 + aa * d; if (Math.abs(d) < FPMIN) d = FPMIN;
-      c = 1 + aa / c; if (Math.abs(c) < FPMIN) c = FPMIN;
-      d = 1 / d; h *= d * c;
-      aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
-      d = 1 + aa * d; if (Math.abs(d) < FPMIN) d = FPMIN;
-      c = 1 + aa / c; if (Math.abs(c) < FPMIN) c = FPMIN;
-      d = 1 / d; const del = d * c; h *= del;
-      if (Math.abs(del - 1) < EPS) break;
-    }
-    return h;
+// ---- main -------------------------------------------------------------------
+function main() {
+const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+const rows = [];
+const perSeed = {};                       // variant -> [{seed, phase, rec}]
+for (const v of VARIANTS) perSeed[v] = [];
+console.log(`E9 Phase-2 batch validation: ${SEEDS} seeds x ${VARIANTS.length} variants, ` +
+            `${TRAIN}+${TEST} trials x ${EPISODE}s x ${NPART} particles`);
+console.log(`variants: ${VARIANTS.join(", ")} | credit pairing: ${PAIRING}`);
+const t0 = Date.now();
+for (let s = 0; s < SEEDS; s++) {
+  const seed = BASE + s * 101;            // same stride as the worker
+  const tS = Date.now();
+  CORE.pressureDemonCore({
+    seed, seedTag: s + 1,                 // row seed tag = replicate id
+    trials: TRAIN + TEST, trainTrials: TRAIN,
+    episodeSeconds: EPISODE, nParticles: NPART,
+    variants: VARIANTS,
+    brainFactory: (tag) => e9BrainFactory(tag),
+    onTrialData: (cond, phase, tr) => {
+      const row = Object.assign({ condition: cond, phase }, tr);
+      delete row.fireVec;   // 139 KB/row display payload — never persist (C-1 hygiene)
+      rows.push(row);
+    },
+  });
+  // final-phase record for this seed: last TRAIN and last TEST trial per variant
+  for (const v of VARIANTS) {
+    const vr = rows.filter(r => r.condition === v && r.seed === s + 1);
+    const lastTrain = [...vr].reverse().find(r => r.phase === "train");
+    const lastTest  = [...vr].reverse().find(r => r.phase === "test");
+    if (lastTrain) perSeed[v].push({ seed: s + 1, phase: "train", rec: lastTrain });
+    if (lastTest)  perSeed[v].push({ seed: s + 1, phase: "test",  rec: lastTest });
   }
-  function lgamma(z) {  // Lanczos
-    const g = [76.18009172947146, -86.50532032941677, 24.01409824083091,
-               -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5];
-    let x = z, y = z, tmp = x + 5.5;
-    tmp -= (x + 0.5) * Math.log(tmp);
-    let ser = 1.000000000190015;
-    for (let j = 0; j < 6; j++) ser += g[j] / ++y;
-    return -tmp + Math.log(2.5066282746310005 * ser / x);
-  }
-  function betai(a, b, x) {
-    if (x <= 0) return 0;
-    if (x >= 1) return 1;
-    const bt = Math.exp(lgamma(a + b) - lgamma(a) - lgamma(b) +
-                        a * Math.log(x) + b * Math.log(1 - x));
-    return x < (a + 1) / (a + b + 2) ? bt * betacf(a, b, x) / a
-                                     : 1 - bt * betacf(b, a, 1 - x) / b;
-  }
+  console.log(`  seed ${s + 1}/${SEEDS} (rng ${seed}) done in ${((Date.now() - tS) / 1000).toFixed(1)} s`);
 }
+const elapsed = (Date.now() - t0) / 1000;
 
+// ---- reproducibility gate: same seed -> identical trajectory ----------------
+{
+  const rerun = [];
+  CORE.pressureDemonCore({
+    seed: BASE, seedTag: 1, trials: TRAIN + TEST, trainTrials: TRAIN,
+    episodeSeconds: EPISODE, nParticles: NPART, variants: VARIANTS,
+    brainFactory: (tag) => e9BrainFactory(tag),
+    onTrialData: (cond, phase, tr) => rerun.push(Object.assign({ condition: cond, phase }, tr)),
+  });
+  const first = rows.filter(r => r.seed === 1 && r.condition === "demon_neural");
+  const again = rerun.filter(r => r.condition === "demon_neural");
+  const fields = ["reward", "decisionAccuracy", "demonAgree", "workJ", "dPfinal",
+                  "pistonX", "spikeRate", "dopamine", "weightDrift", "sensorDecisionBits"];
+  const same = first.length === again.length && first.length > 0 &&
+    first.every((r, i) => fields.every(f =>
+      Math.abs((r[f] || 0) - (again[i][f] || 0)) < 1e-12));
+  console.log(`\nreproducibility: same seed -> ${same ? "IDENTICAL trajectory" : "DIVERGENT (BUG)"}`);
+  if (!same) { console.error("reproducibility gate FAILED"); process.exit(1); }
+}
 const stats = trialStats(rows, B);
 
 // ---- final-phase cross-seed summaries ---------------------------------------
@@ -559,4 +539,27 @@ if (WANT_HTML) {
   console.log(`wrote ${htmlPath}`);
 }
 
-module.exports = { trialStats, welchT, e9BrainFactory };
+// ---- C-3 standardized dataset export (CSV + manifest, sha256-pinned) --------
+{
+  const DX = require("./dataset_export.js");
+  const dsRows = rows.map(r => Object.assign({}, r, { experiment: "e9" }));
+  const ds = DX.exportRun({
+    experiment: "e9",
+    label: "E9 Pressure Demon - Phase-2 multi-seed batch validation",
+    question: "Does the fly-brain neural valve controller improve over training against the classical reference (pressure-demon apparatus)?",
+    protocol: "TRAIN (plasticity ON) -> TEST (frozen); seed = independent replicate; no seeds discarded; credit pairing: " + PAIRING,
+    config: { seeds: SEEDS, seedBase: BASE, seedStride: 101, trainTrials: TRAIN,
+              testTrials: TEST, episodeSeconds: EPISODE, nParticles: NPART,
+              blockB: B, variants: VARIANTS, pairing: PAIRING,
+              engine: "experiment_core.js pressureDemonCore (unmodified)" },
+    conditions: VARIANTS,
+  }, dsRows);
+  console.log("dataset: " + ds.csvPath);
+  console.log("dataset manifest: " + ds.manifestPath + " (sha256 " + ds.sha256.slice(0, 16) + "...)");
+}
+
+}
+
+if (require.main === module) main();
+
+module.exports = { trialStats, welchT, e9BrainFactory, main };

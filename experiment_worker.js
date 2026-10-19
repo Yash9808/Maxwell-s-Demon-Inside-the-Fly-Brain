@@ -20,10 +20,17 @@
 let CORE = null;   // experiment_core.js exports
 let CTRL = null;   // controllers.js exports
 
+// (watch pacing) bump when core/controller files change: busts the browser's
+// HTTP cache for worker module fetches — a stale experiment_core.js silently
+// reintroduces old streamed-t semantics (took one debug session to find).
+const WORKER_ASOF = "2026-09-27a";
+
 function importAs(url, requireFn) {
-  // Synchronous same-origin fetch (allowed in workers).
+  // Synchronous same-origin fetch (allowed in workers). ?v + no-cache: never
+  // serve yesterday's science from the HTTP cache.
   const xhr = new XMLHttpRequest();
-  xhr.open("GET", url, false);
+  xhr.open("GET", url + "?v=" + WORKER_ASOF, false);
+  try { xhr.setRequestHeader("Cache-Control", "no-cache"); } catch (e) {}
   xhr.send();
   if (xhr.status !== 200 && xhr.status !== 0) {
     throw new Error("cannot load " + url + " (status " + xhr.status + ")");
@@ -96,9 +103,11 @@ function runClosedLoop(m) {
   sock.connect().then(() => CLCORE.runEpisode({
     send: (msg) => sock.send(msg),
     circuit: m.circuit, seed, steps, learning, episode,
-    onTick: (rec) => {
+    onTick: (rec, ...onTickObs) => {   // NATURE FIGURE v1: rest-arg keeps the
+                                       // legacy single-arg call valid
       const st = {   // thin snapshot of the ACTUAL loop state
         kind: "closed_loop", contract_v: 1,
+        fly_motion_source: "flybody",   // §17 provenance: this pose IS the real Flybody/MuJoCo stream
         episode, t: rec.t, seed, learning, mode: rec.mode,
         body_pos: rec.body_pos, body_quat: rec.body_quat,
         action: rec.action, reward: rec.reward,
@@ -106,6 +115,11 @@ function runClosedLoop(m) {
         motor_rate: rec.motor_rate,
         neural_active: rec.neural.reduce((a, c) => a + (c > 0 ? 1 : 0), 0),
         neural_dim: rec.neural.length,
+        // NATURE FIGURE v1 (additive envelope): the real 15-D observation the
+        // brain sees NEXT tick — undefined on legacy core versions, dropped by
+        // JSON on the wire when absent. Never synthesized.
+        obs_bins: onTickObs.length ? Array.from(onTickObs[0].slice(0, 8)) : undefined,
+        obs_proprio: onTickObs.length ? Array.from(onTickObs[0].slice(8, 15)) : undefined,
       };
       if (validEnvelope(st)) postMessage({ type: "cl_state", expId: "cl", seq: ++seq, state: st });
     },
@@ -174,9 +188,18 @@ function apparatusBrainFactory(expId, seedIdx) {
     opticDrive: 0,
     motorDrive: 0.6,
     plasticity: "full",
-    // same credit-assignment upgrades as e9BrainFactory (windows + PG readout)
+    // same credit-assignment upgrades as e9BrainFactory (windows + PG readout),
+    // plus the apparatus-grade pairing/feature upgrades: pgBaseline applies the
+    // REINFORCE update at reward-delivery time (pairs credit with the decision
+    // that earned it — the cores deliver before re-latching), includes
+    // zero-reward windows as correct rejections, and centers reward with an
+    // EMA baseline; pgKc adds the mushroom-body sparse code (12-of-200 random
+    // expansion of the sensory channels) as readout features so visitor TYPE
+    // reaches the policy directly.
     eligibility: [{ tau: 0.90, w: 0.45 }, { tau: 0.985, w: 0.35 }, { tau: 0.9995, w: 0.20 }],
     policyGradient: true,
+    pgBaseline: true,
+    pgKc: true,
     pgRng: makeRng(424243 + (seedIdx || 0) * 977),
   });
 }
@@ -206,7 +229,12 @@ const EXPERIMENTS = {
           connectome_4C: (rng, env, cfg) => CTRL.connectomeController(cfg.circuit,
             { shuffle: true, rng, seed: 7, opticDrive: 0.25, plasticity: "full" }),
         }),
-        seeds: 1, train: 40, test: 10, episode: 12 },
+        // (audit step 4) trial cut 120→60 total: 3 controllers × 20 trials
+        // (15 train + 5 test) — measured 342 s (5.7 s/trial) vs the old
+        // 1417 s, a 4.1× dead-air cut. Ranking now comes from the post-
+        // benchmark comparator stage, which suits the 4A-vs-4C question
+        // better than sparse late-block learning chips.
+        seeds: 1, train: 15, test: 5, episode: 12 },
   e6: { label: "E6 · Jet-Closure Paradox (causal decomposition)",
         needsCircuit: false,
         controllers: () => ({
@@ -248,7 +276,10 @@ const EXPERIMENTS = {
         apparatusEnv: "trapdoor",
         controllers: () => ({}),
         physics: () => ({ nParticles: 220, noise: 0 }),
-        seeds: 1, train: 8, test: 8, episode: 16 },
+        // train: 24 — event-locked decisions fire once per molecule visit (~3x
+        // sparser than the old 4 Hz blind clock), so 24 train episodes give
+        // the policy a comparable number of graded decisions per training run
+        seeds: 1, train: 24, test: 8, episode: 16 },
   e11: { label: "E11 · Feynman Ratchet & Pawl",
         needsCircuit: true,
         apparatus: "feynmanRatchetCore",
@@ -267,7 +298,13 @@ const EXPERIMENTS = {
           shuffled_connectome: (rng, env, cfg) => CTRL.connectomeController(cfg.circuit,
             { shuffle: true, rng, seed: 7, opticDrive: 0.25, plasticity: "full" }),
         }),
-        seeds: 1, train: 40, test: 10, episode: 12 },
+        // (audit step 4) trial cut 125→75 total: 5 controllers × 15 trials
+        // (12 train + 3 test) — clean browser run measured 218 s (2.9 s/trial,
+        // connectome-dominated; was 805 s for 125 trials, 3.7×). The formal
+        // 60-trial (12×5) paired protocol lives in the node-side comparator
+        // (e5_comparator.js); the worker run now ends with a comparator stage
+        // ranking the 5 conditions on frozen-test agreement.
+        seeds: 1, train: 12, test: 3, episode: 12 },
 };
 
 // ------------------------------------------------------- message protocol
@@ -343,6 +380,39 @@ function registerCustom(m) {
   };
 }
 
+// (audit step 4) comparator stage — E5's post-benchmark reduction. Ranks the
+// run's conditions on FROZEN-test per-decision agreement (95% CI via the
+// core's meanCI), with ΔT and good:bad selectivity as context. This is the
+// worker-side echo of the formal node-side comparator (e5_comparator.js:
+// paired permutation tests on identical env draws) — same ranking question,
+// honest but lighter statistics, computed from the rows this run produced.
+function buildComparatorStage(rows) {
+  const byCond = {};
+  for (const r of rows) {
+    if (!r || r.phase !== "test") continue;
+    (byCond[r.condition] = byCond[r.condition] || []).push(r);
+  }
+  const entries = [];
+  for (const [cond, rs] of Object.entries(byCond)) {
+    // benchmark rows carry per-trial agreement directly in demonAgree (0..1);
+    // demonDecisions stays 0 there, so NO normalization — take the mean as-is.
+    const agree = rs.map(r => r.demonAgree)
+                    .filter(v => v !== null && v !== undefined && Number.isFinite(v));
+    if (!agree.length) continue;              // condition never decided → unrankable
+    entries.push({ cond,
+                   agree: CORE.meanCI(agree),
+                   dT: CORE.meanCI(rs.map(r => r.dTfinal).filter(v => Number.isFinite(v))),
+                   sel: CORE.meanCI(rs.map(r => r.goodBadRatio).filter(v => v !== null && Number.isFinite(v))),
+                   n: rs.length });
+  }
+  entries.sort((a, b) => b.agree.mean - a.agree.mean);
+  const top = entries[0], second = entries[1];
+  const headline = (top && second)
+    ? `${top.cond} > ${second.cond} · test agree ${top.agree.mean.toFixed(2)} vs ${second.agree.mean.toFixed(2)} ±${top.agree.ci.toFixed(2)}`
+    : (top ? `${top.cond} leads on test agreement` : null);
+  return { ranked: entries, headline };
+}
+
 function runExperiment(expId, circuit, opts) {
   const spec = EXPERIMENTS[expId];
   if (!spec) { postMessage({ type: "error", expId, message: "unknown experiment" }); return; }
@@ -358,6 +428,7 @@ function runExperiment(expId, circuit, opts) {
   // per-condition accumulation of full trial rows (streamed via onTrialData)
   const trialRows = {};     // key -> [row, ...]
   let lastEmit = 0;
+  let lastStagePost = 0;   // (audit step 6) wall-clock gate for intra-trial heartbeats
   let curveBuilder = buildCurve;   // apparatus branch swaps in the generic one
 
   // ---- apparatus experiments (E9/E10/E11): self-contained cores that stream
@@ -371,6 +442,20 @@ function runExperiment(expId, circuit, opts) {
     curveBuilder = () => buildApparatusCurve(4);
     try {
       let lastAppPost = 0, lastAppSeq = 0;   // (patch 17) app_state replay-stream gate
+      // (watch pacing) opts.pace = sim-seconds played per wall-second. The gate
+      // sits INSIDE onState, which fires at fixed physics-step boundaries, so
+      // holding here stretches only WALL TIME — every step, RNG draw, reward
+      // and row is computed exactly as in unpaced runs. Applies to the stage
+      // seed only; later seeds still compute at full speed for the curves.
+      const pace = Math.max(0, Number(opts.pace) || 0);
+      let paceT0 = 0, paceLastT = -1e9;
+      // every variant/seed restarts sim-time at 0; re-anchor the pace clock on
+      // each regression so ALL conditions play at watch speed, not just the first
+      const paceAnchor = (t) => {
+        if (t < paceLastT - 1){ paceT0 = 0; }
+        paceLastT = t;
+        if (!paceT0) paceT0 = Date.now();
+      };
       for (let s = 0; s < nSeeds; s++) {
         const seed = (opts.seed !== undefined ? opts.seed : 1) + s * 101;
         coreFn({
@@ -394,11 +479,28 @@ function runExperiment(expId, circuit, opts) {
           // other episode so the stage stays live without tripling batch time.
           // (patch 17) full-speed streaming flooded the main thread with ~460
           // structured-clone app_state messages/sec and froze the fly (8fps).
-          // Time-gate to ~30Hz - still above the 24fps replay pump on the page.
+          // (watch pacing) the page replays the buffer at a user-chosen speed,
+          // so the stream must carry the FULL sim-time trajectory, not a 30 Hz
+          // wall-time sample: gated to ~125 msg/s (8 ms floor) — well under the
+          // ~460/s that froze the page — while preserving every episode so a
+          // ×1..×10 replay shows each trial's actual dynamics.
           onState: (st) => {
+            if (pace > 0 && s === 0 && typeof st.t === "number") {
+              paceAnchor(st.t);
+              const waitMs = (paceT0 + (st.t / pace) * 1000) - Date.now();
+              if (waitMs > 1) {
+                // spin-wait: a dedicated worker has no sleep(); the main thread
+                // is never blocked and nothing else needs this thread meanwhile
+                const until = performance.now() + waitMs;
+                while (performance.now() < until) { /* hold for watchable pace */ }
+              }
+            }
+            // paced playback streams seed 1 only — later seeds would reset the
+            // stage mid-watch; their rows still feed the learning curves.
+            if (pace > 0 && s !== 0) return;
             if (s === 0 || ((st.trial | 0) & 1) === 0) {
               const now = Date.now();
-              if (now - lastAppPost >= 33) {
+              if (now - lastAppPost >= 8) {
                 lastAppPost = now;
                 st.__seq = (++lastAppSeq);
                 postMessage({ type: "app_state", expId, state: st });
@@ -552,9 +654,30 @@ function runExperiment(expId, circuit, opts) {
       doorHeight: 64,
       _physics: spec.physics || null,   // per-seed env overrides (E7)
       circuit,                                  // E4/E5 read it via cfg
+      // (Stage-3 demon observation) registered-arm plumbing: only carried
+      // when the caller opted in, so OFF worker runs are byte-identical.
+      ...(opts.demonObs === true ? {
+        demonObs: true,
+        demonObsGain: opts.demonObsGain,
+        demonObsBand: opts.demonObsBand || (circuit ? CORE.demonObsBand(circuit) : null),
+      } : {}),
       controllers: spec.controllers(),
       onTrial: (cond, phase, t, n, si, sn) => {
         emit(expId, phase, t, n, si, false);
+      },
+      // (audit step 6) intra-trial heartbeat: the core calls this every ~256
+      // sim steps, but stage 1 is pure neural compute (no app_state stream and
+      // long silent stretches), so the UI had no liveness signal mid-trial.
+      // Wall-clock gated to ≤1 post / 1.2s and every-2nd-step sparse to keep
+      // the hot loop cheap; heartbeats REPLACE the phase label between trial
+      // completions (cleared on the next trial-boundary progress emit).
+      onStepProgress: (cond, phase, t, n, stp, maxSteps, si, sn) => {
+        const now = Date.now();
+        if (now - lastStagePost < 1200 || (stp & 1)) return;
+        lastStagePost = now;
+        postMessage({ type: "stage", expId, phase, trial: t, nTrials: n,
+                      seedIdx: si, nSeeds: sn,
+                      frac: maxSteps ? stp / maxSteps : 0 });
       },
       onTrialData: (cond, phase, tr) => { pushRow(cond, phase, tr); },
     });
@@ -633,6 +756,13 @@ function runExperiment(expId, circuit, opts) {
       }
     }
     const { curve } = buildCurve();
+    // (audit step 4) E5 ends with its comparator stage: rank conditions on
+    // frozen-test metrics instead of leaving the run's payoff to the sparse
+    // late-block chips.
+    let comparator = null;
+    if (expId === "e5") {
+      try { comparator = buildComparatorStage(rows); } catch (e) { comparator = null; }
+    }
     const prov = {
       experiment: expId, label: spec.label,
       seeds: nSeeds, trainTrials: train, testTrials: test,
@@ -642,10 +772,14 @@ function runExperiment(expId, circuit, opts) {
       dt: 1 / 60, tKelvin: 300, simToJoule: 1e-21,
       software: "Fly-Demon Lab v2 experiment list",
       chatDesign: spec.design || null,
+      ...(opts.demonObs === true ? { demonObs: {
+        on: true, gain: opts.demonObsGain !== undefined ? opts.demonObsGain : 12,
+        band: opts.demonObsBand || (circuit ? CORE.demonObsBand(circuit) : null),
+      } } : {}),
       startedISO: new Date(t0).toISOString(),
       elapsedSeconds: (Date.now() - t0) / 1000,
     };
-    postMessage({ type: "done", expId, summary: { conditions, curve }, rows, provenance: prov });
+    postMessage({ type: "done", expId, summary: { conditions, curve }, rows, provenance: prov, comparator });
   } catch (err) {
     postMessage({ type: "error", expId, message: String(err && err.stack || err) });
   }

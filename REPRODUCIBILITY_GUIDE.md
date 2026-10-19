@@ -103,11 +103,14 @@ The real end-to-end loop (canonical FAFB brain → motor decoder → 59-D action
    `PYTHON_EMBODIMENT="$PWD/.venv-embodiment/Scripts/python.exe" node tools/closed_loop_runner.js --steps 240 --seed 11`
    (all 9 causal gates print PASS; `--out <file>` writes the JSONL evidence;
    `tests/closed_loop.test.js` proves 12 causal links + replay determinism).
-2. **Browser (visualization)** — start the sidecar transport, then open the lab
-   and press ▶ on the CLOSED-LOOP BODY card:
+2. **Browser (visualization)** — open the lab and press ▶ on the CLOSED-LOOP
+   BODY card: the launcher auto-starts the sidecar on demand (`POST /api/sidecar`;
+   idempotent, and it fast-fails with the sidecar log tail if deps are missing).
+   The manual start is only a fallback for serving the page another way:
    ```
+   python launch_fly_demon_3d.py        # sidecar auto-starts on demand
+   # manual fallback (page served elsewhere):
    .venv-embodiment/Scripts/python.exe embodiment/sidecar.py --ws --port 8795
-   python launch_fly_demon_3d.py
    ```
    The page instantiates NO second brain: the canonical brain lives in the
    experiment worker (`run_cl`), and the page renders the worker's

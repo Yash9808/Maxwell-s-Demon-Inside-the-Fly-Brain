@@ -36,12 +36,15 @@ const E3_DEFS = {
   classical_demon: (rng, env, c) => CTRL.classicalDemon(rng, env, c),
 };
 const E4_DEFS = {
-  connectome_4A: (rng, env, c) => CTRL.connectomeController(circuit,
-    { shuffle: false, rng, seed: 1, opticDrive: 0.25, plasticity: "full" }),
-  connectome_4B: (rng, env, c) => CTRL.connectomeController(circuit,
-    { shuffle: false, rng, seed: 1, opticDrive: 0.25, plasticity: "restricted" }),
-  connectome_frozen: (rng, env, c) => CTRL.connectomeController(circuit,
-    { shuffle: false, rng, seed: 1, opticDrive: 0.25, plasticity: "none" }),
+  // 4th param opticInput: optional job field (Stage F preregistration
+  // PRE_REGISTRATION_STAGE_F_E4.json). Undefined => controller default,
+  // i.e. bit-identical behavior for the original campaign.
+  connectome_4A: (rng, env, c, opticInput) => CTRL.connectomeController(circuit,
+    { shuffle: false, rng, seed: 1, opticDrive: 0.25, plasticity: "full", opticInput }),
+  connectome_4B: (rng, env, c, opticInput) => CTRL.connectomeController(circuit,
+    { shuffle: false, rng, seed: 1, opticDrive: 0.25, plasticity: "restricted", opticInput }),
+  connectome_frozen: (rng, env, c, opticInput) => CTRL.connectomeController(circuit,
+    { shuffle: false, rng, seed: 1, opticDrive: 0.25, plasticity: "none", opticInput }),
 };
 
 function rowFromDoorTrial(exp, key, tr, shufSeed) {
@@ -61,11 +64,12 @@ const rows = [];
 const CFG = { nParticles: 320, noise: 0.12, doorHeight: 64 };
 
   if (job.exp === "e4") {
+  const opticInput = job.opticInput; // undefined for original campaigns
   const defs = {};
   for (const a of job.arms) {
     if (a === "connectome_4C") defs[a] = (rng, env, c) => CTRL.connectomeController(circuit,
-      { shuffle: true, rng, seed: job.shuffleSeed, opticDrive: 0.25, plasticity: "full" });
-    else defs[a] = E4_DEFS[a];
+      { shuffle: true, rng, seed: job.shuffleSeed, opticDrive: 0.25, plasticity: "full", opticInput });
+    else defs[a] = (rng, env, c) => E4_DEFS[a](rng, env, c, opticInput);
   }
   const res = runBenchmark({
     seed: job.seedStart, nSeeds: job.seedEnd - job.seedStart + 1,

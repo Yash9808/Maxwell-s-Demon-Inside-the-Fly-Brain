@@ -243,6 +243,31 @@ def t6_learning_loop_closes(mode):
                 % (delivery_frac * 100, dec["learned_steps"], drift))
 
 
+# T8: real visual feedback is causally coupled to the physical scene
+# (edge: MuJoCo scene -> visual bins -> brain). FLYBODY-ONLY (flybody mode
+# runs it; mock mode has no MuJoCo scene so T8 is skipped there and the mock
+# T-series gate stays unchanged). Reuses the T3 driver: 120 steps of driven
+# motion, then the driver's own 8-bin visual vector must differ from its
+# rest pose, and repeated observation calls between steps must be identical
+# (pure state function). (FLYBODY_ARCHITECTURE.md §7)
+def t8_visual_causal(mode):
+    if mode != "flybody":
+        return True, "skipped (mock mode has no MuJoCo scene; visual is mock-validated)"
+    body = FlybodyDriver(seed=808)
+    body.reset(808)
+    vis_rest = np.array(body.observation()[:8])
+    assert vis_rest.shape == (8,)
+    # determinism of the sensor itself: recomputation is byte-identical
+    again = np.array(body._sensor.refresh(body.env.physics))
+    det = bool(np.array_equal(vis_rest, again))
+    for i in range(120):
+        body.step(np.full(ACTION_DIM, 0.4 if i < 60 else 0.0))
+    vis_moved = np.array(body.observation()[:8])
+    dl1 = float(np.abs(vis_moved - vis_rest).sum())
+    ok = dl1 > 0.01 and det
+    return ok, ("visual bins track the moving body: rest %s -> moved %s "                "(L1 %.4f, sensor deterministic=%s)"                % (np.round(vis_rest, 3).tolist(), np.round(vis_moved, 3).tolist(),                   dl1, det))
+
+
 # T7: determinism — same seed, same inputs, byte-identical trajectories
 # (in flybody mode this proves determinism through REAL MuJoCo physics)
 def t7_determinism(mode):
@@ -287,6 +312,7 @@ def main():
         ("T5 env->reward", t5_reward_is_environmental),
         ("T6 reward->learning", t6_learning_loop_closes),
         ("T7 determinism", t7_determinism),
+        ("T8 visual->scene", t8_visual_causal),
     ]
     results = []
     for name, fn in tests:

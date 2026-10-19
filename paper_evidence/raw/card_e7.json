@@ -1,0 +1,15 @@
+{
+ "exp": "e7",
+ "lab": "demon",
+ "elapsed_s": 33.9,
+ "verdicts": [
+  "▼ learning 0/1",
+  "⤢ sel 1.62",
+  "ΔT 0.0",
+  "gate 52%"
+ ],
+ "meta": {
+  "eta": "≈6 s",
+  "status": "done ✓ 60 trials · 28s"
+ }
+}

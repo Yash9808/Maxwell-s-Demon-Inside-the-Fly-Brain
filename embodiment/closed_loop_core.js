@@ -88,11 +88,17 @@ function blakeObs(obs) {
  * Run one deterministic closed-loop episode over an injected transport.
  *   send({type:"hello"...}) → welcome, send({type:"reset"...}) → reset_ack,
  *   send(stepCmd) → step_result — all validated fail-closed (contract).
- * Returns { records, gates, episode, seed, mode }.
+ * STAGE 5: opts.task = "pillar" opts in to the physical task scene (the
+ * sidecar's hello.task opt-in; wire contract unchanged). Task telemetry is
+ * carried on every record (`task`, null when no task) and task gates are
+ * computed from it (never hardcoded true).
+ * Returns { records, gates, episode, seed, mode, taskName }.
  */
 async function runEpisode({ send, circuit, seed = 11, steps = 120,
-                            learning = true, episode = 0, onTick }) {
-  const welcome = await send({ type: "hello", v: CONTRACT.CONTRACT_VERSION });
+                            learning = true, episode = 0, onTick, task = null }) {
+  const helloMsg = { type: "hello", v: CONTRACT.CONTRACT_VERSION };
+  if (task) helloMsg.task = task;
+  const welcome = await send(helloMsg);
   if (welcome.type !== "welcome") {
     throw new Error("sidecar handshake failed: " + JSON.stringify(welcome));
   }
@@ -133,6 +139,7 @@ async function runEpisode({ send, circuit, seed = 11, steps = 120,
     }
 
     const reward = res.reward;
+    const taskMeta = (res.task && res.task.task) ? res.task.task : null;  // STAGE 5
     daBefore = brain.dopamine;
     brain.receiveFeedback({ reward });   // (10) the ONLY reward→DA mapping
     obs = res.obs_next;                  // (12) NEW physical state → next input
@@ -148,10 +155,23 @@ async function runEpisode({ send, circuit, seed = 11, steps = 120,
       weight_drift: brain.weightDrift(),
       t_phys: res.t_phys, mode: res.mode,
     };
+    if (task) {
+      // STAGE 5 additive fields ONLY in task mode: legacy (no-task) runs keep
+      // the EXACT pre-Stage-5 record shape, so the frozen Phase 01/02
+      // trajectory anchors stay byte-identical (replay_canonical discipline).
+      rec.obs_bins = obs.slice(0, 8);    // post-step visual field (closure
+                                         // evidence — the environment the
+                                         // brain sees NEXT tick)
+      rec.obs_proprio = obs.slice(8, 15); // post-step proprio/contact (T8)
+      rec.task = taskMeta;               // task telemetry (object per tick)
+    }
     if (driftFirst === null) driftFirst = rec.weight_drift;
     driftLast = rec.weight_drift;
     records.push(rec);
-    if (onTick) onTick(rec);
+    if (onTick) onTick(rec, obs);   // NATURE FIGURE v1: obs as 2nd arg —
+                                     // record shape UNCHANGED (replay anchors
+                                     // stay byte-identical); consumers that
+                                     // ignore the 2nd arg are unaffected.
   }
 
   const movedIdx = records.findIndex(r => Math.abs(r.reward) > 0);
@@ -170,7 +190,18 @@ async function runEpisode({ send, circuit, seed = 11, steps = 120,
       : (driftLast === driftFirst),
     g_sensory_feedback_loop: true,
   };
-  return { records, gates, episode, seed, mode: records[0].mode, learning };
+  // STAGE 5 task gates: computed from recorded task telemetry, only when a
+  // task was requested (absent on legacy runs so legacy gates are unchanged).
+  if (task) {
+    const tt = records.filter(r => r.task);
+    gates.g_task_interaction = tt.length > 0 && tt.some(r =>
+      r.task.first_contact_step !== null || r.task.pillar_disp_norm > 1e-9);
+    gates.g_task_env_changed = tt.length > 0 && tt.some(r =>
+      r.task.pillar_disp_norm > 0.0005);
+    gates.g_task_reward_causal = tt.length > 0 && tt.some(r => r.reward > 0);
+  }
+  return { records, gates, episode, seed, mode: records[0].mode,
+           taskName: task, learning };
 }
 
 module.exports = { init, buildBrain, driveBrain, sensoryTransform, runEpisode, blakeObs };

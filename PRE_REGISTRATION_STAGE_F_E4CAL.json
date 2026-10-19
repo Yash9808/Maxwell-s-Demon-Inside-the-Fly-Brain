@@ -1,0 +1,95 @@
+{
+  "schema": "maxwell-demon-preregistration/1.0",
+  "id": "STAGE_F_E4CAL_RETINOTOPY_INPUT_CALIBRATION",
+  "created": "2026-09-22T00:00:00Z",
+  "author": "Agent (Stage F E4 follow-up), branch deployment/phase-02",
+  "status": "prospective",
+  "timing_declaration": {
+    "statement": "Written and pinned BEFORE running any grid cell on any preregistered calibration seed (k=13..16). Prior observations are the recorded degeneracy of the Stage F E4 campaign and the Stage F wiring-report measurements; no grid cell of this study had been run when this file was written. The only pre-launch execution is the declared smoke mode on non-registered seed 999 with reduced windows, whose outcome values are never inspected.",
+    "existing_artifacts_seen_before_preregistration": [
+      "research_data/validation/stage_f/STAGE_F_E4_DEGENERACY_SUPPLEMENT.json (test openFraction 0.0006 retinotopy vs 0.3342 legacy at identical drive; crossings/trial 0.000 vs 5.941; trials-with-crossing 0.0% vs 93.4%)",
+      "STAGE_F_E4_RESULTS.md section 7 (recommended next step: preregistered optic-to-motor drive-mapping sweep, legacy ballpark openFraction 0.2-0.4, physics/seeds/reward untouched)",
+      "P1_STAGE_F_RETINOTOPY_REPORT.md (optic-layer rate 2.35 Hz at E4 drive; ~9x optic kick collapse at identical drive, tools/diagnose_optic_input.js A/B)",
+      "controllers.js Stage F comment (retinotopy injection collapse documented; motor ratio policy door-open threshold ratio > 0.0125)"
+    ]
+  },
+  "question": "Does a preregistered sweep of the two pre-existing drive knobs (opticDrive, motorDrive) restore test-phase door-open fraction to the legacy ballpark 0.2-0.4 under retinotopic input, without touching physics, seeds, or reward coefficients?",
+  "scope_exclusions": [
+    "No connectome-structure comparison (no shuffled/frozen arm); structure inference belongs to a separately preregistered confirmatory E4R2 at the selected point.",
+    "No inferential statistics in this study (measurement and selection only).",
+    "No endpoint-replacement study executed here."
+  ],
+  "arm": "connectome_4A configuration only: shuffle false, plasticity full, opticInput retinotopy",
+  "grid": {
+    "optic_axis_at_motorDrive_0.35": { "opticDrive": [0.5, 1.0, 2.0, 4.0] },
+    "motor_axis_at_opticDrive_2.0": { "motorDrive": [0.1, 0.2] },
+    "anchor_cell": { "opticDrive": 0.25, "motorDrive": 0.35, "purpose": "degenerate-E4 sanity control on held-out seeds" },
+    "cells": [
+      { "name": "cal_od0p5_md0p35", "opticDrive": 0.5, "motorDrive": 0.35 },
+      { "name": "cal_od1p0_md0p35", "opticDrive": 1.0, "motorDrive": 0.35 },
+      { "name": "cal_od2p0_md0p35", "opticDrive": 2.0, "motorDrive": 0.35 },
+      { "name": "cal_od4p0_md0p35", "opticDrive": 4.0, "motorDrive": 0.35 },
+      { "name": "cal_od2p0_md0p10", "opticDrive": 2.0, "motorDrive": 0.1 },
+      { "name": "cal_od2p0_md0p20", "opticDrive": 2.0, "motorDrive": 0.2 },
+      { "name": "cal_od0p25_md0p35_anchor", "opticDrive": 0.25, "motorDrive": 0.35 }
+    ],
+    "n_cells": 7
+  },
+  "seeds": {
+    "calibration_seeds": [13, 14, 15, 16],
+    "seed_rule": "k = 13..16, physics seed = 1 + (k-1)*101 inside runBenchmark (untouched code path)",
+    "held_out_note": "Confirmatory E4R2, if launched, reuses the original preregistered k=1..12 only; operating-point selection cannot contaminate confirmatory seeds.",
+    "no_seed_selection": true,
+    "no_outcome_exclusion": true
+  },
+  "windows": {
+    "training": "trials [0, 120), 12 s episodes",
+    "test": "all 24 test trials, learning off",
+    "environment": "nParticles 320, noise 0.12, doorHeight 64 (identical to E4 campaign CFG)"
+  },
+  "row_budget": { "rows": 4032, "rule": "7 cells x 4 seeds x 144 trials; coverage check enforced, any missing cell voids the run" },
+  "endpoints": {
+    "per_cell": ["test-phase openFraction mean", "test-phase crossings/trial", "test-phase % trials with >=1 crossing"],
+    "cell_score": "mean over the 4 seeds of test-phase openFraction",
+    "inferential_tests": "NONE (measurement and selection only)"
+  },
+  "selection_rule": {
+    "viable_cell": "cell score in [0.20, 0.40] AND mean test-phase trials-with->=1-crossing >= 0.50",
+    "if_viable": "CALIBRATED; selected cell = viable cell with score closest to legacy 0.334; ties by smaller opticDrive then smaller motorDrive",
+    "if_no_viable_but_score_ge_0.10_and_gate_met": "BELOW_BAND; no confirmatory re-registration from this sweep; a new sweep may be preregistered as a disclosed amendment before its data exists",
+    "if_all_scores_lt_0.10": "NO_CANDIDATE (calibration FAILED for the motorDrive/opticDrive knob pair); endpoint replacement must be separately preregistered; not executed here",
+    "anchor_expectation": "anchor cell expected to reproduce openFraction ~6e-4; deviation is reported as seed-sensitivity observation and changes nothing in the rule"
+  },
+  "integrity": {
+    "hash_gate": "driver verifies sha256 (first 16 hex) of the pinned inputs before any job; mismatch exits 1 pre-launch",
+    "code_hashes": {
+      "fly_brain_circuit.json": "0eb64ba451356563",
+      "controllers.js": "72ef49138c5a7b10",
+      "experiment_core.js": "7fb11e3155214d50",
+      "p1_retinotopy.js": "31765c5a30bbe9e9",
+      "fly_brain_retinotopy.json": "164f7f37460fb526"
+    },
+    "provenance_note": "controllers.js and experiment_core.js are re-pinned to the live worktree bytes at preregistration time (2026-09-22), which differ from the Stage F E4 pins (401888258c485118 / f070e6ab750e2054). The E4-era pins match neither the current worktree nor the branch HEAD blobs: the shared worktree carries a real, uncommitted collaborator workstream that continued evolving these files after the E4 campaign froze its hashes (the E4 campaign itself ran on this same evolving worktree and pinned worktree bytes). The two factory options this study uses (opticDrive, motorDrive), the door-policy threshold (ratio > 0.0125), runBenchmark's seed rule, and the door-trial row schema were all verified present and unchanged in the live files before pinning. Any further change to a pinned file before launch voids the study (hash gate, fail-closed).",
+    "stats_utils_note": "stats_utils.js deliberately not pinned: this study defines no inferential test",
+    "driver_worker_hashes": "full SHA256 of validation_worker_stagefcal.js and calibration_campaign_stagef.js recorded in STAGE_F_E4CAL_CAMPAIGN_META.json at launch, before the first calibration job",
+    "deterministic_rerun": "analysis executes twice from independently re-parsed data; any difference is reported and sets deterministic_rerun=false",
+    "output_isolation": "all outputs under research_data/validation/stage_f_cal/; Stage F E4 and original-campaign artifacts untouched",
+    "no_tuning_between_collection_and_analysis": true
+  },
+  "implementation_delta": {
+    "files_added": ["validation_worker_stagefcal.js", "calibration_campaign_stagef.js"],
+    "files_modified": [],
+    "change": "additive calibration driver + worker using only the two pre-existing connectomeController factory options; no physics, controller, or trial-structure change",
+    "logged_in": "research_data/validation/stage_f_cal/STAGE_F_E4CAL_CAMPAIGN_META.json"
+  },
+  "outputs": {
+    "raw_data_dir": "research_data/validation/stage_f_cal/",
+    "campaign_meta": "research_data/validation/stage_f_cal/STAGE_F_E4CAL_CAMPAIGN_META.json",
+    "result_json": "research_data/validation/stage_f_cal/STAGE_F_E4CAL_RESULT.json",
+    "results_report": "STAGE_F_E4CAL_RESULTS.md"
+  },
+  "consequences": {
+    "CALIBRATED": "selected (opticDrive, motorDrive) becomes the pinned operating point for a separately preregistered E4R2 4-arm comparison (original seeds 1-12, original arm/endpoints family, only the two drive values substituted)",
+    "BELOW_BAND_or_NO_CANDIDATE": "door-task endpoint remains unavailable under retinotopy; endpoint-replacement studies must be separately preregistered before any structure claim"
+  }
+}

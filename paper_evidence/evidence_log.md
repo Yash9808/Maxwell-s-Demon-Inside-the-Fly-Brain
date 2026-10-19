@@ -1,0 +1,92 @@
+- 2026-09-28 15:34:01 | edge headless launched port=9782 pid=47776 phase=demon
+- 2026-09-28 15:34:10 | edge headless launched port=9332 pid=21352 phase=demon
+- 2026-09-28 15:42:28 | RUN e1 start
+- 2026-09-28 15:46:39 | edge headless launched port=9465 pid=19228 phase=e1,e6,e7
+- 2026-09-28 15:51:10 | edge headless launched port=9542 pid=31336 phase=e1,e6,e7
+- 2026-09-28 15:51:14 | app ready statuses=["not connected", "idle", "idle", "idle"]
+- 2026-09-28 15:51:16 | RUN e1 start
+- 2026-09-28 15:52:16 | RUN e1 FAILED st='test 12/12 · seed 2/2 · 71%' after 60s
+- 2026-09-28 15:52:17 | RUN e6 start
+- 2026-09-28 15:53:50 | RUN e6 FAILED st='done ✓ 216 trials · 67s' after 93s
+- 2026-09-28 15:53:50 | RUN e7 start
+- 2026-09-28 15:55:22 | RUN e7 FAILED st='done ✓ 60 trials · 25s' after 92s
+- 2026-09-28 15:55:22 | research_data new files (0):
+- 2026-09-28 15:55:22 | phase e1,e6,e7 COMPLETE
+- 2026-09-28 15:56:41 | edge headless launched port=9482 pid=23064 phase=e1,e6,e7
+- 2026-09-28 15:56:44 | app ready statuses=["not connected", "idle", "idle", "idle"]
+- 2026-09-28 15:56:46 | RUN e1 start
+- 2026-09-28 15:57:07 | RUN e1 done 22s verdicts=["▼ learning 0/1", "⤢ sel 1.09", "ΔT 0.0", "gate 43%"]
+- 2026-09-28 15:57:07 | RUN e6 start
+- 2026-09-28 15:58:11 | RUN e6 done 64s verdicts=["▼ learning 1/3", "⤢ sel 1.03", "ΔT 0.0", "gate 26%"]
+- 2026-09-28 15:58:11 | RUN e7 start
+- 2026-09-28 15:58:45 | RUN e7 done 34s verdicts=["▼ learning 0/1", "⤢ sel 1.62", "ΔT 0.0", "gate 52%"]
+- 2026-09-28 15:58:45 | research_data new files (0):
+- 2026-09-28 15:58:45 | phase e1,e6,e7 COMPLETE
+- 2026-09-28 15:58:50 | edge headless launched port=9685 pid=48536 phase=e9,e10,e11
+- 2026-09-28 15:58:54 | app ready statuses=["not connected", "idle", "idle", "idle"]
+- 2026-09-28 15:58:55 | RUN e9 start
+- 2026-09-28 16:03:34 | RUN e9 done 279s verdicts=[]
+- 2026-09-28 16:03:34 | RUN e10 start
+- 2026-09-28 16:07:03 | RUN e10 done 210s verdicts=[]
+- 2026-09-28 16:07:04 | RUN e11 start
+- 2026-09-28 17:16:45 | edge headless launched port=9549 pid=6056 phase=e11,e2,e8
+- 2026-09-28 17:17:12 | app ready statuses=["not connected", "idle", "idle", "idle"]
+- 2026-09-28 17:17:13 | RUN e11 start
+- 2026-09-28 17:19:48 | RUN e11 done 155s verdicts=["collecting blocks…"]
+- 2026-09-28 17:19:49 | RUN e2 start
+- 2026-09-28 17:22:09 | RUN e2 done 141s verdicts=["▲ learning 2/2", "⤢ sel 0.85", "ΔT 0.0", "gate 67%"]
+- 2026-09-28 17:22:10 | RUN e8 start
+- 2026-09-28 17:24:53 | RUN e8 done 164s verdicts=["▼ learning 0/3", "⤢ sel 1.09", "ΔT 0.0", "gate 43%"]
+- 2026-09-28 17:24:53 | research_data new files (0):
+- 2026-09-28 17:24:53 | phase e11,e2,e8 COMPLETE
+- 2026-09-28 17:25:14 | edge headless launched port=9768 pid=41708 phase=e3
+- 2026-09-28 17:25:18 | app ready statuses=["not connected", "idle", "idle", "idle"]
+- 2026-09-28 17:25:20 | RUN e3 start
+- 2026-09-28 17:26:20 | RUN e3 done 61s verdicts=["▼ learning 0/1", "⤢ sel 0.60", "ΔT 0.0", "gate 0%"]
+- 2026-09-28 17:26:20 | research_data new files (0):
+- 2026-09-28 17:26:20 | phase e3 COMPLETE
+- 2026-09-28 17:26:30 | edge headless launched port=9674 pid=40508 phase=e4
+- 2026-09-28 17:26:33 | app ready statuses=["not connected", "idle", "idle", "idle"]
+- 2026-09-28 17:26:36 | RUN e4 start
+- 2026-09-28 17:31:23 | RUN e4 done 288s verdicts=["⤢ sel 0.57", "ΔT 0.0", "gate 31%"]
+- 2026-09-28 17:31:23 | research_data new files (0):
+- 2026-09-28 17:31:23 | phase e4 COMPLETE
+- 2026-09-28 17:31:33 | edge headless launched port=9715 pid=56608 phase=e5
+- 2026-09-28 17:31:37 | app ready statuses=["not connected", "idle", "idle", "idle"]
+- 2026-09-28 17:31:38 | RUN e5 start
+- 2026-09-28 17:33:38 | RUN e5 done 120s verdicts=["⤢ sel 0.66", "ΔT 0.0", "gate 42%", "⚖ classical_demon 1.00 ±0.00", "⚖ drosophila 0.50 ±0.05", "⚖ shuffled_connectome 0.48 ±0.05", "classical_demon > drosophila · test agree 1.00 vs 0.50 ±0.00"]
+- 2026-09-28 17:33:38 | research_data new files (0):
+- 2026-09-28 17:33:38 | phase e5 COMPLETE
+- 2026-09-28 17:34:31 | pubfig loaded: {"n": 106765, "nb": 400, "ed": 564030}
+- 2026-09-28 17:34:53 | publication figures A+B rendered and saved
+- 2026-09-28 18:02:44 | edge headless launched port=9549 pid=24156 phase=cl
+- 2026-09-28 18:02:47 | app ready statuses=["not connected", "idle", "idle", "idle"]
+- 2026-09-28 18:15:00 | edge headless launched port=9753 pid=57064 phase=cl
+- 2026-09-28 18:15:03 | app ready statuses=["not connected", "idle", "idle", "idle"]
+- 2026-09-28 18:15:11 | CL start via plots page (real sidecar pre-spawned on 8795)
+- 2026-09-28 18:15:27 | clip nfCard failed: Page.captureScreenshot: {'code': -32000, 'message': 'Cannot take screenshot with
+- 2026-09-28 18:15:59 | CL done 55s class='status error' live='stalled — no cl_state ticks for 8 s (sidecar/worker stopped?)' run='connecting worker → sidecar (canonical FAFB brain → FlyBody/MuJoCo)…' nf=null
+- 2026-09-28 18:15:59 | phase cl COMPLETE
+- 2026-09-28 18:20:55 | edge headless launched port=9536 pid=12248 phase=cl
+- 2026-09-28 18:20:58 | app ready statuses=["not connected", "idle", "idle", "idle"]
+- 2026-09-28 18:21:07 | CL start via plots page (real sidecar pre-spawned on 8795)
+- 2026-09-28 18:22:15 | CL done 76s class='status done' live='done ✓ · 240 closed-loop steps · causal gates all PASS' run='episode complete' nf=null
+- 2026-09-28 18:22:15 | phase cl COMPLETE
+
+## Browser closed-loop (FlyBody/MuJoCo) evidence — 2026-09-28 18:22
+
+- Route: `experiment_plots.html#btnRunCLHere` → experiment_worker `run_cl` → canonical FAFB brain → sidecar ws://127.0.0.1:8795 → FlyBody/MuJoCo. (The 3D page's legacy `.exp-card[data-exp=cl]` / `#btnRunCL` entry is NOT in the current DOM — UI restructure; its selectors would crash `setStatus`.)
+- Sidecar: real `.venv-embodiment/Scripts/python.exe embodiment/sidecar.py --ws --port 8795`, pre-spawned detached (Start-Process), PID 60756; episode log `embodiment/logs/run_20260928_182102_ep0.jsonl` (240 records).
+- Harness disclosure (only deviation from a pure click): the static 8765 server has no `/api/sidecar` launcher endpoint, so `_pub_cdp.py` shimmed `window.fetch` **for the launcher handshake only** (returns `{ok:true}`); the brain loop, worker, WebSocket transport and FlyBody physics are the app's own unmodified code. Worker circuit boot (~21s) exceeds the page's 8s stall watchdog, so the harness polls `#nfLive` text for the terminal "causal gates" verdict instead of trusting the transient "stalled" state.
+- Result: **`done ✓ · 240 closed-loop steps · causal gates all PASS`** in 76s wall (headless software render). Runner status: "episode complete".
+- Captures: `raw/stage_cl_00.png` (plots page pre-run), `raw/stage_cl_01.png` (live figure streaming), `raw/stage_cl_02/03.png`, `raw/stage_cl_end.png` (terminal state), `raw/cl_nfCard.png` (clipped live flybody figure), `raw/cl_labBoard.png` (results-by-laboratory board), `raw/card_cl.json` (machine-readable verdict).
+- Cross-check: independent headless CLI run `tools/closed_loop_runner.js --steps 240 --seed 11` → `raw/cl_locomotion.jsonl` (240 records, 9/9 causal gates PASS) and composed panel `figures/combined_CL_locomotion.png`. Same seed, same gates, two entry points.
+
+## Publication run summary — 2026-09-28
+
+- All 11 experiments executed in the current app (headless Edge CDP, zero app code changes): stage/start/mid/end screenshots, sparkline PNGs, verdict chips + bench HUD per experiment (`raw/card_e*.json`, `raw/stage_*.png`, `raw/spark_*.png`).
+- Headline (E5, fresh this session): ⚖ classical_demon 1.00 ±0.00 > drosophila 0.50 ±0.05 ≈ shuffled_connectome 0.48 ±0.05 — "classical_demon > drosophila · test agree 1.00 vs 0.50".
+- CI-grade headless reruns (`paper_v2/paper_program.js`): E3 post-upgrade 288 rows/26s; E5 seeds 0+1, 250 rows each (~214s/237s) → `paper_v2/raw/E3_rows.jsonl`, `E5_rows_s{0,1}.jsonl`. Archived E4/E9/E10/E11 rows remain valid (connectomeController untouched).
+- Brain-outcome figures via the app's own Save PNG pipeline (provenance via `__pubDebug`: n=106765 neurons, nb=400 bundles, ed=564030 mapped edges): `figures/figureA_fly_brain.png`, `figures/figureB_fly_brain.png`.
+- 12 Nature-style combined panels: `paper_evidence/figures/combined_e1..e11.png` + `combined_brain_outcome.png` + `combined_CL_locomotion.png`.
+- Closed loop: browser one-click evidence (this section) + deterministic CLI evidence + composed figure. Both agree: 9/9 gates PASS.

@@ -1,0 +1,26 @@
+{
+  "batch": "e9_batch_2026-09-22T14-14-23.jsonl",
+  "nSeeds": 10,
+  "blockB": 4,
+  "cases": {
+    "demon_neural": {
+      "finalTestReward": -7.397597542010063,
+      "finalTestRewardSem": 0.3619153816120673,
+      "finalTestAcc": 0.5123333333333333,
+      "finalTestAccSem": 0.022933323394949145
+    },
+    "demon_frozen": {
+      "finalTestReward": -7.288062406583117,
+      "finalTestRewardSem": 0.37723964711684427,
+      "finalTestAcc": 0.5189999999999999,
+      "finalTestAccSem": 0.023531757047521758
+    },
+    "demon_speed": {
+      "finalTestReward": 0.0,
+      "finalTestRewardSem": 0.0,
+      "finalTestAcc": 0.9383333333333332,
+      "finalTestAccSem": 0.01932625865252438
+    }
+  },
+  "deltaVmax": 52.0
+}

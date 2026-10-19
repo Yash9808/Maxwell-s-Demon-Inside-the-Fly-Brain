@@ -35,7 +35,70 @@ const DOOR_GAP = 0.6;
 const DOOR_Z_HALF = CH.d * 0.35;
 const PMAX = 600;
 
-// ------------------------------------------------------------ environment
+const DEMON_STATES = ["WATCH", "ATTEND", "HOLD", "STRIKE", "RECOIL"];   // DemonGatekeeper FSM states (frozen order of the obs one-hot)
+
+// ------------------------------------------------- demon-observation FSM -----
+/** Headless replica of the browser DemonGatekeeper FSM (fly_demon_3d.html)
+ *  reduced to the state the obs_* encoder can see. Driven ONLY by two event
+ *  kinds the headless core already owns:
+ *    onDoorRegime(cmd, open) — cmd = door.target > 0.5, open = door.pos > 0.6;
+ *                              open→HOLD / cmd→ATTEND / else→WATCH, ignored
+ *                              while STRIKE/RECOIL (events own the state);
+ *    onCrossing(q, sp)       — good (q>0) → STRIKE, bad → RECOIL; impulse
+ *                              mag = min(1,|q|)·min(1,sp/160) scaled by the
+ *                              browser constants (STRIKE 140, RECOIL 90,
+ *                              recoil cap 180); scalar speed decays ×(1−dt·3.5)
+ *                              and recovers below 12 u/s into doorOpen ?
+ *                              HOLD : WATCH. That is exactly the browser's
+ *                              velocity decay with the direction-dependence
+ *                              (pure geometry) factored out.
+ *  No rng, no wall clock, no sim writes — a pure event transducer. Reset
+ *  per trial/episode (browser's resetToPost on dataset switch).
+ */
+function makeDemonFsm() {
+  const S = {
+    state: "WATCH",        // WATCH | ATTEND | HOLD | STRIKE | RECOIL
+    seq: 0,                // increments on every behavioral transition
+    simTime: 0,            // integrated simulation seconds — never wall clock
+    lastActionT: -1,       // simTime of the last state transition (-1 = none yet)
+    vel: 0,                // scalar speed shadow of the browser's kick decay
+    doorOpen: false,       // remembered open flag for the recovery target
+    crossGood: 0, crossBad: 0,
+    rolling: [],           // last-20 crossing valences (browser chemKeeperStats.recent)
+  };
+  function setState(s) { if (S.state !== s) { S.state = s; S.seq++; S.lastActionT = S.simTime; } }
+  function onDoorRegime(cmd, open) {
+    S.doorOpen = open;
+    if (S.state === "STRIKE" || S.state === "RECOIL") return;   // events own the state until recovery
+    if (open)      setState("HOLD");
+    else if (cmd)  setState("ATTEND");
+    else           setState("WATCH");
+  }
+  function onCrossing(q, sp) {
+    const good = q > 0;
+    S.crossGood += good ? 1 : 0; S.crossBad += good ? 0 : 1;
+    S.rolling.push(good ? 1 : 0);
+    if (S.rolling.length > 20) S.rolling.shift();
+    const mag = Math.min(1, Math.abs(q)) * Math.min(1, sp / 160);   // 0..1 bounded
+    if (mag <= 0) return;                                           // zero impulse: no behavioral kick
+    if (good) { setState("STRIKE");  S.vel = 140 * mag; }
+    else      { setState("RECOIL");  S.vel = Math.min(90 * mag, 180); }
+  }
+  function step(dt) {
+    S.simTime += dt;
+    if (S.state === "STRIKE" || S.state === "RECOIL") {
+      S.vel *= Math.max(0, 1 - dt * 3.5);    // browser recovery law (scalar form)
+      if (S.vel < 12) setState(S.doorOpen ? "HOLD" : "WATCH");
+    }
+  }
+  function reset() {
+    S.state = "WATCH"; S.seq++; S.simTime = 0; S.lastActionT = -1;
+    S.vel = 0; S.doorOpen = false;
+    S.crossGood = 0; S.crossBad = 0; S.rolling.length = 0;
+  }
+  return { S, onDoorRegime, onCrossing, step, reset };
+}
+
 /**
  * Environment constructor. cfg (all optional):
  *   seed        — integer PRNG seed (default 1)
@@ -56,7 +119,28 @@ function makeEnvironment(cfg) {
   const jetAim = cfg.jetAim !== undefined ? cfg.jetAim : 0.5;
   const jetInterval = cfg.jetInterval || 3.5;
 
+  // (Stage-3 demon observation arm, opt-in) cfg.demonObs = true extends the
+  // 7-channel sensor vector with the 8 obs_* features of
+  // fly_demon_3d.html demonObsVector() — EXACT ordering: one-hot FSM state
+  // (WATCH/ATTEND/HOLD/STRIKE/RECOIL), timeSinceAction (2 s clamp), goodRate
+  // (rolling-20 crossing valences, 0.5 prior) and gateCmd = door.target.
+  // The FSM is a DETERMINISTIC headless replica of DemonGatekeeper: its only
+  // inputs are (a) the door regime (door.target > 0.5 command / door.pos > 0.6
+  // open — the same edge table onDoorRegime uses) and (b) door-crossing
+  // events with q = dir*(T2−v2)/max(T2,1) (T2 = lastStats.lMean2 — the same
+  // valence the runner scores) and sp = particle speed (60 u/s fallback),
+  // impulse mag = min(1,|q|)·min(1,sp/160), scalar speed decay ×(1−dt·3.5)
+  // recovering below 12 u/s. It consumes NO rng and reads NO wall clock, so
+  // with the flag OFF nothing below exists and the environment is exactly
+  // the pre-slice machine, bit for bit.
+  let demonObsFsm = null;
+  if (!!cfg.demonObs) demonObsFsm = makeDemonFsm();
+
   const particles = [];
+
+  const door = { target: 0, pos: 0 };
+  let jetPulse = 0, autoJetT = 2.0, time = 0;
+
   function reset() {
     particles.length = 0;
     for (let i = 0; i < nP; i++) {
@@ -69,11 +153,10 @@ function makeEnvironment(cfg) {
         vz: (rng() - 0.5) * sp * 0.6,
       });
     }
+    if (demonObsFsm) demonObsFsm.reset();   // fresh episode = fresh FSM (browser: resetToPost on dataset switch)
   }
-  reset();
 
-  const door = { target: 0, pos: 0 };
-  let jetPulse = 0, autoJetT = 2.0, time = 0;
+  reset();
 
   // ---- statistics captured during the last step ------------------------
   let lastStats = { lMean2: 900 * 900, rMean2: 900 * 900, lN: 1, rN: 1 };
@@ -155,9 +238,27 @@ function makeEnvironment(cfg) {
         const prevX = p.x - p.vx * dt;
         if (prevX < 0 && p.x >= 0 && Math.abs(p.y) < openHalf && Math.abs(p.z) < DOOR_Z_HALF) {
           stats.crossings++; stats.crossingEnergyJ += 0.5 * (p.vx * p.vx + p.vy * p.vy + p.vz * p.vz);
+          // (Stage-3 demon observation) same valence the browser demon sees:
+          // q = dir*(T2−v2)/max(T2,1) with T2 = lastStats.lMean2 (LEFT mean v²),
+          // sp = crossing speed with the browser's 60 u/s non-finite fallback.
+          if (demonObsFsm) {
+            const dq = (lastStats.lMean2 - (p.vx * p.vx + p.vy * p.vy + p.vz * p.vz))
+                     / Math.max(lastStats.lMean2, 1);   // dir = +1 (L→R)
+            const dsp = Math.hypot(p.vx, p.vy, p.vz);
+            demonObsFsm.onCrossing(dq, Number.isFinite(dsp) && dsp > 1e-9 ? dsp : 60);
+          }
           if (onCrossing) onCrossing(p, 1);
         } else if (prevX > 0 && p.x <= 0 && Math.abs(p.y) < openHalf && Math.abs(p.z) < DOOR_Z_HALF) {
           stats.crossings++; stats.crossingEnergyJ += 0.5 * (p.vx * p.vx + p.vy * p.vy + p.vz * p.vz);
+          // (Stage-3 demon observation) same valence the browser demon sees:
+          // q = dir*(T2−v2)/max(T2,1) with T2 = lastStats.lMean2 (LEFT mean v²),
+          // sp = crossing speed with the browser's 60 u/s non-finite fallback.
+          if (demonObsFsm) {
+            const dq = -(lastStats.lMean2 - (p.vx * p.vx + p.vy * p.vy + p.vz * p.vz))
+                     / Math.max(lastStats.lMean2, 1);   // dir = −1 (R→L)
+            const dsp = Math.hypot(p.vx, p.vy, p.vz);
+            demonObsFsm.onCrossing(dq, Number.isFinite(dsp) && dsp > 1e-9 ? dsp : 60);
+          }
           if (onCrossing) onCrossing(p, -1);
         }
       }
@@ -198,6 +299,14 @@ function makeEnvironment(cfg) {
     }
     // door easing
     door.pos += (door.target - door.pos) * clamp(dt * 8, 0, 1);
+    // (Stage-3 demon observation) the browser feeds DemonGatekeeper.onDoorRegime
+    // once per frame with (door.target > 0.5, door.pos > 0.6) — the headless
+    // step plays that frame: integrate (sim clock + strike/recoil decay and
+    // recovery), then the regime feed. No rng, no sim writes.
+    if (demonObsFsm) {
+      demonObsFsm.step(dt);
+      demonObsFsm.onDoorRegime(door.target > 0.5, door.pos > 0.6);
+    }
   }
 
   /** temperatures + occupancy; T = sqrt(<v^2>) * K as in the 3D app (K=1/900). */
@@ -225,12 +334,37 @@ function makeEnvironment(cfg) {
       }
     }
     const doorFast = n ? clamp((sSum / n - 30) / 180, 0, 1) : 0;
-    return [
+    const base = [
       clamp(ts.Tl / 40, 0, 1), clamp(ts.Tr / 40, 0, 1),
       clamp((ts.Tl - ts.Tr) / 20, -1, 1) * 0.5 + 0.5,
       clamp(fracL, 0, 1), clamp(jetPulse, 0, 1),
       doorFast, 1 - doorFast,
     ];
+    // (Stage-3 demon observation, opt-in) OFF: this function returns the SAME
+    // 7-array it always did — no code path below executes. ON: the same 7 base
+    // values, then the obs_8 tail in the EXACT demonObsVector() ordering
+    // (fly_demon_3d.html): one-hot FSM state (WATCH/ATTEND/HOLD/STRIKE/RECOIL),
+    // timeSinceAction = clamp((simTime − last transition)/2 s, 0, 1) falling
+    // back to 1 before any transition, goodRate = mean of the rolling-20
+    // crossing valences with cumulative fallback and a 0.5 prior, gateCmd =
+    // door.target clamped into 0..1. No rng is consumed.
+    if (demonObsFsm) {
+      const o = demonObsFsm.S;
+      const tot = o.crossGood + o.crossBad;
+      const goodRate = o.rolling.length
+        ? o.rolling.reduce((a, b) => a + b, 0) / o.rolling.length
+        : (tot ? o.crossGood / tot : 0.5);
+      const oh = [0, 0, 0, 0, 0];
+      const si = DEMON_STATES.indexOf(o.state);
+      oh[si < 0 ? 0 : si] = 1;
+      return base.concat(
+        oh,
+        o.lastActionT < 0 ? 1 : clamp((o.simTime - o.lastActionT) / 2, 0, 1),
+        goodRate,
+        clamp(door.target, 0, 1),
+      );
+    }
+    return base;
   }
 
   /** 8-bin visual field (4 horizontal x 2 vertical) — matches readVisualField().
@@ -369,6 +503,10 @@ const METRICS = (() => {
  *   controllers: { key: factory(rng, env, cfg) -> controller }
  *   connectomeFactory: optional fn(rng) -> connectome controller factory
  *   onTrial(cond, phase, t, nTrials, seedIdx, nSeeds) — optional progress hook
+ *   onStepProgress(cond, phase, t, nTrials, step, maxSteps, seedIdx, nSeeds) —
+ *     optional intra-trial heartbeat, called every ~256 sim steps (~4.3 sim-
+ *     seconds); lets hosts surface liveness during long neural-controller
+ *     episodes. Keep the implementation cheap: it runs inside the hot loop.
  * A controller implements:
  *   observe(env)                 — optional pre-step read
  *   step(dt)                     — decide + act; MUST set env.door.target
@@ -384,39 +522,71 @@ function runBenchmark(cfg) {
     tKelvin: 300,
   };
   cfg = Object.assign({}, defaults, cfg);
+  if (cfg.seedSpecs !== undefined &&
+      (!Array.isArray(cfg.seedSpecs) || cfg.seedSpecs.length !== cfg.nSeeds))
+    throw new Error("seedSpecs must contain exactly one entry per nSeeds run");
   const out = { cfg, conditions: {} };
+  const phaseDefs = [];
+  if (cfg.trialsPre > 0) phaseDefs.push({ phase: "pre", n: cfg.trialsPre, learning: false,
+                                            episodeSeconds: cfg.preEpisodeSeconds });
+  phaseDefs.push({ phase: "train", n: cfg.trialsTrain, learning: true });
+  if (cfg.trialsTest > 0) phaseDefs.push({ phase: "test", n: cfg.trialsTest, learning: false });
+  if (cfg.trialsPost > 0) phaseDefs.push({ phase: "post", n: cfg.trialsPost, learning: false });
+
+  // Stage-1 frozen pre-baseline (protocol §10): a declared frozen pre phase
+  // must carry its frozenPreSeconds; the core stamps every pre row with
+  // frozenPre: true so downstream consumers can verify the freeze contract
+  // without trusting the caller's phase name.
+  const FROZEN_PRE_PHASE = "pre";
+  const frozenPreSec = cfg.frozenPreSeconds !== undefined ? cfg.frozenPreSeconds : null;
 
   for (const [key, factory] of Object.entries(cfg.controllers)) {
     const trials = [];
     for (let s = 0; s < cfg.nSeeds; s++) {
-      const seed = cfg.seed + s * 101;
+      const scheduled = cfg.seedSpecs && cfg.seedSpecs[s] || {};
+      const seed = scheduled.environmentSeed !== undefined
+        ? scheduled.environmentSeed : cfg.seed + s * 101;
+      const networkSeed = scheduled.networkSeed !== undefined ? scheduled.networkSeed : seed;
+      const topologySeed = scheduled.topologySeed !== undefined ? scheduled.topologySeed : networkSeed;
+      const seedSpec = Object.assign({ runId: "seed_" + (s + 1) }, scheduled,
+                                     { environmentSeed: seed, networkSeed, topologySeed });
       const ph = cfg._physics ? (cfg._physics(s, cfg.nSeeds) || {}) : {};
       const env = makeEnvironment({ seed,
                                     nParticles: ph.nParticles !== undefined ? ph.nParticles : cfg.nParticles,
                                     noise: ph.noise !== undefined ? ph.noise : cfg.noise,
-                                    doorHeight: cfg.doorHeight });
-      const controller = factory(makeRng(seed ^ 0x5f5f), env, cfg);
-      const rec = { seed, trials: [] };
+                                    doorHeight: cfg.doorHeight,
+                                    // (Stage-3 demon observation) per-arm flag: the
+                                    // callers set cfg.demonObsArms when the config
+                                    // enumerates arm-level flags; without it the run
+                                    // flag is the arm flag. OFF calls the ORIGINAL
+                                    // 4-field constructor unchanged.
+                                    demonObs: cfg.demonObsArms
+                                      ? cfg.demonObsArms[key] === true
+                                      : cfg.demonObs === true });
+      const controller = factory(makeRng(networkSeed ^ 0x5f5f), env, cfg, seedSpec);
+      const rec = { seed, networkSeed, topologySeed, runId: seedSpec.runId, trials: [] };
 
-      const phaseDefs = [
-        { phase: "train", n: cfg.trialsTrain, learning: true },
-        { phase: "test", n: cfg.trialsTest, learning: false },
-      ];
-      for (const ph of phaseDefs) {
+      for (let phaseIndex = 0; phaseIndex < phaseDefs.length; phaseIndex++) {
+        const ph = phaseDefs[phaseIndex];
         if (controller.setLearning) controller.setLearning(ph.learning);
         for (let t = 0; t < ph.n; t++) {
           if (cfg.onTrial) cfg.onTrial(key, ph.phase, t, ph.n, s, cfg.nSeeds);
           env.reset();
           env.door.pos = 0; env.door.target = 0;
           if (controller.resetForTrial) controller.resetForTrial();
-          const tr = { seed, phase: ph.phase, trial: t, steps: 0,
+          const tr = { seed, networkSeed, topologySeed, runId: seedSpec.runId,
+                       phase: ph.phase, phaseIndex, trial: t, steps: 0,
+                       plannedEpisodeSeconds: ph.episodeSeconds !== undefined
+                         ? ph.episodeSeconds : cfg.episodeSeconds,
+                       frozenPre: ph.phase === FROZEN_PRE_PHASE ? true : undefined,
+                       frozenPreSeconds: ph.phase === FROZEN_PRE_PHASE ? frozenPreSec : undefined,
                        crossings: 0, goodCrossings: 0, badCrossings: 0,
                        energyJ: 0, jetWorkJ: 0,
                        demonAgree: 0, demonDecisions: 0,
                        openFraction: 0, dTfinal: 0, sortEntropy: 0, spatialH: 0,
                        miNeural: 0,
                        workInJ: 0, measuredBits: 0, erasureCostJ: 0,
-                       extractableJ: 0, landauerRatio: 0 };
+                       extractableJ: 0, landauerRatio: 0, weightDrift: 0 };
           let openSteps = 0, lastDoorTarget = 0;
           const SIM_J = 1e-21;          // 1 sim energy unit in Joules
           const T_ENV = 300;            // demon's ambient erasure temperature (K)
@@ -437,8 +607,10 @@ function runBenchmark(cfg) {
           Object.defineProperty(tr, "goodBadRatio", {
             get: goodBadRatio, enumerable: true, configurable: true,
           });
-          const maxSteps = Math.round(cfg.episodeSeconds / cfg.dt);
+          const maxSteps = Math.round(tr.plannedEpisodeSeconds / cfg.dt);
           for (let st = 0; st < maxSteps; st++) {
+            if (cfg.onStepProgress && (st & 255) === 0)   // (audit step 6) intra-trial heartbeat, ~4.3 sim-s cadence
+              cfg.onStepProgress(key, ph.phase, t, ph.n, st, maxSteps, s, cfg.nSeeds);
             if (controller.observe) controller.observe(env);
             controller.step(cfg.dt, env);
             env.step(cfg.dt);
@@ -459,13 +631,20 @@ function runBenchmark(cfg) {
           tr.dTfinal = ts.Tl - ts.Tr;
           tr.sortEntropy = se.delta;
           tr.spatialH = sp.H;
-          tr.openFraction = openSteps / tr.steps;
+          tr.openFraction = tr.steps ? openSteps / tr.steps : 0;
+          tr.durationSeconds = tr.steps * cfg.dt;
           // thermodynamic budget: extractable work of the final state vs the
           // Landauer erasure bill for the demon's memory traffic
           tr.extractableJ = METRICS.extractableWorkSimJ(env.particles) * SIM_J;
           tr.erasureCostJ = METRICS.landauerJoules(tr.measuredBits, T_ENV);
           tr.landauerRatio = tr.erasureCostJ > 0
             ? tr.extractableJ / tr.erasureCostJ : null;
+          // Stage-1 frozen-pre evidence (protocol §10): persistence metric —
+          // EXACTLY 0.0 after any episode in which no plastic change occurred
+          // (connectome arms during the frozen pre phase); stays 0 for
+          // brainless controllers (classical/random: non-plastic by design).
+          if (typeof controller.weightDrift === "function")
+            tr.weightDrift = controller.weightDrift();
           if (controller.neuralActivity && controller.particleSample) {
             tr.miNeural = METRICS.mutualInformation(
               controller.neuralActivity(), controller.particleSample(env));
@@ -473,6 +652,22 @@ function runBenchmark(cfg) {
           if (controller.layerSpikeRates) tr.layerRates = controller.layerSpikeRates();
           if (controller.fireVec) tr.fireVec = controller.fireVec();
           if (controller.summary) Object.assign(tr, controller.summary());
+          // (Stage-3 demon observation) per-row provenance — written ONLY when
+          // this arm actually carries the registered flag: OFF arms and OFF
+          // runs gain no keys at all. The connectome controller's summary()
+          // already carries its own MEASURED band (obsBandLo/Hi/Neurons); these
+          // defaults fill rows for arms whose sensors are extended without a
+          // connectome and echo the run-level gain.
+          if (cfg.demonObsArms ? cfg.demonObsArms[key] === true : cfg.demonObs === true) {
+            if (tr.demonObsOn === undefined) tr.demonObsOn = true;
+            if (tr.demonObsGain === undefined)
+              tr.demonObsGain = cfg.demonObsGain !== undefined ? cfg.demonObsGain : 12;
+            if (cfg.demonObsBand) {
+              if (tr.obsBandLo === undefined) tr.obsBandLo = cfg.demonObsBand.lo;
+              if (tr.obsBandHi === undefined) tr.obsBandHi = cfg.demonObsBand.hi;
+              if (tr.obsBandNeurons === undefined) tr.obsBandNeurons = cfg.demonObsBand.neurons;
+            }
+          }
           rec.trials.push(tr);
           if (cfg.onTrialData) cfg.onTrialData(key, ph.phase, tr);
         }
@@ -938,7 +1133,8 @@ function pressureDemonCore(cfg) {
             pos[i2 * 3] = Math.round(parts[i2].x); pos[i2 * 3 + 1] = Math.round(parts[i2].y);
             pos[i2 * 3 + 2] = Math.round(parts[i2].z);
           }
-          cfg.onState({ kind: "pressure", t: (t * episode) + (st - BURN) / maxSteps, trials, seed: seedTag,
+          cfg.onState({ kind: "pressure", t: st * dt,   // streamed t = CONTINUOUS sim-seconds (watch pacing maps t→wall)
+                        trials, seed: seedTag,
                         pos, valve: valve.pos, piston: pist.x,
                         tl: s.tl, tr: s.tr, pl: s.pl, pr: s.pr,
                         dT: s.dT, workU, bits, crossings, cond: v.key,
@@ -1308,7 +1504,15 @@ function smoluchowskiCore(cfg) {
             let action = 1;
             const popenFn = brain.policyProb ? brain.policyProb() : null;
             if (popenFn !== null && popenFn !== undefined) {
-              brain.pgReward = epPgAcc;            // credit window -> REINFORCE
+              // deliver the credit accrued over the previous window; the
+              // pgBaseline setter pairs it with the decision that earned it
+              // (decPend is still that decision's — the core re-latches only
+              // after this write). Includes transport, crossings, and the
+              // wWrong penalty: the penalty is the main structured signal
+              // against holding while a fast molecule waits, and omitting it
+              // from the credit stream left the policy blind to exactly the
+              // cost that discriminates hold from release.
+              brain.pgReward = epPgAcc;
               epPgAcc = 0;
               lastPopen = popenFn;
               const sampled = brain.lastPgAction ? brain.lastPgAction() : null;
@@ -1341,6 +1545,9 @@ function smoluchowskiCore(cfg) {
               if (wrong) {
                 epRewPen -= RDOC.wWrong;
                 epRewTotal -= RDOC.wWrong;
+                epPgAcc -= RDOC.wWrong;   // the penalty TEACHES: it belongs in
+                                          // the PG credit stream too, not just
+                                          // the episode bookkeeping
                 brain.receiveFeedback({ reward: -RDOC.wWrong,
                                         kind: "e10_penalty" });
               }
@@ -1387,8 +1594,8 @@ function smoluchowskiCore(cfg) {
             pos[i2 * 3] = Math.round(parts[i2].x); pos[i2 * 3 + 1] = Math.round(parts[i2].y);
             pos[i2 * 3 + 2] = Math.round(parts[i2].z);
           }
-          cfg.onState({ kind: "trapdoor", t: (t * episode) + st / maxSteps, trials,
-                        seed: seedTag, phase, trial: t, trainTrials,
+          cfg.onState({ kind: "trapdoor", t: st * dt,   // streamed t = CONTINUOUS sim-seconds (watch pacing maps t→wall)
+                        trials, seed: seedTag, phase, trial: t, trainTrials,
                         pos, door: door.ang, doorVel: door.vel, hold: door.hold,
                         tl: s.tl, tr: s.tr, nl: s.nl, nr: s.nr,
                         crossLR, crossRL, cond: v.key,
@@ -1709,8 +1916,8 @@ function feynmanRatchetCore(cfg) {
         }
         if (pawl.lift > 0.5) epLiftSteps++;
         if (cfg.onState && (st % 20) === 0) {
-          cfg.onState({ kind: "ratchet", t: (t * episode) + st / maxSteps, trials,
-                        seed: seedTag, phase, trial: t, trainTrials,
+          cfg.onState({ kind: "ratchet", t: st * dt,   // streamed t = CONTINUOUS sim-seconds (watch pacing maps t→wall)
+                        trials, seed: seedTag, phase, trial: t, trainTrials,
                         ang: ang + wobAng, angSnap: ang, vel: velSm,
                         teeth: TEETH, fwd, rev, th: v.Th, tc: v.Tc,
                         load: v.load, qh, qc, cond: v.key,
@@ -1867,7 +2074,24 @@ function apparatusCurve(rows, B) {
   return out;
 }
 
+// ---- reserved obs band of the connectome's input layer (Stage-3 demon
+//      observation arm) — the SAME slice math the layer-channel injector uses:
+//      band = [floor(0.86·L), floor(1.0·L)·cap] of input layer 0. The browser
+//      constants are OBS_INPUT_BAND [0.86, 1.0] with gain 12; for the FAFB
+//      circuit the pinning expects input layer L = 2875 → [2472, 2875),
+//      403 reserved neurons, matching the pre-registered map. Returns null
+//      when no circuit is available (the caller's manifest echoes null).
+function demonObsBand(circuit) {
+  if (!circuit || !Array.isArray(circuit.layers) || !circuit.layers.length ||
+      !Array.isArray(circuit.layers[0]) || !circuit.layers[0].length) return null;
+  const L = circuit.layers[0].length;
+  const lo = Math.max(0, Math.min(L, Math.floor(0.86 * L)));
+  const hi = Math.max(lo, Math.min(L, Math.floor(1.0 * L)));
+  return { lo, hi, neurons: hi - lo, inputLayer: L };
+}
+
 module.exports = { makeRng, makeEnvironment, METRICS, runBenchmark, meanCI,
+                   demonObsBand, makeDemonFsm,
                    apparatusCurve,
                    pressureDemonCore, smoluchowskiCore, feynmanRatchetCore,
                    CH, WALL_T, DOOR_GAP, DOOR_Z_HALF, clamp };

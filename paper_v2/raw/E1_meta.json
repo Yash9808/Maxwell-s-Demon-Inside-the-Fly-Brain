@@ -1,0 +1,108 @@
+{
+ "id": "E1",
+ "provenance": {
+  "experiment": "E1",
+  "label": "e1",
+  "seeds": 2,
+  "seedRule": "seed = 1 + seedIdx*101",
+  "trainTrials": 60,
+  "testTrials": 12,
+  "episodeSeconds": 12,
+  "nParticles": 320,
+  "noise": 0.12,
+  "doorHeight": 64,
+  "dt": 0.016666666666666666,
+  "tKelvin": 300,
+  "simToJoule": 1e-21,
+  "engine": "experiment_core.runBenchmark",
+  "circuit": null,
+  "node": "v26.8.2",
+  "startedISO": "2026-09-23T11:10:03.205Z",
+  "elapsedSeconds": 4.287,
+  "rows": 144
+ },
+ "conditions": {
+  "classical_demon": {
+   "earlyAgreement": {
+    "mean": 1,
+    "ci": 0,
+    "n": 2
+   },
+   "lateAgreement": {
+    "mean": 1,
+    "ci": 0,
+    "n": 2
+   },
+   "testAgreement": {
+    "mean": 1,
+    "ci": 0,
+    "n": 2
+   },
+   "earlyGoodBadRatio": {
+    "mean": 1.2351190476190474,
+    "ci": 0.4238888888888889,
+    "n": 2
+   },
+   "lateGoodBadRatio": {
+    "mean": 1.5366369047619046,
+    "ci": 1.0943916666666662,
+    "n": 2
+   },
+   "testGoodBadRatio": {
+    "mean": 1.2565972222222224,
+    "ci": 0.07009722222222228,
+    "n": 2
+   },
+   "testSortEntropy": {
+    "mean": 0.02699339640548362,
+    "ci": 0.011009329761090942,
+    "n": 2
+   },
+   "testDT": {
+    "mean": 0.026585927344364754,
+    "ci": 0.002383523201537448,
+    "n": 2
+   },
+   "testOpenFraction": {
+    "mean": 0.48269675925925926,
+    "ci": 0.028243055555555452,
+    "n": 2
+   },
+   "testMiNeural": {
+    "mean": 0,
+    "ci": 0,
+    "n": 2
+   },
+   "testEnergyJ": {
+    "mean": 48245.649995357664,
+    "ci": 11179.842135035957,
+    "n": 2
+   },
+   "testWorkInJ": {
+    "mean": 3.29791943914039e-11,
+    "ci": 2.532961564556507e-12,
+    "n": 2
+   },
+   "testExtractableJ": {
+    "mean": 1.9636078708069776e-16,
+    "ci": 2.2446366783327834e-17,
+    "n": 2
+   },
+   "testErasureCostJ": {
+    "mean": 2.8219329957919626e-19,
+    "ci": 1.3833333261271002e-20,
+    "n": 2
+   },
+   "testLandauerRatio": {
+    "mean": 743.7676728309739,
+    "ci": 90.09090351053388,
+    "n": 2
+   },
+   "testMeasuredBits": {
+    "mean": 98.29166666666666,
+    "ci": 4.818333333333338,
+    "n": 2
+   }
+  }
+ }
+}

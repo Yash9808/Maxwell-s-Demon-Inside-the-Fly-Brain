@@ -1,0 +1,116 @@
+{
+  "preregistration": "E3R2 — reward-shaping fix for door-avoidance collapse",
+  "version": "1.0",
+  "date_written": "2026-09-21",
+  "status": "PROSPECTIVE — written before any R2 campaign data was generated or inspected",
+  "author": "Agent 3 (statistical validation)",
+  "branch_at_preregistration": "deployment/phase-02",
+  "prior_evidence_used": {
+    "note": "R1 anchors from the completed validation campaign (research_data/validation/raw_e3.csv, 20 seeds/arm). Used ONLY for calibration constants and diagnosis; no R2 outcome was consulted.",
+    "anchors": {
+      "drosophila_R1":        { "g_minus_b_per_ep_train": -0.00, "openFraction": 0.000, "verdict": "collapsed: 100% of seeds reach openFraction<0.02 by training quarter 2" },
+      "drosophila_frozen_R1": { "g_minus_b_per_ep_train": -1.04, "openFraction": 0.246, "P_good": 0.403 },
+      "random_R1":            { "g_minus_b_per_ep_train": -1.69, "openFraction": 0.381, "P_good": 0.383 },
+      "classical_demon_R1":   { "g_minus_b_per_ep_train": -0.11, "openFraction": 0.508, "P_good": 0.492 }
+    },
+    "diagnosis": "Two compounding mechanisms: (1) SILENCE — a closed door generates zero crossing events, so the only learning channel (env.onCrossing -> controller.receiveFeedback) is inactive in the collapsed state; (2) VALUE ASYMMETRY — P(good) < 0.5 for every unselective policy, so E[feedback | open] < 0 = E[feedback | closed]; closing is reinforcement-learning-optimal even for engaged policies below classical selectivity."
+  },
+  "intervention": {
+    "class": "reward-shaping / feedback-channel overlay ONLY",
+    "forbidden": [
+      "no changes to drosophilaController internals (weights, layers, plasticity rules, hysteresis latch)",
+      "no changes to experiment_core.js physics or trial engine",
+      "no changes to controllers.js or experiment_worker.js (branch has uncommitted collaborator edits; R2 is purely additive in new files)",
+      "no changes to env.onCrossing semantics, good/bad definition, or episode structure"
+    ],
+    "implementation": "e3r2_wrapper.js wraps the unmodified drosophilaController; the wrapper is the controller object seen by runBenchmark, translating/adding feedback events through the existing receiveFeedback bridge.",
+    "arms": {
+      "R2A_cost": {
+        "description": "Centered-cost shaping: (a) crossing feedback delivered unchanged (sign form the brain already maps to +/-1); (b) closed-door dwell cost kappa delivered as a synthetic punishment event {good:false, kind:'dwell_cost'} whenever the door target is 0, at rate kappa per simulated step (3.6 events per fully-closed 720-step episode).",
+        "kappa_per_step": 0.005,
+        "kappa_basis": "Episode = 12 s x 60 Hz = 720 steps; the brain quantizes all feedback to +/-1 events, so calibration is in event rate. Two thresholds from R1 anchors: BREAKEVEN kappa_b = 1.69/720 = 0.00235/step (closed-door punishment rate exceeding the net punishment of blind opening) and EVENT-PARITY kappa_p = 8.5/720 = 0.0118/step (dwell events equaling the total crossing-event flux of an engaged episode, i.e. swamping). kappa = 0.005/step is the geometric midpoint of [kappa_b, kappa_p] => 3.6 dwell events per fully-closed episode, 2.1x breakeven, 0.42x parity. No post-hoc tuning permitted; any change requires a new preregistration (E3R3).",
+        "calibration_note": "An earlier draft of this file (same session, pre-outcome, never used to run anything) stated kappa=0.01 with a 300-step episode basis; corrected to 720 steps and event-rate framing before any R2 data was generated.",
+        "target_state": "applies while door.target==0 (the learned collapsed state), train phase only (plasticity gated by setLearning as in R1)"
+      },
+      "R2B_floor": {
+        "description": "Exploration floor ablation: no dwell cost, no feedback reweighting; during TRAIN phase only, each step the wrapper forces e.door.target=1 with probability floorP AFTER the brain's own decision (actuation overlay, network untouched). Tests the pure-engagement hypothesis: does feedback access alone suffice?",
+        "floorP": 0.05,
+        "role": "pre-specified mechanism ablation (secondary family), not the primary hypothesis"
+      },
+      "shaped_frozen_control": {
+        "description": "Identical wrapper (same mode, same parameters) around drosophilaController with plasticity disabled via setLearning(false) in both phases — isolates whether LEARNING (not shaping per se) produces any gain.",
+        "modes_run": ["R2A_cost", "R2B_floor"],
+        "matched_to": ["R2A_cost", "R2B_floor"]
+      },
+      "unshaped_references": {
+        "description": "AMENDED PRE-OUTCOME: originally planned as reuse of archived R1 rows, but collaborators have modified controllers.js on branch deployment/phase-02 since R1, so the vanilla drosophila arm is RERUN in the current codebase at the same seeds (1..20) as part of the R2 campaign (arm name: vanilla_rerun). Archived R1 rows remain historical anchors only.",
+        "arms": ["vanilla_rerun (plain drosophilaController, current codebase)", "drosophila_frozen (archived R1 anchor)", "random (archived R1 anchor)", "classical_demon (archived R1 anchor)"],
+        "role": "package-effect comparison and task-difficulty reference"
+      }
+    }
+  },
+  "design": {
+    "independent_replicate_unit": "one seed = one independent replicate (300 TRAIN episodes with plasticity on, then 60 TEST episodes with plasticity off). Episodes/trials within a seed are NOT independent replicates.",
+    "n_seeds": 20,
+    "seeds": "1..20, identical to R1; environment and controller streams derive from the same seed rule, giving exact matching across arms",
+    "train_window": "TRAIN episodes 1..300 (learning enabled)",
+    "test_window": "TEST episodes 1..60 (learning disabled; post-learning policy readout)",
+    "episode_seconds": 12,
+    "environment": "E3 pressure-door task, unchanged: nParticles/noise/doorHeight as in R1 campaign (CFG), dt=1/60"
+  },
+  "endpoints": {
+    "primary": {
+      "name": "P1_learning_under_shaping",
+      "definition": "Per-seed paired difference in mean goodMinusBad per TEST episode: R2A_cost minus shaped_frozen_control (R2A mode), same seeds.",
+      "direction": "greater than 0",
+      "statistical_test": "seed-level paired permutation test (sign-flip, 10,000 draws, two-sided) with seed-level Hedges' g and 95% t-CI (df=19)",
+      "success_criterion": "p_adjusted < 0.05 AND Hedges' g >= 0.5 AND engagement gate G1 met",
+      "failure_criterion": "95% CI of the paired difference lies entirely <= 0, OR engagement gate G1 fails (verdict then FAILURE with mechanism label 'non-engagement' or 'no-learning-benefit' as appropriate)",
+      "family": "primary (family size 1, no multiplicity correction beyond reporting exact p)"
+    },
+    "engagement_gate": {
+      "name": "G1_engagement",
+      "definition": "In R2A_cost TEST phase: mean openFraction >= 0.10 AND proportion of episodes with >=1 crossing >= 0.50.",
+      "basis": "frozen reference openFraction=0.246, random=0.381; 0.10 = 40% of frozen reference, far above R1's collapsed 0.000; crossing-presence threshold keeps the learning channel verifiably alive",
+      "joint_rule": "P1 can only be declared SUCCESS if G1 also holds; G1 failure forces primary FAILURE regardless of the contrast outcome"
+    },
+    "secondary": {
+      "family": "secondary (BH-FDR q=0.05 across all secondary tests)",
+      "tests": [
+        { "name": "S1_floor_ablation", "definition": "R2B_floor vs shaped_frozen_control (R2B mode), same paired contrast as P1", "role": "mechanism: does engagement alone suffice?" },
+        { "name": "S2_package_effect", "definition": "R2A_cost vs vanilla R1 drosophila (unshaped, matched seeds), paired test-phase goodMinusBad", "role": "does the full shaping+learning package beat the collapsed baseline?" },
+        { "name": "S3_within_arm_gain", "definition": "R2A_cost per-seed goodMinusBad late-train quarter (226..300) minus early-train quarter (1..75), paired", "role": "within-arm adaptation under shaping" },
+        { "name": "S4_test_selectivity_positive", "definition": "R2A_cost TEST-phase mean goodMinusBad > 0 (one-sided, CI lower bound > 0)", "role": "absolute (not just relative) selectivity after learning" },
+        { "name": "S5_collapse_recurrence", "definition": "fraction of R2A_cost seeds with TEST-phase openFraction < 0.02; success requires <= 10% (R1: 100%)", "role": "was the absorbing state eliminated?" }
+      ]
+    },
+    "exploratory": {
+      "note": "Reported but never citable as confirmatory. dTfinal and sortEntropy are flagged DEGENERATE-INSTRUMENT: a permanently closed door scores as 'perfect sorting' on these (R1 lesson: hollow success).",
+      "metrics": ["dTfinal", "sortEntropy", "demonAgree (reference only)", "classical_demon benchmark distance", "dwellCostEvents per episode", "forcedOpenSteps per episode (R2B)"]
+    },
+    "instability_guard": {
+      "name": "G2_stability",
+      "definition": "SD of per-seed TEST-phase goodMinusBad means in R2A_cost must not exceed 3x the shaped_frozen control's SD.",
+      "failure_action": "if violated, verdict FAILURE with mechanism label 'shaping-induced instability'"
+    }
+  },
+  "statistics": {
+    "ci": "95% t-CI on seed-level means and paired differences (df = n-1)",
+    "effect_size": "Hedges' g (seed-level, bias-corrected); report g for every contrast",
+    "permutation": "seed-level paired sign-flip permutation, 10,000 draws, two-sided; relative tolerance for tie handling as in stats_utils.js",
+    "multiplicity": "BH-FDR q=0.05 within the secondary family; primary family has a single test",
+    "reporting": "n, mean, SD, SE, 95% CI, median, effect size, and raw per-seed values for every primary/secondary endpoint",
+    "forbidden": "trial-level CIs; permuting episodes instead of seeds; post-hoc endpoint substitution; re-running with adjusted parameters after seeing outcomes"
+  },
+  "deliverables": {
+    "code": ["e3r2_wrapper.js", "e3r2_campaign.js", "e3r2_analyze.js"],
+    "data": ["E3R2_RAW.csv", "E3R2_SUMMARY.csv", "E3R2_TESTS.csv", "E3R2_EFFECTS.csv", "E3R2_metadata.json"],
+    "report": "E3R2_REPORT.md with FACT / INFERENCE / EXPLORATORY labels and a final verdict of SUCCESS, FAILURE, or INCONCLUSIVE against these criteria",
+    "plots": ["learning trajectory (per-quarter goodMinusBad + openFraction, seed-level spread)", "primary contrast per-seed paired plot"]
+  },
+  "falsifiability": {
+    "if_P1_fails_and_G1_holds": "genuine finding: engagement restored but learning does not exceed shaping-only control; the architecture cannot exploit calibrated feedback on this task — report as FAILURE, do not tune parameters and retry (that would require a new preregistration, E3R3)",
+    "if_G1_fails": "shaping magnitude/structure insufficient to break the absorbing state; report FAILURE with the kappa scale-analysis; any new kappa requires E3R3 preregistration",
+    "if_instability_guard_fails": "report FAILURE with variance evidence; no outcome-driven smoothing or trimming permitted"
+  }
+}

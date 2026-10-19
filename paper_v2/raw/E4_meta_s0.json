@@ -1,0 +1,273 @@
+{
+ "id": "E4",
+ "provenance": {
+  "experiment": "E4",
+  "label": "e4",
+  "seeds": 1,
+  "seedRule": "seed = 1 + (seedBase + seedIdx)*101",
+  "seedBase": 0,
+  "trainTrials": 40,
+  "testTrials": 10,
+  "episodeSeconds": 12,
+  "nParticles": 320,
+  "noise": 0.12,
+  "doorHeight": 64,
+  "dt": 0.016666666666666666,
+  "tKelvin": 300,
+  "simToJoule": 1e-21,
+  "engine": "experiment_core.runBenchmark",
+  "circuit": "fly_brain_circuit.json (FAFB v783, sha256 0eb64ba4...)",
+  "node": "v26.8.2",
+  "startedISO": "2026-09-23T11:24:07.815Z",
+  "elapsedSeconds": 234.903,
+  "rows": 150
+ },
+ "conditions": {
+  "connectome_4A": {
+   "earlyAgreement": {
+    "mean": 0.5118055555555556,
+    "ci": 0,
+    "n": 1
+   },
+   "lateAgreement": {
+    "mean": 0.5114583333333333,
+    "ci": 0,
+    "n": 1
+   },
+   "testAgreement": {
+    "mean": 0.4969444444444444,
+    "ci": 0,
+    "n": 1
+   },
+   "earlyGoodBadRatio": {
+    "mean": 0.5185185185185185,
+    "ci": 0,
+    "n": 1
+   },
+   "lateGoodBadRatio": {
+    "mean": 0.6408163265306123,
+    "ci": 0,
+    "n": 1
+   },
+   "testGoodBadRatio": {
+    "mean": 0.34932659932659926,
+    "ci": 0,
+    "n": 1
+   },
+   "testSortEntropy": {
+    "mean": 0.023391973116829962,
+    "ci": 0,
+    "n": 1
+   },
+   "testDT": {
+    "mean": 0.027083810934987164,
+    "ci": 0,
+    "n": 1
+   },
+   "testOpenFraction": {
+    "mean": 0.2580555555555556,
+    "ci": 0,
+    "n": 1
+   },
+   "testMiNeural": {
+    "mean": 0.0034953474911347594,
+    "ci": 0,
+    "n": 1
+   },
+   "testEnergyJ": {
+    "mean": 50228.875139902535,
+    "ci": 0,
+    "n": 1
+   },
+   "testWorkInJ": {
+    "mean": 2.153873489922066e-11,
+    "ci": 0,
+    "n": 1
+   },
+   "testExtractableJ": {
+    "mean": 1.9925853430622992e-16,
+    "ci": 0,
+    "n": 1
+   },
+   "testErasureCostJ": {
+    "mean": 2.839398117342858e-19,
+    "ci": 0,
+    "n": 1
+   },
+   "testLandauerRatio": {
+    "mean": 787.7119714745016,
+    "ci": 0,
+    "n": 1
+   },
+   "testMeasuredBits": {
+    "mean": 98.9,
+    "ci": 0,
+    "n": 1
+   }
+  },
+  "connectome_4B": {
+   "earlyAgreement": {
+    "mean": 0.46736111111111117,
+    "ci": 0,
+    "n": 1
+   },
+   "lateAgreement": {
+    "mean": 0.49149305555555567,
+    "ci": 0,
+    "n": 1
+   },
+   "testAgreement": {
+    "mean": 0.47347222222222224,
+    "ci": 0,
+    "n": 1
+   },
+   "earlyGoodBadRatio": {
+    "mean": 0.8878787878787878,
+    "ci": 0,
+    "n": 1
+   },
+   "lateGoodBadRatio": {
+    "mean": 0.6448717948717949,
+    "ci": 0,
+    "n": 1
+   },
+   "testGoodBadRatio": {
+    "mean": 0.703125,
+    "ci": 0,
+    "n": 1
+   },
+   "testSortEntropy": {
+    "mean": 0.022215855617050147,
+    "ci": 0,
+    "n": 1
+   },
+   "testDT": {
+    "mean": 0.02441735651748318,
+    "ci": 0,
+    "n": 1
+   },
+   "testOpenFraction": {
+    "mean": 0.26652777777777775,
+    "ci": 0,
+    "n": 1
+   },
+   "testMiNeural": {
+    "mean": 0.003913283125107037,
+    "ci": 0,
+    "n": 1
+   },
+   "testEnergyJ": {
+    "mean": 54468.63047610562,
+    "ci": 0,
+    "n": 1
+   },
+   "testWorkInJ": {
+    "mean": 2.2629961909801587e-11,
+    "ci": 0,
+    "n": 1
+   },
+   "testExtractableJ": {
+    "mean": 1.7519053229687467e-16,
+    "ci": 0,
+    "n": 1
+   },
+   "testErasureCostJ": {
+    "mean": 3.1379799213910453e-19,
+    "ci": 0,
+    "n": 1
+   },
+   "testLandauerRatio": {
+    "mean": 734.8512279255067,
+    "ci": 0,
+    "n": 1
+   },
+   "testMeasuredBits": {
+    "mean": 109.3,
+    "ci": 0,
+    "n": 1
+   }
+  },
+  "connectome_4C": {
+   "earlyAgreement": {
+    "mean": 0.48211805555555554,
+    "ci": 0,
+    "n": 1
+   },
+   "lateAgreement": {
+    "mean": 0.5407986111111112,
+    "ci": 0,
+    "n": 1
+   },
+   "testAgreement": {
+    "mean": 0.4554166666666667,
+    "ci": 0,
+    "n": 1
+   },
+   "earlyGoodBadRatio": {
+    "mean": 0.525,
+    "ci": 0,
+    "n": 1
+   },
+   "lateGoodBadRatio": {
+    "mean": 0.8908730158730158,
+    "ci": 0,
+    "n": 1
+   },
+   "testGoodBadRatio": {
+    "mean": 0.5111904761904762,
+    "ci": 0,
+    "n": 1
+   },
+   "testSortEntropy": {
+    "mean": 0.019298283748940805,
+    "ci": 0,
+    "n": 1
+   },
+   "testDT": {
+    "mean": 0.020930588856419213,
+    "ci": 0,
+    "n": 1
+   },
+   "testOpenFraction": {
+    "mean": 0.4190277777777777,
+    "ci": 0,
+    "n": 1
+   },
+   "testMiNeural": {
+    "mean": 0.007032569190873761,
+    "ci": 0,
+    "n": 1
+   },
+   "testEnergyJ": {
+    "mean": 84675.89574961617,
+    "ci": 0,
+    "n": 1
+   },
+   "testWorkInJ": {
+    "mean": 2.2152380652188867e-11,
+    "ci": 0,
+    "n": 1
+   },
+   "testExtractableJ": {
+    "mean": 1.4895096703786946e-16,
+    "ci": 0,
+    "n": 1
+   },
+   "testErasureCostJ": {
+    "mean": 3.71217569840679e-19,
+    "ci": 0,
+    "n": 1
+   },
+   "testLandauerRatio": {
+    "mean": 435.71243892999456,
+    "ci": 0,
+    "n": 1
+   },
+   "testMeasuredBits": {
+    "mean": 129.3,
+    "ci": 0,
+    "n": 1
+   }
+  }
+ }
+}

@@ -1,0 +1,65 @@
+{
+ "id": "E9",
+ "provenance": {
+  "experiment": "E9",
+  "seeds": 10,
+  "seedRule": "core seed = 1 + (seedTag-1)*101",
+  "trainTrials": 12,
+  "testTrials": 12,
+  "episodeSeconds": 20,
+  "nParticles": 260,
+  "engine": "experiment_core.pressureDemonCore",
+  "circuit": "fly_brain_circuit.json (FAFB v783, sha256 0eb64ba4...)",
+  "node": "v26.8.2",
+  "startedISO": "2026-09-23T11:53:11.691Z",
+  "elapsedSeconds": 310.969,
+  "rows": 1200
+ },
+ "conditions": {
+  "demon_neural": {
+   "episodes": 240,
+   "testWorkJEp": 7.332373975111e-24,
+   "testReward": -8.472107317288895,
+   "testDecisionAccuracy": 0.5100555555555556,
+   "testDemonAgree": 0.49511111111111106,
+   "testNetPerEpisode": null,
+   "testWeightDrift": 403.01361421044635
+  },
+  "demon_frozen": {
+   "episodes": 240,
+   "testWorkJEp": 7.22202617203144e-24,
+   "testReward": -8.361949345699212,
+   "testDecisionAccuracy": 0.515833333333333,
+   "testDemonAgree": 0.49733333333333296,
+   "testNetPerEpisode": null,
+   "testWeightDrift": 0
+  },
+  "demon_speed": {
+   "episodes": 240,
+   "testWorkJEp": 7.716874065161697e-24,
+   "testReward": 0,
+   "testDecisionAccuracy": 0.8186111111111111,
+   "testDemonAgree": 1,
+   "testNetPerEpisode": null,
+   "testWeightDrift": 0
+  },
+  "demon_random": {
+   "episodes": 240,
+   "testWorkJEp": 3.3856633148528784e-25,
+   "testReward": 0,
+   "testDecisionAccuracy": 0.37327777777777765,
+   "testDemonAgree": 0.5488333333333333,
+   "testNetPerEpisode": null,
+   "testWeightDrift": 0
+  },
+  "never_open": {
+   "episodes": 240,
+   "testWorkJEp": 2.995609656510573e-25,
+   "testReward": 0,
+   "testDecisionAccuracy": 0.20894444444444446,
+   "testDemonAgree": 0.6229999999999998,
+   "testNetPerEpisode": null,
+   "testWeightDrift": 0
+  }
+ }
+}

@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Publication figures — fly brain (FlyWire FAFB v783)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --ink:#1a1a1a; --rule:#c9c9c9; --paper:#ffffff; --panelbg:#f7f7f7;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+       font:13px/1.45 "Source Sans 3","Helvetica Neue",Arial,sans-serif}
+  header{padding:14px 22px 8px;border-bottom:1px solid var(--rule)}
+  header h1{font-size:17px;font-weight:600;margin:0 0 2px}
+  header .sub{color:#555;font-size:12px}
+  header .sub b{color:#222;font-weight:600}
+  #tabs{padding:8px 22px;border-bottom:1px solid var(--rule);display:flex;gap:8px;align-items:center}
+  #tabs button{font:600 12.5px/1 "Source Sans 3",Arial,sans-serif;padding:7px 14px;
+      border:1px solid var(--rule);background:var(--panelbg);color:#333;border-radius:3px;cursor:pointer}
+  #tabs button.on{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+  #tabs .save{margin-left:auto;background:#fff;color:#1a1a1a;border-color:#8a8a8a}
+  #tabs .save:hover{background:#efefef}
+  #stage{position:relative;width:min(1400px,96vw);height:min(860px,78vh);min-height:560px;margin:14px auto;border:1px solid var(--rule)}
+  #stage canvas{display:block;width:100%;height:100%}
+  .overlay{position:absolute;left:14px;bottom:12px;background:rgba(255,255,255,.94);
+      border:1px solid var(--rule);padding:10px 12px;font-size:12px;max-width:330px}
+  .overlay h3{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#444}
+  .overlay .row{display:flex;align-items:center;gap:8px;margin:3px 0}
+  .overlay svg{vertical-align:middle}
+  #cbar{position:absolute;right:16px;bottom:14px;background:rgba(255,255,255,.92);
+      border:1px solid var(--rule);padding:8px 10px;font-size:11px}
+  #cbar .ttl{font-weight:600;margin-bottom:4px}
+  #cbar .ticks{display:flex;justify-content:space-between;margin-top:2px;color:#333}
+  #figcap{width:min(1400px,96vw);margin:0 auto 24px;color:#333;font-size:12.5px}
+  #figcap b{font-weight:600}
+  #err{color:#8a1f1f;padding:0 22px;font-size:12.5px;white-space:pre-wrap}
+  .hide{display:none}
+</style>
+</head>
+<body>
+<header>
+  <h1>Fly brain — outcome figures (publication mode)</h1>
+  <div class="sub">
+    Real FlyWire FAFB v783 anatomy (canonical frame) · pathway bundles aggregated from
+    <b>564,030</b> mapped circuit edges (W1 synapse-coordinate geometry) ·
+    activity/learning from the frozen E9 batch (<span id="runinfo">…</span>). Interactive viewer:
+    <a href="fly_demon_3d.html">fly_demon_3d.html</a> (unchanged).
+  </div>
+</header>
+
+<div id="tabs">
+  <button id="tabA" class="on">Figure A — 3D anatomy, live firing</button>
+  <button id="tabB">Figure B — learning deltas (late − early)</button>
+  <button class="save" id="savePng">Save PNG</button>
+</div>
+
+<div id="stage"></div>
+<div id="cbar" class="hide"></div>
+<div id="figcap"></div>
+<div id="err"></div>
+
+<script type="module">
+import * as THREE from "./three.module.js";
+
+/* ============================== data loading ============================== */
+const $ = (id) => document.getElementById(id);
+const errBox = $("err");
+function fail(msg){ errBox.textContent += msg + "\n"; throw new Error(msg); }
+
+const j = (u) => fetch(u, { cache: "no-cache" }).then(r => {
+  if (!r.ok) throw new Error(u + " -> " + r.status); return r.json(); });
+const buf = (u) => fetch(u, { cache: "no-cache" }).then(r => {
+  if (!r.ok) throw new Error(u + " -> " + r.status); return r.arrayBuffer(); });
+
+const [meta, bundlesDoc, rowsDoc, posBuf, ctDoc] = await Promise.all([
+  j("fly_brain_meta.json"),
+  j("fly_brain_pathway_bundles.json"),
+  j("research_data/figure_rows.json"),
+  buf("fly_brain_positions.bin"),
+  j("fly_brain_celltypes.json"),
+]);
+
+const N = +meta.n;
+if (posBuf.byteLength !== N * 7)
+  fail(`positions.bin/meta mismatch: ${posBuf.byteLength} B vs n*7=${N * 7}`);
+const pos = new Int16Array(posBuf, 0, N * 3);      // Int16 scene*10, interleaved xyz
+const primNp = new Uint8Array(posBuf, N * 6, N);   // primary neuropil index (np_names)
+const P = new Float32Array(N * 3);
+for (let i = 0; i < N; i++) {
+  P[3*i] = pos[3*i] / 10; P[3*i+1] = pos[3*i+1] / 10; P[3*i+2] = pos[3*i+2] / 10;
+}
+const bundles = bundlesDoc.bundles;
+const cond = rowsDoc.conditions.demon_neural;   // the learning condition
+if (!cond || !cond.fireVecEarly || !cond.fireVecLate)
+  fail("figure_rows.json lacks demon_neural early/late firing vectors");
+
+const b64 = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const fvEarly = b64(cond.fireVecEarly), fvLate = b64(cond.fireVecLate),
+      fvMean  = b64(cond.fireVecMean);
+
+$("runinfo").textContent =
+  (rowsDoc.provenance && rowsDoc.provenance.source) || "e9 batch rows";
+$("runinfo").textContent += ` · early/late = first/last ${rowsDoc.B} train trials per seed`;
+
+/* region -> functional group (from the meta's own mapping) */
+const groupOf = {};
+for (const [g, list] of Object.entries(meta.region_of || {}))
+  for (const r of list) groupOf[r] = g;
+const GROUP_COLOR = {
+  optic: "#4C72B0", antennal: "#DD8452", mb: "#55A868", lh: "#8172B3",
+  cx: "#937860", motor: "#C44E52", central: "#7F7F7F", other: "#b0b0b0",
+};
+const groupColor = (r) => GROUP_COLOR[groupOf[r] || "other"];
+
+/* ============================== scene (shared) ============================ */
+const stage = $("stage");
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+renderer.setSize(stage.clientWidth, stage.clientHeight);
+renderer.setClearColor(0xffffff, 1);
+stage.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xffffff);
+/* deterministic camera: frame the neuron cloud itself (p99.5 radius) */
+const rgc = meta.neuropils;                    // {name: {c:[x,y,z], s:[…], n}}
+const focus = new THREE.Vector3(0, 0, 0);      // canonical frame is centered
+let rCloud = 0;
+{ // robust radius from the actual positions (sampled deterministically)
+  const stride = Math.max(1, Math.floor(N / 20000));
+  const d2 = [];
+  for (let i = 0; i < N; i += stride) {
+    const x = P[3*i], y = P[3*i+1], z = P[3*i+2];
+    d2.push(x*x + y*y + z*z);
+  }
+  d2.sort((a, b) => a - b);
+  rCloud = Math.sqrt(d2[Math.floor(0.995 * (d2.length - 1))]);
+}
+const r98 = rCloud;
+const CAM_DIR = new THREE.Vector3(0.55, 0.42, 1).normalize();   // fixed 3/4 view
+/* fit: dist = margin * radius / tan(fov/2) keeps the whole organ framed */
+const CAM_POS = focus.clone().addScaledVector(CAM_DIR, 1.18 * r98 / Math.tan(THREE.MathUtils.degToRad(15)));
+const camera = new THREE.PerspectiveCamera(30, stage.clientWidth / stage.clientHeight, 1, 20000);
+camera.position.copy(CAM_POS); camera.lookAt(focus);
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0xd8d8d8, 1.05));
+const sun = new THREE.DirectionalLight(0xffffff, 0.55);
+sun.position.set(1, 1.6, 0.8); scene.add(sun);
+
+/* neuron point cloud — muted, publication-safe */
+function buildNeuronPoints(colors, sizePx, opacity) {
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.BufferAttribute(P, 3));
+  g.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+  const m = new THREE.PointsMaterial({ size: sizePx, sizeAttenuation: false,
+    vertexColors: true, opacity, transparent: true, depthWrite: false });
+  return new THREE.Points(g, m);
+}
+/* typed-neuron muted category colors (nt_class), untyped light gray.
+   celltypes.json 'neurons' are in circuit-row order (verified: row 0 root_id
+   matches circuit provenance root_ids[0]); untyped -> light gray. */
+const NT_COLOR = {
+  cholinergic: [0.72, 0.60, 0.24], gabaergic: [0.44, 0.56, 0.74],
+  glutamatergic: [0.52, 0.70, 0.56], dopaminergic: [0.74, 0.52, 0.68],
+  octopaminergic: [0.79, 0.60, 0.40], serotonergic: [0.66, 0.57, 0.75],
+  untyped: [0.76, 0.76, 0.76],
+};
+const ntColorArr = new Float32Array(N * 3);
+const rowNt = new Array(N).fill("untyped");
+ctDoc.neurons.forEach((n, i) => { if (i < N) rowNt[i] = n.nt_class || "untyped"; });
+for (let i = 0; i < N; i++) {
+  const c = NT_COLOR[rowNt[i]] || NT_COLOR.untyped;
+  ntColorArr[3*i] = c[0]; ntColorArr[3*i+1] = c[1]; ntColorArr[3*i+2] = c[2];
+}
+const pointsA = buildNeuronPoints(ntColorArr, 1.6, 0.95);
+const pointsGray = (() => {   // Figure B base cloud: all light gray
+  const a = new Float32Array(N * 3).fill(0.72);
+  return buildNeuronPoints(a, 1.4, 0.55);
+})();
+
+/* region reference markers + labels for the regions the bundles touch */
+function makeLabel(text) {
+  const c = document.createElement("canvas");
+  c.width = 256; c.height = 64;
+  const x = c.getContext("2d");
+  x.font = "600 30px 'Source Sans 3', Arial, sans-serif";
+  x.textAlign = "center"; x.textBaseline = "middle";
+  x.lineWidth = 6; x.strokeStyle = "rgba(255,255,255,.95)";
+  x.strokeText(text, 128, 32); x.fillStyle = "#333"; x.fillText(text, 128, 32);
+  const t = new THREE.CanvasTexture(c);
+  t.anisotropy = 4;
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, depthTest: false, transparent: true }));
+  s.scale.set(46, 11.5, 1);
+  return s;
+}
+const topRegions = [...new Set(bundles.map(b => b.tgt))]
+  .map(r => [r, bundles.filter(b => b.tgt === r).reduce((a, b) => a + b.synTotal, 0)])
+  .sort((a, b) => b[1] - a[1]).slice(0, 12).map(x => x[0]);
+const labelGroup = new THREE.Group();
+for (const r of topRegions) {
+  const e = rgc[r]; if (!e) continue;
+  const s = makeLabel(r.replace(/_([LR])$/, " ($1)"));
+  s.position.set(e.c[0], e.c[1] + (e.s ? e.s[1] : 0) * 0.75 + 14, e.c[2]);
+  labelGroup.add(s);
+  const dot = new THREE.Mesh(new THREE.SphereGeometry(2.6, 12, 10),
+    new THREE.MeshBasicMaterial({ color: 0x444444 }));
+  dot.position.set(e.c[0], e.c[1], e.c[2]);
+  labelGroup.add(dot);
+}
+
+/* W2 real traced arbors (curated top-200, skeletons.bin) — thin gray
+   LineSegments under the bundles; a deterministic subset of 40 */
+const arborGroup = new THREE.Group();
+try {
+  const [skIdx, skBuf] = await Promise.all([
+    j("data/skeletons/skeletons_index.json"),
+    buf("data/skeletons/skeletons.bin"),
+  ]);
+  const f16 = new Uint16Array(skBuf);
+  const i16 = new Int16Array(skBuf);
+  const recs = Object.entries(skIdx.by_root)
+    .map(([r, v]) => ({ r, off: v.off, nodes: v.nodes }))
+    .sort((a, b) => b.nodes - a.nodes).slice(0, 40);   // deterministic subset
+  const segs = [];
+  for (const rec of recs) {
+    const base = rec.off / 2;                 // byte offset -> u16 index
+    const n = rec.nodes;
+    const xyz0 = base + 1;                    // after uint32 n
+    const pd0 = xyz0 + 3 * n;                 // i16 parentDelta block
+    for (let i = 1; i < n; i++) {
+      const d = i16[pd0 + i];
+      if (d === 0) continue;
+      const p = i + d;
+      if (p < 0 || p >= n) continue;
+      segs.push(f16[xyz0 + 3*p] / 10, f16[xyz0 + 3*p + 1] / 10, f16[xyz0 + 3*p + 2] / 10,
+                f16[xyz0 + 3*i] / 10, f16[xyz0 + 3*i + 1] / 10, f16[xyz0 + 3*i + 2] / 10);
+    }
+  }
+  if (segs.length) {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(segs), 3));
+    arborGroup.add(new THREE.LineSegments(g, new THREE.LineBasicMaterial({
+      color: 0x555555, transparent: true, opacity: 0.22, depthWrite: false })));
+  }
+} catch (e) { /* skeletons.bin optional: bundles still render */ }
+
+/* ============================== pathway bundles ========================== */
+/* bundle polylines: real W1 waypoints averaged over member edges (16 samples) */
+const bpts = new Int16Array(await buf("fly_brain_pathway_bundles.bin"));
+const bundleMeanFire = bundles.map((b, bi) => {
+  // activity weighting = mean quantized firing of the bundle's PRE neurons
+  // (already aggregated by tools/run_e9_figure_rows.js into bundleDelta.early)
+  const bd = cond.bundleDelta && cond.bundleDelta[bi];
+  return bd && bd.early != null ? bd.early : null;
+});
+const synMax = Math.max(...bundles.map(b => b.synTotal), 1);
+const fireMax = Math.max(...bundleMeanFire.map(v => v == null ? 0 : v), 1e-9);
+
+/* Chaikin corner-cutting: turns the 16-sample bundle polylines into smooth
+   curves (deterministic, endpoints preserved, x2 iterations) */
+function chaikin(pts, iters) {
+  for (; iters > 0; iters--) {
+    const n = pts.length / 3;
+    const out = new Float32Array((2 * n - 2) * 3);
+    let o = 0;
+    out[o++] = pts[0]; out[o++] = pts[1]; out[o++] = pts[2];
+    for (let i = 0; i < n - 1; i++) {
+      const a = 3 * i, b = a + 3;
+      for (let c = 0; c < 3; c++) {
+        out[o++] = 0.75 * pts[a + c] + 0.25 * pts[b + c];
+      }
+      for (let c = 0; c < 3; c++) {
+        out[o++] = 0.25 * pts[a + c] + 0.75 * pts[b + c];
+      }
+    }
+    out[o++] = pts[pts.length - 3]; out[o++] = pts[pts.length - 2]; out[o++] = pts[pts.length - 1];
+    pts = out;
+  }
+  return pts;
+}
+function bundleLine(bi, color, width, opacity, dashed) {
+  const b = bundles[bi];
+  let arr = new Float32Array(b.binCount * 3);
+  for (let k = 0; k < b.binCount * 3; k++)
+    arr[k] = bpts[b.binOffset * 3 + k] / 10;
+  arr = chaikin(arr, 2);
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.BufferAttribute(arr, 3));
+  const m = dashed
+    ? new THREE.LineDashedMaterial({ color, linewidth: width, transparent: true,
+        opacity, dashSize: 9, gapSize: 6, depthWrite: false })
+    : new THREE.LineBasicMaterial({ color, linewidth: width, transparent: true,
+        opacity, depthWrite: false });
+  const line = new THREE.Line(g, m);
+  if (dashed) line.computeLineDistances();
+  return line;
+}
+const groupBundle = new THREE.Group();   // Figure A overlay
+for (let bi = 0; bi < bundles.length; bi++) {
+  const b = bundles[bi];
+  const act = bundleMeanFire[bi];
+  const op = act == null ? 0.5 : 0.5 + 0.45 * (act / fireMax);
+  const w = 0.22 + 1.7 * Math.sqrt(b.synTotal / synMax);
+  groupBundle.add(bundleLine(bi, groupColor(b.src), w, op, b.mod));
+}
+/* Figure B overlay: bundle color = synapse-weighted delta (diverging).
+   ONE shared scale for dots and bundles: same color = same delta. */
+function divColor(d, vmax) {  // color-blind-safe diverging (blue << 0 << red);
+  // zero = light neutral gray so 'no change' stays visible on white paper
+  const t = Math.max(-1, Math.min(1, d / vmax));
+  const pos = new THREE.Color(0.72, 0.11, 0.16);   // #B2182B
+  const neg = new THREE.Color(0.13, 0.40, 0.67);   // #2166AC
+  const mid = new THREE.Color(0.80, 0.80, 0.80);   // #CCCCCC
+  return t >= 0 ? mid.clone().lerp(pos, t) : mid.clone().lerp(neg, -t);
+}
+const dN = new Float32Array(N);
+for (let i = 0; i < N; i++) dN[i] = fvLate[i] - fvEarly[i];
+let deltaVmax = 1;
+{ // robust shared vmax: p99 of |neuron delta| and |bundle delta| (floored)
+  const ds = [];
+  for (let i = 0; i < N; i++) if (dN[i]) ds.push(Math.abs(dN[i]));
+  for (const b of (cond.bundleDelta || []))
+    if (b.deltaW != null && b.deltaW) ds.push(Math.abs(b.deltaW));
+  ds.sort((a, b) => a - b);
+  deltaVmax = Math.max(ds[Math.floor(0.99 * (ds.length - 1))] || 1, 1e-6);
+}
+const bGroupB = new THREE.Group();
+for (let bi = 0; bi < bundles.length; bi++) {
+  const b = bundles[bi], bd = cond.bundleDelta && cond.bundleDelta[bi];
+  const d = bd && bd.deltaW != null ? bd.deltaW : 0;
+  bGroupB.add(bundleLine(bi, divColor(d, deltaVmax), 1.1, 0.85, b.mod));
+}
+/* Figure B neuron dots: per-neuron delta (late − early), same scale */
+const pointsB = (() => {
+  const a = new Float32Array(N * 3);
+  const c = new THREE.Color();
+  for (let i = 0; i < N; i++) {
+    c.copy(divColor(dN[i], deltaVmax));
+    a[3*i] = c.r; a[3*i+1] = c.g; a[3*i+2] = c.b;
+  }
+  return buildNeuronPoints(a, 1.9, 0.95);
+})();
+
+/* ============================== figure switching ========================= */
+const brainGroup = new THREE.Group();
+scene.add(brainGroup);
+let mode = "A";
+function renderMode(m) {
+  mode = m;
+  while (brainGroup.children.length) brainGroup.remove(brainGroup.children[0]);
+  if (m === "A") {
+    brainGroup.add(pointsA); brainGroup.add(arborGroup); brainGroup.add(groupBundle);
+  } else {
+    brainGroup.add(pointsGray); brainGroup.add(pointsB); brainGroup.add(bGroupB);
+  }
+  brainGroup.add(labelGroup);
+  $("tabA").className = m === "A" ? "on" : "";
+  $("tabB").className = m === "B" ? "on" : "";
+  $("cbar").classList.toggle("hide", m !== "B");
+  $("figcap").innerHTML = m === "A" ? CAPTION_A : CAPTION_B;
+  buildLegend(m);
+  renderer.render(scene, camera);
+}
+$("tabA").onclick = () => renderMode("A");
+$("tabB").onclick = () => renderMode("B");
+$("savePng").onclick = () => {
+  /* deterministic landscape export: temporarily resize the renderer to a
+     fixed 1600x1100 figure canvas, render, compose, restore */
+  const W0 = stage.clientWidth, H0 = stage.clientHeight;
+  const FW = 1600, FH = 1100;
+  renderer.setSize(FW, FH, false);
+  camera.aspect = FW / FH; camera.updateProjectionMatrix();
+  renderer.render(scene, camera);
+  /* self-contained export: canvas + legend + colorbar + caption composed on
+     white, like a typeset figure */
+  const cv = renderer.domElement;
+  const cap = document.createElement("div");
+  cap.style.cssText = "position:absolute;left:-9999px;top:0;width:900px;font:13px 'Source Sans 3',Arial,sans-serif";
+  cap.innerHTML = ($("figcap").innerHTML) + "<div style=\"margin-top:6px\">Data: FlyWire FAFB v783 " +
+    "(Dorkenwald et al., Nature 2024); bundles: this pipeline (564,030 mapped edges); " +
+    "activity: frozen E9 batch (" + ((rowsDoc.provenance && rowsDoc.provenance.source) || "") + ").</div>";
+  document.body.appendChild(cap);
+  const capH = Math.ceil(cap.getBoundingClientRect().height) + 26;
+  const out = document.createElement("canvas");
+  out.width = cv.width + 40; out.height = cv.height + capH;
+  const x = out.getContext("2d");
+  x.fillStyle = "#ffffff"; x.fillRect(0, 0, out.width, out.height);
+  x.drawImage(cv, 20, 20);
+  const leg = document.getElementById("legend"), cb = $("cbar");
+  const vis = (el) => el && !el.classList.contains("hide");
+  /* draw overlays with canvas primitives (SVG foreignObject is unreliable) */
+  const LX = 30, LW = 372;
+  let LY = cv.height - 268;
+  if (vis(leg)) {
+    x.fillStyle = "rgba(255,255,255,0.94)"; x.fillRect(LX, LY, LW, 246);
+    x.strokeStyle = "#c9c9c9"; x.strokeRect(LX, LY, LW, 246);
+    x.fillStyle = "#444";
+    x.font = "600 11px 'Source Sans 3', Arial, sans-serif";
+    x.fillText("LEGEND", LX + 12, LY + 18);
+    x.font = "12px 'Source Sans 3', Arial, sans-serif";
+    let yy = LY + 38;
+    const line = (txt, color, dash) => {
+      x.strokeStyle = color; x.lineWidth = 2.4;
+      x.setLineDash(dash ? [6, 4] : []);
+      x.beginPath(); x.moveTo(LX + 14, yy - 4); x.lineTo(LX + 46, yy - 4); x.stroke();
+      x.setLineDash([]); x.lineWidth = 1;
+      x.fillStyle = "#1a1a1a"; x.fillText(txt, LX + 56, yy);
+      yy += 19;
+    };
+    if (mode === "A") {
+      x.fillStyle = "#1a1a1a"; x.fillText("bundle color = source-region group:", LX + 12, yy); yy += 19;
+      const used = [...new Set(Object.values(groupOf))];
+      for (const g of used) line(GROUP_NAME[g] || g, GROUP_COLOR[g] || "#8a8a8a");
+      line("width ∝ √(member synapses) · opacity ∝ source firing", "#555");
+      line("modulatory (separate channel)", "#555", true);
+      line("dot = neurotransmitter class; gray tubes = traced arbors (W2)", "#777");
+    } else {
+      line("firing increase (late > early)", "#B2182B");
+      line("no change", "#CCCCCC");
+      line("firing decrease (late < early)", "#2166AC");
+      line("modulatory (dashed, same scale)", "#555", true);
+    }
+    /* scale bar */
+    x.strokeStyle = "#1a1a1a"; x.lineWidth = 2;
+    x.beginPath(); x.moveTo(LX + 14, yy); x.lineTo(LX + 60, yy);
+    x.moveTo(LX + 14, yy - 5); x.lineTo(LX + 14, yy + 5);
+    x.moveTo(LX + 60, yy - 5); x.lineTo(LX + 60, yy + 5); x.stroke();
+    x.fillStyle = "#1a1a1a"; x.fillText(scaleBarUm + " µm", LX + 70, yy + 4);
+  }
+  if (vis(cb)) {
+    const CW = 190, CX = FW - CW - 30, CY = cv.height - 64;
+    x.fillStyle = "rgba(255,255,255,0.94)"; x.fillRect(CX, CY, CW, 46);
+    x.strokeStyle = "#c9c9c9"; x.strokeRect(CX, CY, CW, 46);
+    const N2 = 60, BW = CW - 24;
+    for (let i = 0; i < N2; i++) {
+      const d = (-1 + 2 * i / (N2 - 1)) * deltaVmax;
+      const c2 = divColor(d, deltaVmax);
+      x.fillStyle = `#${c2.getHexString()}`;
+      x.fillRect(CX + 12 + i * BW / N2, CY + 24, BW / N2 + 1, 10);
+    }
+    x.strokeStyle = "#999"; x.strokeRect(CX + 12, CY + 24, BW, 10);
+    x.fillStyle = "#1a1a1a"; x.font = "600 11px 'Source Sans 3', Arial, sans-serif";
+    x.fillText("Δ mean quantized firing (late − early)", CX + 12, CY + 16);
+    x.font = "11px 'Source Sans 3', Arial, sans-serif";
+    const vt = (v) => (Math.abs(v) >= 10 ? v.toFixed(0) : v.toFixed(1));
+    x.fillText("−" + vt(deltaVmax), CX + 12, CY + 44);
+    x.fillText("0", CX + 12 + BW / 2 - 3, CY + 44);
+    x.fillText("+" + vt(deltaVmax), CX + 12 + BW - 14, CY + 44);
+  }
+  x.fillStyle = "#1a1a1a";
+  x.font = "13px 'Source Sans 3', Arial, sans-serif";
+  x.textBaseline = "top";
+  wrapText(x, cap.textContent.replace(/\s+/g, " ").trim(), 20, cv.height + 34, out.width - 40, 17);
+  function wrapText(ctx, text, xx, yy, maxW, lh) {
+    let line = "", y2 = yy;
+    for (const w of text.split(" ")) {
+      const t = line + w + " ";
+      if (ctx.measureText(t).width > maxW && line) { ctx.fillText(line, xx, y2); line = w + " "; y2 += lh; }
+      else line = t;
+    }
+    ctx.fillText(line, xx, y2);
+  }
+  setTimeout(() => {
+    renderer.setSize(W0, H0, false);
+    camera.aspect = W0 / H0; camera.updateProjectionMatrix();
+    renderer.render(scene, camera);
+    const dataUrl = out.toDataURL("image/png");
+    const b64 = dataUrl.split(",")[1];
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    fetch(`/api/figure_save?name=figure${mode}_fly_brain`, {
+      method: "POST", headers: { "Content-Type": "image/png" }, body: bytes })
+      .then(r => r.json()).then(res => {
+        if (res.ok) $("figcap").innerHTML = CAPNOTE + $("figcap").innerHTML;
+        else throw new Error(res.error || "save failed");
+      })
+      .catch(() => {   // offline fallback: browser download
+        const a = document.createElement("a");
+        a.download = `figure_${mode}_fly_brain.png`;
+        a.href = dataUrl; a.click();
+      });
+    cap.remove();
+  }, 300);   // let the overlay <img>s decode
+};
+
+/* ============================== captions + legend ======================== */
+const nmPerUnit = bundlesDoc.nmPerSceneUnit || 777550.6;
+const scaleBarUnits = 100;                     // scene units
+const scaleBarUm = (scaleBarUnits * nmPerUnit / 1000).toFixed(0);   // -> µm
+const GROUP_NAME = { optic: "optic lobe", antennal: "antennal lobe", mb: "mushroom body",
+  lh: "lateral horn", cx: "central complex", central: "central",
+  motor: "motor (GNG/SAD)", other: "other" };
+const CAPNOTE = `<div style="color:#1a7a2f">Figure saved to <code>figures/</code>.</div>`;
+const CAPTION_A = `<b>Figure A. Brain outcome — 3D brain anatomy (live firing).</b>
+Real FlyWire FAFB v783 anatomy in the canonical frame (optic lobes on x). Colored dots: typed
+neurons (muted neurotransmitter-class palette). Curves: pathway bundles aggregated from
+564,030 real circuit edges by anatomical source\u2192target neuropil pair; bundle width \u221d
+\u221a(total synapses of member edges), opacity \u221d mean firing of the source population
+(E9 <i>demon_neural</i>, all trials), color = source region group, dashed = modulatory.
+Region dots mark neuropil centroids (top 12 by bundle synapses). Scale bar ${scaleBarUm} µm.`;
+const CAPTION_B = `<b>Figure B. Brain outcome — learning deltas (late − early).</b>
+Same coordinates and camera as Figure A. Dot color: per-neuron change in mean quantized
+firing between the last (${rowsDoc.B}-trial) and first (${rowsDoc.B}-trial) training blocks,
+10 seeds. Bundle color: synapse-weighted member-edge mean of the same per-neuron deltas on the
+real pathway geometry. Diverging scale centered at 0 (blue = decrease, red = increase),
+v<sub>max</sub> = 99th percentile of |Δ| (shared dots+bundles: ${deltaVmax.toFixed(1)}
+quantized-firing units). Zero-change renders as light gray. Scale bar ${scaleBarUm} µm.`;
+
+function buildLegend(m) {
+  let old = document.getElementById("legend"); if (old) old.remove();
+  const el = document.createElement("div");
+  el.className = "overlay"; el.id = "legend";
+  const sw = (c, w, dash) =>
+    `<svg width="34" height="10"><line x1="1" y1="5" x2="33" y2="5" stroke="${c}" stroke-width="${w}"${dash ? ' stroke-dasharray="6 4"' : ""}/></svg>`;
+  let rows = "";
+  if (m === "A") {
+    const usedGroups = new Set(Object.values(groupOf));
+    for (const [g, c] of Object.entries(GROUP_COLOR)) {
+      if (!usedGroups.has(g)) continue;
+      const nm = { optic: "optic lobe", antennal: "antennal lobe", mb: "mushroom body",
+                   lh: "lateral horn", cx: "central complex", central: "central",
+                   motor: "motor (GNG/SAD)", other: "other" }[g] || g;
+      rows += `<div class="row">${sw(c, 2.4)} ${nm}</div>`;
+    }
+    rows = `<div class="row">bundle color = source-region group:</div>` + rows;
+    rows += `<div class="row">${sw("#555", 3.4)} width \u221d \u221a(member synapses) · opacity \u221d source firing</div>`;
+    rows += `<div class="row">${sw("#555", 1.6, true)} modulatory (separate channel)</div>`;
+    rows += `<div class="row">${sw("#8a8a8a", 2.4)} typed-neuron dot = neurotransmitter class</div>`;
+  } else {
+    rows += `<div class="row">${sw("#B2182B", 2.6)} firing increase (late &gt; early)</div>`;
+    rows += `<div class="row">${sw("#f5f5f0", 2.6)} no change</div>`;
+    rows += `<div class="row">${sw("#2166AC", 2.6)} firing decrease (late &lt; early)</div>`;
+    rows += `<div class="row">${sw("#555", 1.6, true)} modulatory (dashed, same scale)</div>`;
+  }
+  /* scale bar */
+  rows += `<div class="row" style="margin-top:6px"><svg width="34" height="12">
+    <line x1="1" y1="8" x2="33" y2="8" stroke="#1a1a1a" stroke-width="2"/>
+    <line x1="1" y1="4" x2="1" y2="12" stroke="#1a1a1a" stroke-width="2"/>
+    <line x1="33" y1="4" x2="33" y2="12" stroke="#1a1a1a" stroke-width="2"/></svg>
+    ${scaleBarUm} µm</div>`;
+  el.innerHTML = "<h3>Legend</h3>" + rows;
+  stage.appendChild(el);
+}
+/* colorbar (Figure B) */
+{
+  const W = 150, H = 12, N2 = 60;
+  let stops = "";
+  const c = new THREE.Color();
+  for (let i = 0; i < N2; i++) {
+    const d = (-1 + 2 * i / (N2 - 1)) * deltaVmax;
+    c.copy(divColor(d, deltaVmax));
+    stops += `<stop offset="${(100 * i / (N2 - 1)).toFixed(1)}%" stop-color="#${c.getHexString()}"/>`;
+  }
+  const vmaxTxt = (x) => (Math.abs(x) >= 10 ? x.toFixed(0) : x.toFixed(1));
+  $("cbar").innerHTML =
+    `<div class="ttl">Δ mean quantized firing (late − early)</div>
+     <svg width="${W}" height="${H}"><defs><linearGradient id="cbg" x1="0" x2="1">${stops}</linearGradient></defs>
+     <rect x="0" y="0" width="${W}" height="${H}" fill="url(#cbg)" stroke="#999" stroke-width="0.6"/></svg>
+     <div class="ticks"><span>−${vmaxTxt(deltaVmax)}</span><span>0</span><span>+${vmaxTxt(deltaVmax)}</span></div>`;
+}
+
+/* deterministic single render per mode; one gentle autorotate off by default */
+renderMode("A");
+window.addEventListener("resize", () => {
+  camera.aspect = stage.clientWidth / stage.clientHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(stage.clientWidth, stage.clientHeight);
+  renderer.render(scene, camera);
+});
+
+/* verification handle (no FPS/animation machinery in publication mode) */
+window.__pubDebug = {
+  nNeurons: N, nBundles: bundles.length,
+  edgesTotal: bundlesDoc.edgesTotal, edgesMapped: bundlesDoc.edgesMapped,
+  edgesUnmapped: bundlesDoc.edgesUnmapped,
+  deltaVmaxBundle: deltaVmax,
+  camPos: CAM_POS.toArray(), focus: focus.toArray(),
+  B: rowsDoc.B, provenance: rowsDoc.provenance,
+  render: renderMode,
+};
+</script>
+</body>
+</html>

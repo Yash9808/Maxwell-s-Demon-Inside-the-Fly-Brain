@@ -1,0 +1,9 @@
+{
+ "exp": "cl",
+ "route": "experiment_plots.html#btnRunCLHere",
+ "elapsed_s": 76.4,
+ "ok": true,
+ "live_status": "done ✓ · 240 closed-loop steps · causal gates all PASS",
+ "runner_status": "episode complete",
+ "stream": null
+}

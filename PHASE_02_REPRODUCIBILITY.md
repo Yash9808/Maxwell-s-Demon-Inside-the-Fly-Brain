@@ -180,3 +180,36 @@ protocol bytes: unchanged (MEASURED bit-exact).
 ## 16. Verdict
 
 # `PHASE 02 COMPLETE — READY FOR PHASE 03`
+
+---
+
+## 17. APPENDIX (post-Phase-02 additive change — real visual feedback)
+
+Recorded after the Phase 02 freeze; **no scientific semantics of the frozen
+baseline were modified**. The sidecar's flybody observation gained a real
+8-bin visual field (egocentric geometric occupancy of the MuJoCo scene —
+FLYBODY_ARCHITECTURE.md §7), closing the last constant sensory channel in
+the embodiment loop.
+
+- Scope: `embodiment/sidecar.py` (sensor + driver wiring + banner provenance),
+  `embodiment/smoke_test.py` (T8, flybody-mode only),
+  `tests/closed_loop.test.js` (T-V1/T-V2/T-V3, additive),
+  `deployment/replay_canonical.js` + `deployment/lib/mode_replay.js`
+  (opt-in `EMBODIMENT_TRAJECTORY_SHA256` target override),
+  `deployment/lib/mode_flybody.js` (opt-in `EMBODIMENT_REQUIRE_GL` gate).
+- Contract: **NO CHANGE** — `state_contract.js` untouched, OBS_DIM stays 15,
+  protocol v1, all R-guards intact, and the frozen Phase 01 hash
+  (`05c47753…`) remains the DEFAULT replay target.
+- Baseline note (precise): the visual change alters the `obs_next` field of
+  every closed-loop record, so the seed-11 trajectory hash NECESSARILY
+  changes — the frozen Phase 01 hash is only expected to match at the frozen
+  tag (pristine pre-visual code). On trees carrying this additive change,
+  anchor post-change runs with the new visual baseline:
+  `EMBODIMENT_TRAJECTORY_SHA256=477eb89d8c2ce1f12b2d3f30dc930c9dfdc7c60882b5d6eef170d30c7a4076e3`
+  (artifact: `baselines/closed_loop_visual/trajectory_seed11.jsonl` + meta;
+  determinism proven by two identical capture runs). At the frozen tag, the
+  frozen hash remains valid and the default gate stays green.
+- Coexisting foreign workstream: this worktree also carries the documented,
+  unrelated E10/edge-waypoint edits (`deployment/foreign/DISPOSITION.json`);
+  they were left untouched, and none of them lie on the closed-loop path
+  (`buildBrain` does not set the opt-in `policyGradient` options).

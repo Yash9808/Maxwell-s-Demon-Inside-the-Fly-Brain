@@ -1,0 +1,421 @@
+{
+  "started_utc": "2026-09-25T12:10:40.916Z",
+  "quick": false,
+  "eval_steps": 150,
+  "train_steps": 200,
+  "train_episodes": 12,
+  "eval_seeds": [
+    5,
+    6
+  ],
+  "phases": {
+    "eval_before": {
+      "episodes": [
+        {
+          "steps": 150,
+          "dist_init": 0.031084,
+          "dist_final": 0.022007,
+          "dist_min": 0.020773,
+          "pillar_disp": 0.081727,
+          "success": 1,
+          "success_step": 3,
+          "cum_reward": 906.871674,
+          "touch_bonus_steps": 1,
+          "mean_motor_rate": 45.86,
+          "vis_bins_l1_range": 2.4275,
+          "mean_da": 2.972132,
+          "weight_drift_delta": 2251.755689
+        },
+        {
+          "steps": 150,
+          "dist_init": 0.031077,
+          "dist_final": 0.02234,
+          "dist_min": 0.019409,
+          "pillar_disp": 0.086239,
+          "success": 1,
+          "success_step": 3,
+          "cum_reward": 918.0083,
+          "touch_bonus_steps": 1,
+          "mean_motor_rate": 51.686667,
+          "vis_bins_l1_range": 2.4317,
+          "mean_da": 2.998489,
+          "weight_drift_delta": 1247.835348
+        }
+      ],
+      "aggregate": {
+        "steps": {
+          "mean": 150,
+          "std": 0
+        },
+        "dist_init": {
+          "mean": 0.031081,
+          "std": 0.000005
+        },
+        "dist_final": {
+          "mean": 0.022174,
+          "std": 0.000235
+        },
+        "dist_min": {
+          "mean": 0.020091,
+          "std": 0.000964
+        },
+        "pillar_disp": {
+          "mean": 0.083983,
+          "std": 0.00319
+        },
+        "success": {
+          "mean": 1,
+          "rate": "2/2"
+        },
+        "cum_reward": {
+          "mean": 912.439987,
+          "std": 7.874784
+        },
+        "touch_bonus_steps": {
+          "mean": 1,
+          "std": 0
+        },
+        "mean_motor_rate": {
+          "mean": 48.773334,
+          "std": 4.120076
+        },
+        "vis_bins_l1_range": {
+          "mean": 2.4296,
+          "std": 0.00297
+        },
+        "mean_da": {
+          "mean": 2.985311,
+          "std": 0.018637
+        },
+        "weight_drift_delta": {
+          "mean": 1749.795519,
+          "std": 709.878881
+        }
+      }
+    },
+    "train": {
+      "episodes": [
+        {
+          "steps": 200,
+          "dist_init": 0.031073,
+          "dist_final": 0.024177,
+          "dist_min": 0.020897,
+          "pillar_disp": 0.080728,
+          "success": 1,
+          "success_step": 3,
+          "cum_reward": 1293.256306,
+          "touch_bonus_steps": 1,
+          "mean_motor_rate": 51.86,
+          "vis_bins_l1_range": 2.4266,
+          "mean_da": 2.997522,
+          "weight_drift_delta": 219.757984
+        },
+        {
+          "steps": 200,
+          "dist_init": 0.031094,
+          "dist_final": 0.023615,
+          "dist_min": 0.020877,
+          "pillar_disp": 0.085547,
+          "success": 1,
+          "success_step": 3,
+          "cum_reward": 1356.010391,
+          "touch_bonus_steps": 1,
+          "mean_motor_rate": 50.77,
+          "vis_bins_l1_range": 2.4266,
+          "mean_da": 3,
+          "weight_drift_delta": 208.066768
+        },
+        {
+          "steps": 200,
+          "dist_init": 0.031077,
+          "dist_final": 0.022058,
+          "dist_min": 0.019777,
+          "pillar_disp": 0.088261,
+          "success": 1,
+          "success_step": 3,
+          "cum_reward": 1388.183257,
+          "touch_bonus_steps": 1,
+          "mean_motor_rate": 51.385,
+          "vis_bins_l1_range": 2.4286,
+          "mean_da": 3,
+          "weight_drift_delta": 73.108023
+        },
+        {
+          "steps": 200,
+          "dist_init": 0.031079,
+          "dist_final": 0.020265,
+          "dist_min": 0.019589,
+          "pillar_disp": 0.08692,
+          "success": 1,
+          "success_step": 3,
+          "cum_reward": 1425.918296,
+          "touch_bonus_steps": 1,
+          "mean_motor_rate": 51.685,
+          "vis_bins_l1_range": 2.4291,
+          "mean_da": 3,
+          "weight_drift_delta": 55.490638
+        },
+        {
+          "steps": 200,
+          "dist_init": 0.031069,
+          "dist_final": 0.026867,
+          "dist_min": 0.019263,
+          "pillar_disp": 0.08252,
+          "success": 1,
+          "success_step": 3,
+          "cum_reward": 1327.451274,
+          "touch_bonus_steps": 1,
+          "mean_motor_rate": 51.69,
+          "vis_bins_l1_range": 2.428,
+          "mean_da": 3,
+          "weight_drift_delta": 40.504161
+        },
+        {
+          "steps": 200,
+          "dist_init": 0.031071,
+          "dist_final": 0.023148,
+          "dist_min": 0.021244,
+          "pillar_disp": 0.081639,
+          "success": 1,
+          "success_step": 3,
+          "cum_reward": 1340.7859,
+          "touch_bonus_steps": 1,
+          "mean_motor_rate": 51.655,
+          "vis_bins_l1_range": 2.4289,
+          "mean_da": 2.996206,
+          "weight_drift_delta": 60.733528
+        },
+        {
+          "steps": 200,
+          "dist_init": 0.031072,
+          "dist_final": 0.019627,
+          "dist_min": 0.019512,
+          "pillar_disp": 0.087312,
+          "success": 1,
+          "success_step": 3,
+          "cum_reward": 1446.167922,
+          "touch_bonus_steps": 1,
+          "mean_motor_rate": 51.705,
+          "vis_bins_l1_range": 2.4342,
+          "mean_da": 3,
+          "weight_drift_delta": 22.957214
+        },
+        {
+          "steps": 200,
+          "dist_init": 0.031084,
+          "dist_final": 0.02168,
+          "dist_min": 0.020019,
+          "pillar_disp": 0.081602,
+          "success": 1,
+          "success_step": 3,
+          "cum_reward": 1284.249151,
+          "touch_bonus_steps": 1,
+          "mean_motor_rate": 53.095,
+          "vis_bins_l1_range": 2.4261,
+          "mean_da": 2.998299,
+          "weight_drift_delta": 8.330403
+        },
+        {
+          "steps": 200,
+          "dist_init": 0.031067,
+          "dist_final": 0.021639,
+          "dist_min": 0.019544,
+          "pillar_disp": 0.082041,
+          "success": 1,
+          "success_step": 3,
+          "cum_reward": 1291.448265,
+          "touch_bonus_steps": 1,
+          "mean_motor_rate": 52.955,
+          "vis_bins_l1_range": 2.4261,
+          "mean_da": 2.999905,
+          "weight_drift_delta": 7.737096
+        },
+        {
+          "steps": 200,
+          "dist_init": 0.03108,
+          "dist_final": 0.019997,
+          "dist_min": 0.018517,
+          "pillar_disp": 0.077359,
+          "success": 1,
+          "success_step": 3,
+          "cum_reward": 1250.414666,
+          "touch_bonus_steps": 1,
+          "mean_motor_rate": 53.61,
+          "vis_bins_l1_range": 2.4289,
+          "mean_da": 2.999384,
+          "weight_drift_delta": 5.899191
+        },
+        {
+          "steps": 200,
+          "dist_init": 0.031085,
+          "dist_final": 0.023743,
+          "dist_min": 0.020303,
+          "pillar_disp": 0.081254,
+          "success": 1,
+          "success_step": 3,
+          "cum_reward": 1326.897744,
+          "touch_bonus_steps": 1,
+          "mean_motor_rate": 52.13,
+          "vis_bins_l1_range": 2.4285,
+          "mean_da": 2.998334,
+          "weight_drift_delta": 17.389224
+        },
+        {
+          "steps": 200,
+          "dist_init": 0.031082,
+          "dist_final": 0.023432,
+          "dist_min": 0.02112,
+          "pillar_disp": 0.089837,
+          "success": 1,
+          "success_step": 3,
+          "cum_reward": 1407.152785,
+          "touch_bonus_steps": 1,
+          "mean_motor_rate": 51.97,
+          "vis_bins_l1_range": 2.428,
+          "mean_da": 2.998608,
+          "weight_drift_delta": 19.683293
+        }
+      ],
+      "aggregate": {
+        "steps": {
+          "mean": 200,
+          "std": 0
+        },
+        "dist_init": {
+          "mean": 0.031078,
+          "std": 0.000008
+        },
+        "dist_final": {
+          "mean": 0.022521,
+          "std": 0.002069
+        },
+        "dist_min": {
+          "mean": 0.020055,
+          "std": 0.000844
+        },
+        "pillar_disp": {
+          "mean": 0.083752,
+          "std": 0.00373
+        },
+        "success": {
+          "mean": 1,
+          "std": 0
+        },
+        "cum_reward": {
+          "mean": 1344.827996,
+          "std": 61.398114
+        },
+        "touch_bonus_steps": {
+          "mean": 1,
+          "std": 0
+        },
+        "mean_motor_rate": {
+          "mean": 52.0425,
+          "std": 0.798372
+        },
+        "vis_bins_l1_range": {
+          "mean": 2.4283,
+          "std": 0.002173
+        },
+        "mean_da": {
+          "mean": 2.999021,
+          "std": 0.001245
+        },
+        "weight_drift_delta": {
+          "mean": 61.638127,
+          "std": 74.54608
+        }
+      }
+    },
+    "eval_after": {
+      "episodes": [
+        {
+          "steps": 150,
+          "dist_init": 0.031084,
+          "dist_final": 0.021106,
+          "dist_min": 0.02044,
+          "pillar_disp": 0.079634,
+          "success": 1,
+          "success_step": 3,
+          "cum_reward": 863.934619,
+          "touch_bonus_steps": 1,
+          "mean_motor_rate": 53.286667,
+          "vis_bins_l1_range": 2.4231,
+          "mean_da": 2.997648,
+          "weight_drift_delta": 60.79125
+        },
+        {
+          "steps": 150,
+          "dist_init": 0.031077,
+          "dist_final": 0.019067,
+          "dist_min": 0.019067,
+          "pillar_disp": 0.083971,
+          "success": 1,
+          "success_step": 3,
+          "cum_reward": 919.177687,
+          "touch_bonus_steps": 1,
+          "mean_motor_rate": 53.393333,
+          "vis_bins_l1_range": 2.428,
+          "mean_da": 2.999645,
+          "weight_drift_delta": 30.393845
+        }
+      ],
+      "aggregate": {
+        "steps": {
+          "mean": 150,
+          "std": 0
+        },
+        "dist_init": {
+          "mean": 0.031081,
+          "std": 0.000005
+        },
+        "dist_final": {
+          "mean": 0.020087,
+          "std": 0.001442
+        },
+        "dist_min": {
+          "mean": 0.019754,
+          "std": 0.000971
+        },
+        "pillar_disp": {
+          "mean": 0.081803,
+          "std": 0.003067
+        },
+        "success": {
+          "mean": 1,
+          "rate": "2/2"
+        },
+        "cum_reward": {
+          "mean": 891.556153,
+          "std": 39.062748
+        },
+        "touch_bonus_steps": {
+          "mean": 1,
+          "std": 0
+        },
+        "mean_motor_rate": {
+          "mean": 53.34,
+          "std": 0.075424
+        },
+        "vis_bins_l1_range": {
+          "mean": 2.42555,
+          "std": 0.003465
+        },
+        "mean_da": {
+          "mean": 2.998647,
+          "std": 0.001412
+        },
+        "weight_drift_delta": {
+          "mean": 45.592547,
+          "std": 21.494211
+        }
+      }
+    }
+  },
+  "brain": {
+    "seed": 11,
+    "weight_drift_total": 4346.808758,
+    "learning": true,
+    "note": "persistent brain across all phases; eval episodes' rewards are delivered to DA but their gradients are not excluded (k=2 eval seeds are fixed and identical across phases, so eval stats are directly comparable)"
+  }
+}

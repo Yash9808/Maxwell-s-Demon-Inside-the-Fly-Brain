@@ -1,0 +1,51 @@
+{
+  "configVersion": 1,
+  "stage": 1,
+  "SMOKE": true,
+  "smokeNote": "FIVE-ARM SMOKE ONLY (tests/stage1_five_arm_smoke.test.js; audit item 3). NOT the pinned pilot config: consumedPairs=1, tiny phases (pre 1x2s frozen / train 2x2s / post 1x2s), and seed streams (env 5101 / network 7101 / topology 6501) deliberately DISJOINT from the pre-drawn pilot table (4101-4801 / 9201-9907 / 7001-7008) AND from the Gate-3 smoke table (6101 / 8201 / 6401) so no pilot seed is consumed. Physics identical to pinned stage1_config.json. Outputs are written to research_data/ by benchmark.js, verified byte-for-byte by the test, then deleted by the test; they carry zero evidential weight.",
+  "protocol": {
+    "document": "Confirmatory_experiment_protocol_v1.md",
+    "version": "v1.1",
+    "status": "SMOKE — engineering sanity only, no analysis claims"
+  },
+  "runtime": {
+    "engine": "experiment_core.js",
+    "driver": "benchmark.js --config tests/stage1_smoke_tiny_config.json",
+    "note": "Headless designated runtime only (protocol §2)."
+  },
+  "physics": {
+    "dt": 0.016666666666666666,
+    "nParticles": 320,
+    "noise": 0.12,
+    "doorHeight": 64,
+    "jetPower": 0.55,
+    "jetAim": 0.5,
+    "jetInterval": 3.5,
+    "tKelvin": 300,
+    "simToJoule": 1e-21,
+    "landauerBitJ": 2.871e-21,
+    "lr": 0.004,
+    "lrNote": "identical to pinned stage1_config.json physics"
+  },
+  "phases": {
+    "pre": { "trials": 1, "episodeSeconds": 2, "learning": false, "frozen": true },
+    "train": { "trials": 2, "episodeSeconds": 2, "learning": true },
+    "post": { "trials": 1, "episodeSeconds": 2, "learning": false }
+  },
+  "frozenPreSeconds": 2,
+  "arms": {
+    "armA_real_connectome": { "kind": "connectome", "shuffle": false, "plasticity": "full", "opticDrive": 0.25, "opticInput": "legacy8bin" },
+    "armB_restricted_connectome": { "kind": "connectome", "shuffle": false, "plasticity": "restricted", "opticDrive": 0.25, "opticInput": "legacy8bin" },
+    "armC_degree_preserved_shuffle": { "kind": "connectome", "shuffle": true, "plasticity": "full", "opticDrive": 0.25, "opticInput": "legacy8bin" },
+    "armD_matched_random_sparse": { "kind": "connectome", "shuffle": false, "plasticity": "full", "customEdges": "degreeMatchedRandomEdges", "swapFactor": 10, "opticDrive": 0.25, "opticInput": "legacy8bin" },
+    "armE_random_action_floor": { "kind": "random", "policy": "randomActionFloor" }
+  },
+  "seedTable": {
+    "note": "FIVE-ARM SMOKE seeds, disjoint from both the §6c pilot table and the Gate-3 smoke table by construction.",
+    "seedStride": 101,
+    "consumedPairs": 1,
+    "pairs": [
+      { "k": 1, "environmentSeed": 5101, "networkSeed": 7101, "topologySeed": 6501 }
+    ]
+  }
+}

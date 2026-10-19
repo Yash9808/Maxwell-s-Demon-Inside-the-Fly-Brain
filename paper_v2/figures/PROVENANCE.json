@@ -1,0 +1,208 @@
+{
+ "schema": "figure-provenance/1.0",
+ "generated": "2026-09-23T12:37:23.769309+00:00",
+ "figures": {
+  "figure1_overview": {
+   "source": [
+    "experiments/e1.json..e11.json (registry)",
+    "paper_v2/configs/experiment_registry.json"
+   ],
+   "panels": {
+    "A": "Conceptual schematic (program flow), drawn from registry metadata only"
+   },
+   "data_files": [],
+   "script": "paper_v2/paper_figures.py",
+   "note": "Panel A is a conceptual schematic of the experimental program, not a result."
+  },
+  "figure2_learning_behaviour": {
+   "source": [
+    "paper_v2/raw/E3_rows.jsonl",
+    "paper_v2/raw/E2_rows.jsonl",
+    "paper_v2/raw/E5_rows_s*.jsonl",
+    "paper_v2/raw/E9_rows.jsonl"
+   ],
+   "panels": {
+    "a": "E3 openFraction blocks (learning vs frozen)",
+    "b": "E2/E5 test openFraction bars \u00b195%CI",
+    "c": "E5 test dTfinal per-seed box+points",
+    "d": "E9 sensory vs motor pool activity scatter"
+   },
+   "data_files": [
+    "paper_v2/processed/curves_E3.csv",
+    "paper_v2/processed/E5_per_seed.csv"
+   ],
+   "script": "paper_v2/paper_figures.py",
+   "note": "a: blocks over 2 seeds \u00d7 72 trials (band = 2.5\u201397.5 percentile across seeds). b: n=2 seeds, bar = mean, error = 95% t-CI. c: n=2 seeds/condition. d: n=10 seeds pooled episodes; r reported per seed in the statistics report."
+  },
+  "figure3_information_budget": {
+   "source": [
+    "paper_v2/raw/E5_rows_s*.jsonl",
+    "paper_v2/analysis/ANALYSIS_RESULTS.json (thermoLedger)"
+   ],
+   "panels": {
+    "a": "E5 test MI by condition",
+    "b": "thermo ledger bits used vs needed"
+   },
+   "data_files": [
+    "paper_v2/analysis/ANALYSIS_RESULTS.json"
+   ],
+   "script": "paper_v2/paper_figures.py",
+   "note": "a: n=2 seeds/condition (box = per-seed means). b: bits_needed = extractable work priced in Landauer bits (k_B\u00b7300 K\u00b7ln2); bits_used = metered decision + crossing evaluations."
+  },
+  "figure4_connectome_and_secondlaw": {
+   "source": [
+    "paper_v2/raw/E4_rows_s*.jsonl",
+    "paper_v2/raw/E10_rows.jsonl",
+    "paper_v2/raw/E11_rows.jsonl"
+   ],
+   "panels": {
+    "a": "E4 test dTfinal per seed (n=2/cond)",
+    "b": "E10 test crossingRate per seed (n=10/cond)",
+    "c": "E11 test netPerEpisode per seed (n=10/cond)"
+   },
+   "data_files": [
+    "paper_v2/processed/E4_per_seed.csv",
+    "paper_v2/processed/E10_per_seed.csv",
+    "paper_v2/processed/E11_per_seed.csv"
+   ],
+   "script": "paper_v2/paper_figures.py",
+   "note": "Points = per-seed test-phase means; heavy line = mean \u00b1 95% t-CI (n=10) or mean \u00b1 CI (n=2). Panel c shows the second-law boundary: rectification only with a thermal gradient."
+  },
+  "figure5_mechanism": {
+   "source": [
+    "paper_v2/raw/E9_rows.jsonl",
+    "paper_v2/raw/E10_rows.jsonl"
+   ],
+   "panels": {
+    "a": "E9 openFraction per seed",
+    "b": "E9 decisionAccuracy per seed",
+    "c": "E9/E10 manipulation checks (weight drift, hold fraction)"
+   },
+   "data_files": [
+    "paper_v2/processed/E9_per_seed.csv",
+    "paper_v2/processed/E10_per_seed.csv"
+   ],
+   "script": "paper_v2/paper_figures.py",
+   "note": "Points = per-seed test-phase means (n=10 seeds). Chance line at 0.5 in b. Learning manipulations are verified: weight drift only in learning arms."
+  },
+  "figure6_robustness": {
+   "source": [
+    "paper_v2/raw/E7_rows.jsonl",
+    "paper_v2/raw/E8_rows.jsonl",
+    "paper_v2/raw/E9_rows.jsonl",
+    "paper_v2/raw/E11_rows.jsonl"
+   ],
+   "panels": {
+    "a": "E7 g:B by physics regime (per seed)",
+    "b": "E8 openFraction by demon variant",
+    "c": "E9/E11 per-seed test\u2212train reward delta"
+   },
+   "data_files": [
+    "paper_v2/processed/E7_per_seed.csv",
+    "paper_v2/processed/E8_per_seed.csv"
+   ],
+   "script": "paper_v2/paper_figures.py",
+   "note": "a: one regime per seed (regime fixed per seed by the manifest). b: n=2 seeds/variant. c: n=10 seeds; reward is apparatus reward, not work."
+  },
+  "figure7_integrated": {
+   "source": [
+    "paper_v2/analysis/ANALYSIS_RESULTS.json",
+    "paper_v2/analysis/STATISTICS_REPORT.md"
+   ],
+   "panels": {
+    "A": "Schematic chain + evidence classification (OBSERVED / INFERRED / HYPOTHESIS)"
+   },
+   "data_files": [],
+   "script": "paper_v2/paper_figures.py",
+   "note": "Top chain is a schematic of the modeled pipeline; bottom boxes list measured results with evidence class labels. Nothing in the schematic is data."
+  }
+ },
+ "figure8_brain_activity": {
+  "data": [
+   "raw/E9_rows.jsonl",
+   "processed/brain/ACT_E9_*.bin",
+   "fly_brain_positions.json",
+   "fly_brain_hulls.json/bin"
+  ],
+  "window": "test phase, seeds 1..10",
+  "figure8_brain_activity": {
+   "a": "E9 demon_neural test-phase per-neuron decoded activity on FAFB anatomy (3D)",
+   "b": "E9 demon_neural zoom: 12 most-active neuropils",
+   "c": "E9 demon_frozen zoom: 12 most-active neuropils",
+   "d": "E9 top-10 neuropil sums, trained vs frozen (10 seeds)"
+  }
+ },
+ "figure9_which_neurons": {
+  "panels": {
+   "a": "all firing neurons, trained brain, test phase (3D)",
+   "b": "top-800 most-active neurons on hulls",
+   "c": "cell-type composition of top-600",
+   "d": "AL zoom (sensory input)"
+  },
+  "data": [
+   "raw/E9_rows.jsonl",
+   "processed/brain/ACT_E9_demon_neural_test.bin",
+   "fly_brain_celltypes.json",
+   "fly_brain_positions.json",
+   "fly_brain_hulls.json/bin"
+  ]
+ },
+ "figure10_learning_delta": {
+  "panels": {
+   "a": "early-window activity (3D)",
+   "b": "late-window activity (3D)",
+   "c": "per-neuron learning delta on anatomy",
+   "d": "|delta| distribution",
+   "e": "regions ranked by delta"
+  },
+  "data": [
+   "raw/E9_rows.jsonl",
+   "processed/brain/ACT_E9_demon_neural_early.bin",
+   "processed/brain/ACT_E9_demon_neural_late.bin",
+   "fly_brain_positions.json",
+   "fly_brain_hulls.json/bin"
+  ],
+  "definition": "learning delta = late \u2212 early per-neuron decoded spike counts, seed-averaged"
+ },
+ "figure11_neural_mi": {
+  "panels": {
+   "a": "top-12 neuropil MI(model state -> above-chance decision episode), mean \u00b1 SEM over 10 seeds",
+   "b": "same MI values rendered on FAFB anatomy"
+  },
+  "data": [
+   "raw/E9_rows.jsonl",
+   "processed/brain/MI_E9.json",
+   "fly_brain_positions.json",
+   "fly_brain_hulls.json/bin"
+  ],
+  "estimator": "2x2 plug-in MI, Miller-Madow bias correction, per-seed replication"
+ },
+ "figure12_learning_curves": {
+  "panels": {
+   "a": "E9 decisionAccuracy over episodes, 10 seed replicates + mean",
+   "b": "E3 openFraction per trial, both learning conditions",
+   "c": "E10/E11 decisionAccuracy over episodes",
+   "d": "E1 demonAgree over training trials"
+  },
+  "data": [
+   "raw/E9_rows.jsonl",
+   "raw/E3_rows.jsonl",
+   "raw/E10_rows.jsonl",
+   "raw/E11_rows.jsonl",
+   "raw/E1_rows.jsonl"
+  ]
+ },
+ "figure13_predictions_budget_ledger": {
+  "panels": {
+   "a": "preregistered primary endpoints vs observed sign",
+   "b": "E1 thermodynamic budget (jet work, erasure, extractable; log scale)",
+   "c": "good/bad crossing ledger E1\u2013E8 (test phase)"
+  },
+  "data": [
+   "PRE_REGISTERED_CRITERIA.json",
+   "raw/E1_rows.jsonl",
+   "raw/E{1..8}_rows.jsonl",
+   "analysis/ANALYSIS_RESULTS.json"
+  ]
+ }
+}

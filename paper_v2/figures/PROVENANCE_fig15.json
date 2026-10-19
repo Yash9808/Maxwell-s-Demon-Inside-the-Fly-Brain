@@ -1,0 +1,16 @@
+{
+ "figure15_entropy_ledger": {
+  "a": "sorting-entropy reduction (bits) per condition, test phase, per-seed dots",
+  "b": "good/bad crossing counts per episode with conditional g:b ratio",
+  "data": [
+   "raw/E1_rows.jsonl",
+   "raw/E2_rows.jsonl",
+   "raw/E3_rows.jsonl",
+   "raw/E4_rows_s*.jsonl",
+   "raw/E5_rows_s*.jsonl",
+   "raw/E6_rows.jsonl",
+   "raw/E8_rows.jsonl"
+  ],
+  "definitions": "\u0394H = H_mixed \u2212 H_sorted (speed classes \u00d7 sides); good = hot\u2192cold crossing; bad = cold\u2192hot"
+ }
+}

@@ -1,0 +1,57 @@
+{
+  "prereg_version": 1,
+  "experiment": "single-lever dT-gradient test (DemonGatekeeper app) — EXPERIMENT 2",
+  "created_utc": "2026-10-08T15:35:00Z",
+  "created_local_note": "This file was written BEFORE the jetP diff was applied and BEFORE any experiment session was launched. Provenance: file mtime must predate the session export's first data timestamp (checked in Phase 4).",
+  "deviation_disclosure": {
+    "supersedes": "the lever order in app_prereg_lr.json (which named rewScale 1.5 -> 3.0 next)",
+    "rationale": "the lr experiment's own evidence: dTimprove (0.07) and dwMaxFinal (300) were unmoved at 3x lr, and dTbaseline = 0 in every session so far — there is no temperature gradient for any reward-driven lever to amplify. Testing the gradient lever first is the cheaper diagnostic.",
+    "verdict_log_correction": "the lr verdict's 'below both baselines' wording is corrected: burst 29.4% (64/218) vs the 621 s baseline's 29.5% (71/241) is EQUAL within noise, not below. lr's outcome is recorded as NO EFFECT in this regime, not 'degraded'."
+  },
+  "parameter_change": {
+    "parameter": "jetP (jet power, fly_demon_3d.html slider #jetP)",
+    "from": 0.55,
+    "to": 1.0,
+    "units": "dimensionless app slider, range 0-1 (max)",
+    "why_this_knob": "no dedicated initial-dT parameter exists: particle spawn is symmetric by construction (fly_demon_3d.html:1940-1949, speeds 40-70 u/s both sides -> Tl=Tr -> dTbaseline=0 structurally). The ONLY asymmetry-generating mechanism is the left-side-only jet: slab band = 90+120*power, kick probability 0.3*power, kick speed 200+130*rand*(0.6+0.4*power) (jetFire, L7591-7614), auto-fired every 3.5 s at 0.8*jetP (L7848). jetP is therefore the single knob that sets the sides' temperature difference; T per side = sqrt(mean(v^2))/900 (tempStats L7800-7810).",
+    "expected_effect_on_dTbaseline": "band 143->300 units (~19%->~39% of chamber), kick prob 0.165->0.3, faster kicks -> sustained dT in the ~0.03-0.07 range (modest, nonzero) instead of transient spikes decaying to <0.005",
+    "disclosed_confound": "jetP also raises particle flux toward the gate (jet kicks are +x-directed, cos(an)~0.97-0.99) -> more crossings. Head metric is therefore a RATE (pooled good/total over burst windows), with crossing-rate-per-window reported alongside; burst windows are defined by crossing count to keep regime classification comparable across sessions.",
+    "only_change": true,
+    "unchanged": ["lr (0.004, reverted)", "rewScale (1.5)", "noise (0.12)", "doorH (64)", "keeper success rule", "export schema (v2.1)", "all instrumentation"]
+  },
+  "keeper_rule_quote": {
+    "rule": "const ok = (selR !== null && selR >= 60 && tot >= 30 && p !== null && p < 0.05);",
+    "location": "fly_demon_3d.html:5213 (criteria string :5220)",
+    "amended": false,
+    "note": "Quoted as-is, NOT amended by this pre-registration. selRecent = rolling-last-20-crossings selectivity."
+  },
+  "session_plan": {
+    "mode": "same as all prior sessions (app boot defaults, fly-brain keeper; keeper row must read keeper=Demon, gateDriver=Fly brain)",
+    "duration_sim_seconds": 870,
+    "duration_note": ">=800 s required, 900 preferred. Main CSV caps at 7200 rows = 720 s of 10 Hz rows (pre-existing cap, unchanged); events.csv and keeper stats cover the FULL session — all window analysis uses events.csv.",
+    "export": "schema v2.1 (meta.schema_version === 2.1), same benchmark-harness driver (verify_schema_v2_session.js pattern, detached)",
+    "jetp_readback": "the fly_log CSV jetP column must read 1 on every row (slider max); a session with jetP != 1 is INVALID and voids the experiment (counted as the one session, no reroll)"
+  },
+  "planned_analysis": {
+    "windows": "60 s good-rate windows from events.csv crossing rows (field good) — identical read-only pipeline to all three prior sessions so all four are directly comparable",
+    "burst_regime_definition": "a 60 s window is BURST if it contains >= 25 crossings (same pre-registered definition as the lr prereg)",
+    "head_metric": "pooled burst-regime mean good-rate = pooled good / pooled n across burst windows",
+    "burst_p": "one-sided binomial (normal approximation, same estimator as the keeper rule) vs 50% at the burst pooled n",
+    "rolling20_replay": "rolling-last-20 selectivity over the full crossing sequence; report MAX and fraction of positions >= 60",
+    "keeper_row": "selRecentFinal, nGood, nBad, pOneSided, learningSuccess from keeper_performance.csv",
+    "gradient_check": "dTbaseline (keeper dTbaseline), dTvMax, dTimprove, dwMaxFinal — explicit check: did dTbaseline become > 0, and did dTimprove exceed 0.07 (the flat value from every session so far)?",
+    "gate_sanity": "gate_open/gate_close 1:1 pairing by gateId (open-at-save gate may legitimately be unclosed)",
+    "baselines": {
+      "session_10-45-13": "lifetime 46.0% (652/1417), burst windows ~43-50%, p=0.9987",
+      "session_621s": "lifetime 29.5% (71/241), flat, p=1.0, dTbaseline 0, dTimprove 0.07",
+      "session_lr012": "burst pooled 29.4% (64/218), p=1.0, dTbaseline 0, dTimprove 0.07, dwMax 300 — recorded as NO EFFECT (corrected per deviation_disclosure)"
+    }
+  },
+  "decision_rule": {
+    "PASS": "keeper rule met, OR burst-regime pooled mean >= 55% with p < 0.05 -> the dT gradient lever is sufficient; proceed to plan in verdict",
+    "PARTIAL": "burst-regime pooled mean >= 52% with p < 0.05 -> clear shift above every baseline; proceed",
+    "NO_EFFECT": "burst-regime pooled mean within the prior-session noise band, ~26-46% (i.e. > 46% and < 52% counts as above-baseline but not significant: recorded as NO-EFFECT-ABOVE-BASELINE with the p value reported), or inside 26-46% -> jetP alone insufficient in this regime",
+    "FAIL": "unusable session — physics destabilized (NaN rows, crossing rate collapses to <5/min sustained), or good-rate far below all prior sessions (< 20%) -> report as unusable, lever rejected-in-this-regime"
+  },
+  "no_reroll_clause": "EXACTLY ONE experiment session. Technical failures (crash, invalid export, jetP readback mismatch, infrastructure kill) may be re-attempted ONCE for recovery only — never to obtain a different behavioral outcome. No criterion changes after data exists. Bands are fixed now."
+}

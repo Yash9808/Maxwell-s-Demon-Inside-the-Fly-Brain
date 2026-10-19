@@ -1,0 +1,338 @@
+{
+  "generated": "2026-10-13T15-05-37",
+  "elapsedSeconds": 0.8,
+  "conditions": {
+    "classical_demon": {
+      "earlyAgreement": {
+        "mean": 1,
+        "ci": 0,
+        "n": 1
+      },
+      "lateAgreement": {
+        "mean": 1,
+        "ci": 0,
+        "n": 1
+      },
+      "testAgreement": {
+        "mean": 1,
+        "ci": 0,
+        "n": 1
+      },
+      "earlyGoodBadRatio": {
+        "mean": 2,
+        "ci": 0,
+        "n": 1
+      },
+      "lateGoodBadRatio": {
+        "mean": 0.6666666666666666,
+        "ci": 0,
+        "n": 1
+      },
+      "testGoodBadRatio": {
+        "mean": 0.6875,
+        "ci": 0,
+        "n": 1
+      },
+      "testSortEntropy": {
+        "mean": 0.016063708756669737,
+        "ci": 0,
+        "n": 1
+      },
+      "testDT": {
+        "mean": 0.025068625910924548,
+        "ci": 0,
+        "n": 1
+      },
+      "testOpenFraction": {
+        "mean": 0.6111111111111112,
+        "ci": 0,
+        "n": 1
+      },
+      "testMiNeural": {
+        "mean": 0,
+        "ci": 0,
+        "n": 1
+      },
+      "testEnergyJ": {
+        "mean": 55385.55355556858,
+        "ci": 0,
+        "n": 1
+      },
+      "testWorkInJ": {
+        "mean": 2.5251341797667185e-12,
+        "ci": 0,
+        "n": 1
+      },
+      "testExtractableJ": {
+        "mean": 1.7704981734736638e-16,
+        "ci": 0,
+        "n": 1
+      },
+      "testErasureCostJ": {
+        "mean": 2.3542026857645535e-19,
+        "ci": 0,
+        "n": 1
+      },
+      "testLandauerRatio": {
+        "mean": 759.6304571083256,
+        "ci": 0,
+        "n": 1
+      },
+      "testMeasuredBits": {
+        "mean": 82,
+        "ci": 0,
+        "n": 1
+      },
+      "blocks": []
+    },
+    "random": {
+      "earlyAgreement": {
+        "mean": 0.42916666666666664,
+        "ci": 0,
+        "n": 1
+      },
+      "lateAgreement": {
+        "mean": 0.5243055555555556,
+        "ci": 0,
+        "n": 1
+      },
+      "testAgreement": {
+        "mean": 0.5362962962962963,
+        "ci": 0,
+        "n": 1
+      },
+      "earlyGoodBadRatio": {
+        "mean": 1.5,
+        "ci": 0,
+        "n": 1
+      },
+      "lateGoodBadRatio": {
+        "mean": 5,
+        "ci": 0,
+        "n": 1
+      },
+      "testGoodBadRatio": {
+        "mean": 0.375,
+        "ci": 0,
+        "n": 1
+      },
+      "testSortEntropy": {
+        "mean": 0.016446848282554355,
+        "ci": 0,
+        "n": 1
+      },
+      "testDT": {
+        "mean": 0.0272183483094382,
+        "ci": 0,
+        "n": 1
+      },
+      "testOpenFraction": {
+        "mean": 0.24236111111111114,
+        "ci": 0,
+        "n": 1
+      },
+      "testMiNeural": {
+        "mean": 0,
+        "ci": 0,
+        "n": 1
+      },
+      "testEnergyJ": {
+        "mean": 21212.172984543475,
+        "ci": 0,
+        "n": 1
+      },
+      "testWorkInJ": {
+        "mean": 2.360877868628856e-12,
+        "ci": 0,
+        "n": 1
+      },
+      "testExtractableJ": {
+        "mean": 1.9097276646645556e-16,
+        "ci": 0,
+        "n": 1
+      },
+      "testErasureCostJ": {
+        "mean": 2.5838809965708515e-20,
+        "ci": 0,
+        "n": 1
+      },
+      "testLandauerRatio": {
+        "mean": 9332.633323654336,
+        "ci": 0,
+        "n": 1
+      },
+      "testMeasuredBits": {
+        "mean": 9,
+        "ci": 0,
+        "n": 1
+      },
+      "blocks": []
+    },
+    "ann": {
+      "earlyAgreement": {
+        "mean": 0.5333333333333333,
+        "ci": 0,
+        "n": 1
+      },
+      "lateAgreement": {
+        "mean": 0.5569444444444445,
+        "ci": 0,
+        "n": 1
+      },
+      "testAgreement": {
+        "mean": 0.38541666666666663,
+        "ci": 0,
+        "n": 1
+      },
+      "earlyGoodBadRatio": {
+        "mean": 0.7857142857142857,
+        "ci": 0,
+        "n": 1
+      },
+      "lateGoodBadRatio": {
+        "mean": 1.4,
+        "ci": 0,
+        "n": 1
+      },
+      "testGoodBadRatio": {
+        "mean": 0.3833333333333333,
+        "ci": 0,
+        "n": 1
+      },
+      "testSortEntropy": {
+        "mean": 0.02702416367125199,
+        "ci": 0,
+        "n": 1
+      },
+      "testDT": {
+        "mean": 0.024071300554921293,
+        "ci": 0,
+        "n": 1
+      },
+      "testOpenFraction": {
+        "mean": 0.9944444444444445,
+        "ci": 0,
+        "n": 1
+      },
+      "testMiNeural": {
+        "mean": 0.04255850753770407,
+        "ci": 0,
+        "n": 1
+      },
+      "testEnergyJ": {
+        "mean": 156926.48928702372,
+        "ci": 0,
+        "n": 1
+      },
+      "testWorkInJ": {
+        "mean": 2.511719750601697e-12,
+        "ci": 0,
+        "n": 1
+      },
+      "testExtractableJ": {
+        "mean": 1.70428492227156e-16,
+        "ci": 0,
+        "n": 1
+      },
+      "testErasureCostJ": {
+        "mean": 6.02905565866532e-20,
+        "ci": 0,
+        "n": 1
+      },
+      "testLandauerRatio": {
+        "mean": 2847.349390775253,
+        "ci": 0,
+        "n": 1
+      },
+      "testMeasuredBits": {
+        "mean": 21,
+        "ci": 0,
+        "n": 1
+      },
+      "blocks": []
+    },
+    "drosophila": {
+      "earlyAgreement": {
+        "mean": 0.5194444444444445,
+        "ci": 0,
+        "n": 1
+      },
+      "lateAgreement": {
+        "mean": 0.5027777777777778,
+        "ci": 0,
+        "n": 1
+      },
+      "testAgreement": {
+        "mean": 0.5861111111111111,
+        "ci": 0,
+        "n": 1
+      },
+      "earlyGoodBadRatio": {
+        "mean": 0.6,
+        "ci": 0,
+        "n": 1
+      },
+      "lateGoodBadRatio": {
+        "mean": 0,
+        "ci": 0,
+        "n": 0
+      },
+      "testGoodBadRatio": {
+        "mean": 0,
+        "ci": 0,
+        "n": 0
+      },
+      "testSortEntropy": {
+        "mean": 0.02644854080643738,
+        "ci": 0,
+        "n": 1
+      },
+      "testDT": {
+        "mean": 0.027610703231231777,
+        "ci": 0,
+        "n": 1
+      },
+      "testOpenFraction": {
+        "mean": 0,
+        "ci": 0,
+        "n": 1
+      },
+      "testMiNeural": {
+        "mean": 0.0006377403340497301,
+        "ci": 0,
+        "n": 1
+      },
+      "testEnergyJ": {
+        "mean": 0,
+        "ci": 0,
+        "n": 1
+      },
+      "testWorkInJ": {
+        "mean": 2.489445966664164e-12,
+        "ci": 0,
+        "n": 1
+      },
+      "testExtractableJ": {
+        "mean": 1.956181041274978e-16,
+        "ci": 0,
+        "n": 1
+      },
+      "testErasureCostJ": {
+        "mean": 0,
+        "ci": 0,
+        "n": 1
+      },
+      "testLandauerRatio": {
+        "mean": 0,
+        "ci": 0,
+        "n": 0
+      },
+      "testMeasuredBits": {
+        "mean": 0,
+        "ci": 0,
+        "n": 1
+      },
+      "blocks": []
+    }
+  }
+}

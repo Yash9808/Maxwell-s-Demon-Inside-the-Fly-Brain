@@ -1,0 +1,16 @@
+{
+ "n": 79223,
+ "bbox_min": [
+  -353.4,
+  -316.2,
+  -289.7
+ ],
+ "bbox_max": [
+  378.9,
+  232.1,
+  385.7
+ ],
+ "scale": 1356.1,
+ "source": "ETAIN micro-CT Drosophila adult female (Wijnen + Katsamenis, Univ. of Southampton; 3D model F. Ribas) - Zenodo 14838021, CC-BY 4.0; head capsule cut from Drosophila_exoskeleton.stl",
+ "registration": "uniform scale (median axis ratio, meta central bbox vs CT brain) + CT-brain-centroid -> real central-neuron-cloud centroid"
+}

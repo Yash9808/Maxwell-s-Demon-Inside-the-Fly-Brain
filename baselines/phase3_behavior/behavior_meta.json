@@ -1,0 +1,184 @@
+{
+  "artifact": "phase03_behavioral_baseline",
+  "recorded_utc": "2026-09-25T12:35:39Z",
+  "command": "node tools/phase3_behavior_experiment.js",
+  "params": {
+    "eval_steps": 150,
+    "train_steps": 200,
+    "train_episodes": 12,
+    "eval_seeds": [
+      5,
+      6
+    ],
+    "brain_seed": 11
+  },
+  "aggregates": {
+    "eval_before": {
+      "steps": {
+        "mean": 150,
+        "std": 0
+      },
+      "dist_init": {
+        "mean": 0.031081,
+        "std": 0.000005
+      },
+      "dist_final": {
+        "mean": 0.022174,
+        "std": 0.000235
+      },
+      "dist_min": {
+        "mean": 0.020091,
+        "std": 0.000964
+      },
+      "pillar_disp": {
+        "mean": 0.083983,
+        "std": 0.00319
+      },
+      "success": {
+        "mean": 1,
+        "rate": "2/2"
+      },
+      "cum_reward": {
+        "mean": 912.439987,
+        "std": 7.874784
+      },
+      "touch_bonus_steps": {
+        "mean": 1,
+        "std": 0
+      },
+      "mean_motor_rate": {
+        "mean": 48.773334,
+        "std": 4.120076
+      },
+      "vis_bins_l1_range": {
+        "mean": 2.4296,
+        "std": 0.00297
+      },
+      "mean_da": {
+        "mean": 2.985311,
+        "std": 0.018637
+      },
+      "weight_drift_delta": {
+        "mean": 1749.795519,
+        "std": 709.878881
+      }
+    },
+    "train": {
+      "steps": {
+        "mean": 200,
+        "std": 0
+      },
+      "dist_init": {
+        "mean": 0.031078,
+        "std": 0.000008
+      },
+      "dist_final": {
+        "mean": 0.022521,
+        "std": 0.002069
+      },
+      "dist_min": {
+        "mean": 0.020055,
+        "std": 0.000844
+      },
+      "pillar_disp": {
+        "mean": 0.083752,
+        "std": 0.00373
+      },
+      "success": {
+        "mean": 1,
+        "std": 0
+      },
+      "cum_reward": {
+        "mean": 1344.827996,
+        "std": 61.398114
+      },
+      "touch_bonus_steps": {
+        "mean": 1,
+        "std": 0
+      },
+      "mean_motor_rate": {
+        "mean": 52.0425,
+        "std": 0.798372
+      },
+      "vis_bins_l1_range": {
+        "mean": 2.4283,
+        "std": 0.002173
+      },
+      "mean_da": {
+        "mean": 2.999021,
+        "std": 0.001245
+      },
+      "weight_drift_delta": {
+        "mean": 61.638127,
+        "std": 74.54608
+      }
+    },
+    "eval_after": {
+      "steps": {
+        "mean": 150,
+        "std": 0
+      },
+      "dist_init": {
+        "mean": 0.031081,
+        "std": 0.000005
+      },
+      "dist_final": {
+        "mean": 0.020087,
+        "std": 0.001442
+      },
+      "dist_min": {
+        "mean": 0.019754,
+        "std": 0.000971
+      },
+      "pillar_disp": {
+        "mean": 0.081803,
+        "std": 0.003067
+      },
+      "success": {
+        "mean": 1,
+        "rate": "2/2"
+      },
+      "cum_reward": {
+        "mean": 891.556153,
+        "std": 39.062748
+      },
+      "touch_bonus_steps": {
+        "mean": 1,
+        "std": 0
+      },
+      "mean_motor_rate": {
+        "mean": 53.34,
+        "std": 0.075424
+      },
+      "vis_bins_l1_range": {
+        "mean": 2.42555,
+        "std": 0.003465
+      },
+      "mean_da": {
+        "mean": 2.998647,
+        "std": 0.001412
+      },
+      "weight_drift_delta": {
+        "mean": 45.592547,
+        "std": 21.494211
+      }
+    }
+  },
+  "brain_total_weight_drift": 4346.808758,
+  "determinism": "full payload byte-identical across two independent --quick runs; eval phases bit-identical across fresh processes (episode-level proof also in tests/phase3_behavior.test.js T-B8)",
+  "learning_verdict": "NO behavioral improvement (honest null): eval_after cum_reward 891.556153 ± 39.062748 vs eval_before 912.439987 ± 7.874784 — plasticity ran (drift 4255.157346) but behavior is at task ceiling (spawn contact), success 2/2 in both phases",
+  "files": {
+    "baselines/phase3_behavior/behavior_experiment.json": "7baedbbba262ed679a1c8be07867e7171de6c1f9455fefe8262a96aa6732d004",
+    "tools/phase3_behavior_experiment.js": "1d78641335b1513e570e1b01381f2ca1c67c498314fb5442c01d088aa9c0fb87",
+    "tests/phase3_behavior.test.js": "c7e66e1eb599a56f8d55550b6f5db2ec49dd3f90d54c59ba094c17c89ccb9186",
+    "embodiment/task_pillar.py": "24f32dce3db1dbddf38b23225d6fbe0f4d3d92439ca5cab33fcc73f5b4be5a0a"
+  },
+  "key_metrics": {
+    "tb7_max_identity_err": 0,
+    "tb7_fly_moved_zero_reward_steps": 42,
+    "tb6_max_pillar_disp_m": 0.08919,
+    "tb6_closure_l1": 0.0541,
+    "perf_step_p50_ms": 9.03,
+    "perf_step_p95_ms": 10.91
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "scope": "mini-circuit populations (PN/KC/MBON) -> behavior; NOT anatomical MI",
+  "behavior": {
+    "crossed": {
+      "drosophila": {
+        "nTrialsPerSeed": 72,
+        "blocks": {
+          "pn": {
+            "mean": 0.0040112866627799604,
+            "nSeeds": 1,
+            "perSeed": [
+              0.0040112866627799604
+            ]
+          },
+          "kc": {
+            "mean": 0.006406843341148624,
+            "nSeeds": 1,
+            "perSeed": [
+              0.006406843341148624
+            ]
+          }
+        }
+      },
+      "drosophila_frozen": {
+        "nTrialsPerSeed": 72,
+        "blocks": {}
+      }
+    }
+  },
+  "note": "MI(population rate state -> trial had >=1 crossing), binarized (median-split), Miller-Madow; per-seed then mean. nSeeds=2 -> descriptive only."
+}

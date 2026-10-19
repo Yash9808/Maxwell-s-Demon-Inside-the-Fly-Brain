@@ -442,6 +442,10 @@ function ntToModulator(nt) {                 // tolerant fallback for partial sc
 function connectomeController(circuit, opts) {
   opts = opts || {};
   const shuffle = !!opts.shuffle;
+  // Stage-1/configurable lr (pre-registration config): the dopamine-gated
+  // update rate for applyLearning below. Default 0.004 preserves the legacy
+  // magnitude byte-for-byte for every existing caller.
+  const lr = opts.lr !== undefined && Number.isFinite(opts.lr) ? opts.lr : 0.004;
   const motorDrive = opts.motorDrive !== undefined ? opts.motorDrive : 0.35;
   const opticDrive = opts.opticDrive !== undefined ? opts.opticDrive : 1.0;
   // plasticity mode (Experiment 4 variants):
@@ -453,6 +457,8 @@ function connectomeController(circuit, opts) {
   const MOD_GAINS = Object.assign({}, MOD_GAINS_DEFAULT, opts.modulation || {});
   const hasModField = circuit.modulatory_edges !== undefined ||
     (circuit.edges.length && circuit.edges[0].modulatory !== undefined);
+  // arm D keeps the REAL modulatory-contact layout: customEdges replaces only
+  // the FAST propagation list; modEdgesRaw below still reads circuit.edges.
   const modEdgesRaw = hasModField && circuit.modulatory_edges
     ? circuit.modulatory_edges
     : (circuit.edges || []).filter(e => e.modulatory);   // tolerant fallback
@@ -467,7 +473,13 @@ function connectomeController(circuit, opts) {
   // P0: modulatory edges are NOT propagation edges. They are filtered out
   // here so spike propagation, weights and eligibility traces only ever see
   // fast synapses; their activity feeds the third-factor channels instead.
-  let edges = circuit.edges.filter(e => !e.modulatory)
+  // Stage 1 arm D (Confirmatory_experiment_protocol_v1.md §5c): opts.customEdges
+  // — an explicitly supplied fast-synapse edge list (built by
+  // degreeMatchedRandomEdges) — REPLACES the real fast-edge list BEFORE the
+  // shuffle branch. Every other construction step (weight scaling, plastic,-
+  // ity flags, CSR layout, modulatory handling) is untouched, so arm D differs
+  // from arm A only in wiring, never in runtime.
+  let edges = (opts.customEdges || circuit.edges).filter(e => !e.modulatory)
                            .map(e => ({ s: e.s, t: e.t, w: e.w, sign: e.sign, nt: e.nt || null }));
   if (shuffle) {
     // degree-preserving rewiring: collect all endpoints, shuffle targets.
@@ -628,13 +640,34 @@ function connectomeController(circuit, opts) {
   }
   const opticLists = opticByChannel.map(a => Int32Array.from(a));
 
-  function injectLayerChannels(layerIndex, values, gain, rng) {
+  // (Stage-3 demon observation) opt-in: the headless env's 15-channel sensor
+  // vector (base 7 + obs_8 tail, appended by experiment_core readSensors when
+  // the arm's demonObs flag is set) is SPLIT-injected — the base 7 keep the
+  // original 7-bin whole-layer partition (same map, same rng order as the
+  // OFF path), and the obs tail enters the RESERVED sub-band of input layer 0
+  // with its own gain. Mirrors fly_demon_3d.html brainTick /
+  // brain_worker.js exactly (browser constants: band [0.86, 1.0], gain 12).
+  const demonObs = opts.demonObs === true;
+  const demonObsGain = opts.demonObsGain !== undefined ? opts.demonObsGain : 12;
+
+  // (Stage-3 demon observation) OPTIONAL 5th argument `slice` = {start, count,
+  // frac}: map values[start .. start+count) across the layer index span
+  // [frac[0]*len, frac[1]*len) instead of the whole layer. ABSENT (= every
+  // pre-slice call) start0 = 0, bins = values.length, lo = 0, hi = layer.length,
+  // so the loop body is arithmetically identical and consumes rng in exactly
+  // the original order — the pre-slice input mapping, byte for byte.
+  function injectLayerChannels(layerIndex, values, gain, rng, slice) {
     if (layerIndex < 0 || !values || !values.length) return;
     const layer = layers[layerIndex];
-    const bins = values.length;
-    for (let k = 0; k < layer.length; k++) {
-      const i = layer[k];
-      const channel = Math.min(bins - 1, Math.floor(k * bins / layer.length));
+    const start0 = slice ? (slice.start | 0) : 0;
+    const bins = slice ? (slice.count | 0) : values.length;
+    const lo = slice && slice.frac ? Math.max(0, Math.min(layer.length, Math.floor(slice.frac[0] * layer.length))) : 0;
+    const hi = slice && slice.frac ? Math.max(lo, Math.min(layer.length, Math.floor(slice.frac[1] * layer.length))) : layer.length;
+    const span = hi - lo;
+    if (bins <= 0 || span <= 0 || start0 + bins > values.length) return;
+    for (let k = 0; k < span; k++) {
+      const i = layer[lo + k];
+      const channel = start0 + Math.min(bins - 1, Math.floor(k * bins / span));
       if (rng() < values[channel] * 0.5) V[i] += gain * (0.5 + rng());
     }
   }
@@ -654,10 +687,48 @@ function connectomeController(circuit, opts) {
   // low-variance sensor→action association trained by the same reward
   // channel. Learning stops entirely when learning=false (frozen control).
   let pg = null, phi = null, pgR = 0;     // readout state (factory scope:
+  // --- KC-style sparse code for the policy readout (opt-in pgKc) ----------
+  // The fly solves learned sensory->action association with the mushroom
+  // body: random high-dimensional expansion of sensory drive into a sparse
+  // Kenyon-cell code (12-of-200 winner-take-all), read out by plastic
+  // synapses. The rate-only policy readout tunnels every sensory distinction
+  // through one smoothed motor-rate scalar — measured on E10 it yields a
+  // correctly-signed but tiny gradient (~0.03 P-movement per 24 episodes).
+  // Feeding a sparse random-projection code to the softmax lets REINFORCE
+  // associate visitor TYPE with action directly. Allocated/rng-consuming
+  // ONLY when opts.pgKc — every other experiment keeps byte-identical
+  // behavior and rng streams.
+  let pgKcState = null;
+  if (opts.policyGradient && opts.pgKc) {
+    const NKCp = 200, KCAP = 12;                // expansion size, sparsity
+    const wSK = new Float32Array(12 * NKCp);    // sensory ch -> KC (fixed)
+    const kcRng = makeRng(((opts.seed !== undefined ? opts.seed : 7) *
+                           2654435761 % 4294967291 + 1013904223) % 4294967291);
+    for (let i = 0; i < wSK.length; i++) wSK[i] = kcRng() * 2 - 1;
+    pgKcState = {
+      wSK, NKCp, KCAP,
+      drive: new Float32Array(NKCp),
+      bit: new Uint8Array(NKCp),
+      ids: new Uint16Array(KCAP),               // active KC ids this tick
+      n: 0,
+      W: new Float32Array(NKCp),                // KC -> policy (LEARNED)
+    };
+  }
   if (opts.policyGradient) {               // brainTick updates it every tick)
     const WPG = new Float32Array(m1 - m0);        // readout weights, zero-init
     const RNG = opts.pgRng || makeRng(opts.seed !== undefined ? opts.seed * 2654435761 % 4294967291 : 7);
     const TAU = 1;                                // softmax temperature
+    // Baseline mode (opt-in pgBaseline): one REINFORCE update per decision
+    // with the reward centered by an EMA baseline (unbiased variance
+    // reduction) and zero-reward windows INCLUDED — in event-locked E10 an
+    // r=0 window is a correct rejection (the hold kept a leak out), the
+    // strongest pro-hold sample available, and the legacy pgR!==0 gate
+    // discards it. Delivery is also fixed: the cores write pgReward BEFORE
+    // lastPgAction() re-latches the sample, so applying at delivery time
+    // pairs credit with the decision that earned it (the deferred tick
+    // update pairs it with the NEXT decision — an off-by-one that corrupts
+    // the gradient whenever consecutive decisions differ).
+    const baseBeta = !!opts.pgBaseline;
     pg = {
       WPG, get W() { return WPG; },
       bias: 0,                           // learnable action prior: without it
@@ -667,7 +738,41 @@ function connectomeController(circuit, opts) {
       probs: 0.5,                        // cached P(open), updated every step
       action: 0,                         // cached Bernoulli sample
       RNG, TAU,
+      baseBeta, base: 0,                 // EMA reward baseline (baseBeta only)
+      BASE_BETA: 0.05,
+      kc: pgKcState,                     // null unless opts.pgKc
     };
+  }
+  function pgZ(pg, phi) {                        // policy logit
+    let z = pg.bias;
+    for (let i = 0; i < pg.WPG.length; i++) z += pg.WPG[i] * phi[i];
+    // KC branch uses the MBON readout's own normalization (mean of active
+    // weights, cf. mb[m] *= 1/nAct): raw sums across 12 active KCs inflate
+    // logit variance ~sqrt(12)x, saturating the softmax and killing the
+    // gradient (measured: E10 delta −0.254 ± 0.114 with raw sums).
+    if (pg.kc && pg.kc.n > 0) {
+      let s = 0;
+      for (let n = 0; n < pg.kc.n; n++) s += pg.kc.W[pg.kc.ids[n]];
+      z += s / pg.kc.n;
+    }
+    return z;
+  }
+  function pgProbs2(pg, phi) {                   // P(open) — 2-action softmax
+    const e = Math.exp(clamp(pgZ(pg, phi) / pg.TAU, -20, 20));
+    return e / (e + 1);                          // = 1 / (1 + e^(-z))
+  }
+  function pgDelta(pg, ga) {                     // REINFORCE weight move
+    const d = pg.decPend;
+    for (let i = 0; i < pg.WPG.length; i++)
+      pg.WPG[i] = clamp(pg.WPG[i] + ga * d.phi[i], -2, 2);
+    // KC mean readout: dLogit/dW_k = 1/n for each active k, so the exact
+    // per-synapse move is ga/n (credit shared equally among the codeword).
+    if (pg.kc && d.kc && d.kc.n > 0) {
+      const gk = ga / d.kc.n;
+      for (let n = 0; n < d.kc.n; n++)
+        pg.kc.W[d.kc.ids[n]] = clamp(pg.kc.W[d.kc.ids[n]] + gk, -2, 2);
+    }
+    pg.bias = clamp(pg.bias + ga, -2, 2);        // the prior learns too
   }
   function pgProbs(W, phi, tau, bias) {            // P(open) — 2-action softmax
     let z = bias;
@@ -676,7 +781,35 @@ function connectomeController(circuit, opts) {
     return e / (e + 1);                            // = 1 / (1 + e^(-z))
   }
   function brainTick(rng, sens, visual, motorDrive, opticScale) {
-    injectLayerChannels(0, sens, 12, rng);
+    // (Stage-3 demon observation) OFF: the ORIGINAL single call — with
+    // sens.length === 7 the loop is the pre-slice 7-bin whole-layer sweep,
+    // byte for byte. ON: the base 7 ride the same 7-bin partition via the
+    // {start:0, count:7} slice (arithmetically identical map and rng order),
+    // and the obs_8 tail enters the reserved input-layer sub-band with its
+    // own gain — the headless mirror of the browser application.
+    injectLayerChannels(0, sens, 12, rng, (demonObs && sens && sens.length > 7) ? { start: 0, count: 7 } : undefined);
+    if (demonObs && sens && sens.length > 7)
+      injectLayerChannels(0, sens, demonObsGain, rng, { start: 7, count: 8, frac: [0.86, 1.0] });
+    // KC sparse code (pgKc only): random fixed expansion of the sensory
+    // channels into a 12-of-200 winner-take-all codeword — the mushroom-body
+    // motif. Deterministic in sens, consumes no rng: legacy streams untouched.
+    if (pg && pg.kc) {
+      const K = pg.kc, sL = Math.min(12, sens.length);
+      for (let k = 0; k < K.NKCp; k++) {
+        let a = 0;
+        for (let j = 0; j < sL; j++) a += (sens[j] || 0) * K.wSK[j * K.NKCp + k];
+        K.drive[k] = a;
+        K.bit[k] = 0;
+      }
+      K.n = 0;
+      for (let it = 0; it < K.KCAP; it++) {      // top-K winner-take-all
+        let bi = -1, bv = -Infinity;
+        for (let k = 0; k < K.NKCp; k++)
+          if (!K.bit[k] && K.drive[k] > bv) { bv = K.drive[k]; bi = k; }
+        if (bi < 0) break;
+        K.bit[bi] = 1; K.ids[K.n++] = bi;
+      }
+    }
     if (opticInput === "retinotopy") {
       if (opticByColumn) {
         // Stage F retinotopic injection: per-column drive from the 800-bin
@@ -766,22 +899,26 @@ function connectomeController(circuit, opts) {
     // OWN rng so a seed fully determines the trajectory. The core consumes
     // both the probability (telemetry/rows) and the action (valve command).
     if (pg) {
-      // REINFORCE: apply credit accrued since the last SAMPLE, paired with
-      // THAT decision's own cached (action, P, features) — snapshotted by
-      // lastPgAction() at decision time (decPend). Without the snapshot the
-      // credit would pair with a mid-window 60 Hz sample instead of the
-      // action that earned it: measured, the gradient then carries zero
-      // information (E10 P(hold) never left 0.5). Learning stops when frozen.
-      if (pgR !== 0 && pg.decPend && learning) {
-        const ga = 0.08 * pgR * (pg.decPend.a - pg.decPend.p);
-        for (let i = 0; i < pg.WPG.length; i++)
-          pg.WPG[i] = clamp(pg.WPG[i] + ga * pg.decPend.phi[i], -2, 2);
-        pg.bias = clamp(pg.bias + ga, -2, 2);      // the prior learns too
-        pgR = 0;
+      // REINFORCE, two delivery modes:
+      //  legacy (default): apply accrued credit on a later tick, paired with
+      //    decPend — the decision snapshot captured by lastPgAction(). This
+      //    preserves E9's byte-identical behavior.
+      //  pgBaseline: the update is applied at DELIVERY time (see the set
+      //    pgReward accessor below) so credit pairs with the decision that
+      //    earned it even when the next sample latches within the same core
+      //    step; ticks only recompute the policy here. Zero-reward windows
+      //    still count: in event-locked E10 an r=0 window is a correct
+      //    rejection (the hold kept a leak out), not missing data.
+      if (!pg.baseBeta) {
+        if (pgR !== 0 && pg.decPend && learning) {
+          const ga = 0.08 * pgR * (pg.decPend.a - pg.decPend.p);
+          pgDelta(pg, ga);
+          pgR = 0;
+        }
       }
       phi = new Float32Array(m1 - m0);           // readout features: this
       for (let i = m0; i < m1; i++) phi[i - m0] = spikes[i];   // tick's pool spikes
-      pg.probs = pgProbs(pg.WPG, phi, pg.TAU, pg.bias);
+      pg.probs = pgProbs2(pg, phi);
       pg.action = pg.RNG() < pg.probs ? 1 : 0;
       pg.pend = { a: pg.action, p: pg.probs, phi };
     }
@@ -916,14 +1053,14 @@ function connectomeController(circuit, opts) {
       // dopamine-gated plasticity, but never touch env.door.
       if (!env.door) {
         decisions++;
-        if (learning) { applyLearning(0.004); if ((decisions & 255) === 0) syncWeights(); }
+        if (learning) { applyLearning(lr); if ((decisions & 255) === 0) syncWeights(); }
         return;
       }
       env.door.target = clamp(ratio * 40, 0, 1);
       const open = env.door.target > 0.5;
       decisions++;
       if (open === (demonDecisionFor(env, _sharedDecision) === 1)) agreeCount++;
-      if (learning) { applyLearning(0.004); if ((decisions & 255) === 0) syncWeights(); }
+      if (learning) { applyLearning(lr); if ((decisions & 255) === 0) syncWeights(); }
     },
     receiveFeedback(fb) {
       // Legacy E1-E8 crossing feedback ({dir, T2, v2, ...}): original q
@@ -952,6 +1089,17 @@ function connectomeController(circuit, opts) {
                       if (pg) { pgR = 0; phi = null; pg.probs = 0.5; pg.action = 0; pg.pend = null; pg.decPend = null; } },
     summary() {
       let s = 0; for (let i = m0; i < m1; i++) s += spikes[i];
+      // (Stage-3 demon observation) measured per-row provenance, only when the
+      // arm carries the registered flag — OFF summary objects gain NO keys.
+      if (demonObs) {
+        const L = layers[0].length;
+        const blo = Math.max(0, Math.min(L, Math.floor(0.86 * L)));
+        const bhi = Math.max(blo, Math.min(L, Math.floor(1.0 * L)));
+        return { demonAgree: decisions > 0 ? agreeCount / decisions : 0,
+                 motorHz: s / layers[motorLayer].length,
+                 demonObsOn: true, demonObsGain,
+                 obsBandLo: blo, obsBandHi: bhi, obsBandNeurons: bhi - blo };
+      }
       return { demonAgree: decisions > 0 ? agreeCount / decisions : 0,
                motorHz: s / layers[motorLayer].length };
     },
@@ -1010,16 +1158,32 @@ function connectomeController(circuit, opts) {
     // window into pgReward, closing the loop Δw_i ∝ r·(a − P_open).
     policyProb() { return pg ? pg.probs : null; },
     // The core reads the sampled action at decision time; this read is what
-    // DEFINES the decision, so it latches the sample's (a, P, phi) snapshot
-    // for the REINFORCE update that will consume the credit this decision
-    // accrues. 60 Hz ticks in between must not touch it.
+    // DEFINES the decision, so it latches the sample's (a, P, phi, KC code)
+    // snapshot for the REINFORCE update that will consume the credit this
+    // decision accrues. 60 Hz ticks in between must not touch it.
     lastPgAction() {
-      if (pg) pg.decPend = { a: pg.action, p: pg.probs, phi };
+      if (pg) pg.decPend = { a: pg.action, p: pg.probs, phi,
+                             kc: pg.kc ? { ids: Uint16Array.from(pg.kc.ids.subarray(0, pg.kc.n)), n: pg.kc.n } : null };
       return pg ? pg.action : null;
     },
     // PG readout state for HUD/tests: P(hold), sampled action, learned prior
     pgState() { return pg ? { probs: pg.probs, action: pg.action, bias: pg.bias } : null; },
-    set pgReward(v) { if (pg) pgR = v; },
+    set pgReward(v) {
+      if (!pg) return;
+      if (pg.baseBeta) {
+        // Baseline mode: credit applies NOW, against decPend — the decision
+        // that earned this window (cores deliver before re-latching the next
+        // sample). The EMA baseline centers the reward without biasing the
+        // gradient, and zero windows flow through as correct rejections.
+        if (pg.decPend && learning) {
+          const ga = 0.08 * (v - pg.base) * (pg.decPend.a - pg.decPend.p);
+          if (ga !== 0) pgDelta(pg, ga);
+          pg.base += pg.BASE_BETA * (v - pg.base);
+        }
+      } else {
+        pgR = v;                               // legacy deferred delivery
+      }
+    },
     fireVec() {
       // Uint8-quantized per-neuron spike counts (log scale preserves the
       // dynamic range: 255 = 256+ spikes in the trial, 1 = 1 spike)
@@ -1132,6 +1296,75 @@ function neverGateController(rng, env) {
   };
 }
 
+// -------------------------------- 6. arm D: degree-matched random sparse ----
+/**
+ * Confirmatory_experiment_protocol_v1.md §5a — Maslov–Sneppen double-edge
+ * rewiring of the REAL circuit edge list. Produces a random sparse graph that
+ * matches the real connectivity EXACTLY in |E|, per-neuron out-degree and
+ * per-neuron in-degree (each swap moves endpoints between existing edges, so
+ * every degree is preserved by construction), with no self-loops and no
+ * duplicate (s,t) pairs. Weights/signs/nt tags stay attached to their
+ * original edges (they ride along with the edge's source). Deterministic:
+ * the whole draw comes from makeRng(seed). Consumed by connectomeController
+ * through opts.customEdges (arm D). REJECTS instead of forcing: a swap that
+ * would create a self-loop or a duplicate is discarded, never repaired.
+ *
+ * Accepts a plain edge list in place of the circuit (tests use this to
+ * validate the swap machinery without the full connectome).
+ */
+function degreeMatchedRandomEdges(circuit, opts) {
+  opts = opts || {};
+  // tolerate a caller passing (edgeArray, opts) or (circuit, {edges})
+  let real = Array.isArray(circuit) ? circuit
+    : (opts.edges || ((circuit.edges || []).filter(e => !e.modulatory)));
+  if (!Array.isArray(real)) throw new Error("degreeMatchedRandomEdges: no edge list");
+  const seed = opts.seed !== undefined ? opts.seed : 7;
+  const rng = makeRng(seed);
+  // resolve lazily: only when a rewired edge list is actually needed, so the
+  // controller-construction path in Stage 1 never deep-copies the full
+  // edge list twice.
+  let cache = null;
+  function rewired() {
+    if (cache) return cache;
+    const E = real.length;
+    if (E < 2) { cache = real.map(e => ({ s: e.s, t: e.t, w: e.w, sign: e.sign, nt: e.nt || null })); return cache; }
+    // flat working copy: s/t mutable, w/sign/nt fixed to the edge slot
+    const s = new Int32Array(E), t = new Int32Array(E);
+    for (let i = 0; i < E; i++) { s[i] = real[i].s; t[i] = real[i].t; }
+    // duplicate detector: hash set over "s<<21|t" (validated for ids < 2^21;
+    // circuit indices are well below that). Rebuilt only when a swap ACCEPTS.
+    const key = (a, b) => a * 2097152 + b;
+    const pairs = new Set();
+    for (let i = 0; i < E; i++) pairs.add(key(s[i], t[i]));
+    const attempts = opts.swapFactor !== undefined ? opts.swapFactor * E : 10 * E;
+    let accepted = 0;
+    for (let a = 0; a < attempts; a++) {
+      // two distinct edge slots
+      const i = (rng() * E) | 0; if (i === E) continue;
+      let j = (rng() * (E - 1)) | 0; if (j >= i) j++;   // j != i, uniform
+      const s1 = s[i], t1 = t[i], s2 = s[j], t2 = t[j];
+      if (s1 === s2 || t1 === t2) continue;   // would create a parallel pair
+      const newT1 = t2, newT2 = t1;
+      if (newT1 === s1 || newT2 === s2) continue; // would create a self-loop
+      if (pairs.has(key(s1, newT1)) || pairs.has(key(s2, newT2))) continue;
+      // accept: rewire + record in the pair set atomically
+      pairs.delete(key(s1, t1)); pairs.delete(key(s2, t2));
+      pairs.add(key(s1, newT1)); pairs.add(key(s2, newT2));
+      t[i] = newT1; t[j] = newT2;
+      accepted++;
+    }
+    const out = new Array(E);
+    for (let k = 0; k < E; k++) out[k] = { s: s[k], t: t[k], w: real[k].w, sign: real[k].sign, nt: real[k].nt || null };
+    cache = out;
+    return cache;
+  }
+  rewired._stats = () => ({ seed, attempts: opts.swapFactor !== undefined ? opts.swapFactor * real.length : 10 * real.length });
+  rewired.real = real;
+  rewired.rewired = rewired;
+  return rewired;
+}
+
 module.exports = { classicalDemon, demonDecisionFor, randomController,
                    annController, drosophilaController, connectomeController,
-                   saboteurController, neverGateController };
+                   saboteurController, neverGateController,
+                   degreeMatchedRandomEdges };

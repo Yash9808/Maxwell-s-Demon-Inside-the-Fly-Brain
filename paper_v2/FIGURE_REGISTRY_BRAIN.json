@@ -1,0 +1,74 @@
+[
+ [
+  "3D brain + neural activity",
+  "E9 (demon_neural/demon_frozen)",
+  "Fig 8",
+  "a\u2013c",
+  "Required \u2014 provided (3D FAFB anatomy + per-neuron activity)",
+  "raw/E9_rows.jsonl fireVec -> ACT bins",
+  "DONE"
+ ],
+ [
+  "Which neurons fired",
+  "E9",
+  "Fig 9",
+  "a\u2013d",
+  "Required \u2014 provided",
+  "ACT bins + celltypes",
+  "DONE"
+ ],
+ [
+  "Learning curve",
+  "E9, E3, E10, E11",
+  "Fig 12",
+  "a\u2013c",
+  "Optional/linked",
+  "raw rows",
+  "DONE"
+ ],
+ [
+  "Good:bad crossing ratio",
+  "E1\u2013E8",
+  "Fig 13",
+  "c",
+  "Optional/linked (counts shown with ledger)",
+  "raw rows",
+  "DONE"
+ ],
+ [
+  "Thermodynamic budget",
+  "E1",
+  "Fig 13",
+  "b",
+  "Optional \u2014 provided (model quantities only)",
+  "raw/E1_rows.jsonl",
+  "DONE"
+ ],
+ [
+  "Neural mutual information",
+  "E9",
+  "Fig 11",
+  "a\u2013b",
+  "Required where localizable \u2014 provided (region map)",
+  "MI_E9.json",
+  "DONE"
+ ],
+ [
+  "Sorting entropy reduction",
+  "E1 (sortEntropy/spatialH ledger)",
+  "Main Fig 3 (existing) + S tables",
+  "\u2014",
+  "Required where localizable \u2014 quantified in Fig 3 & SUPPLEMENTARY S1",
+  "raw/E1_rows.jsonl",
+  "DONE (existing Fig 3)"
+ ],
+ [
+  "Learning delta",
+  "E9",
+  "Fig 10",
+  "a\u2013e",
+  "Required \u2014 provided",
+  "ACT bins early/late",
+  "DONE"
+ ]
+]

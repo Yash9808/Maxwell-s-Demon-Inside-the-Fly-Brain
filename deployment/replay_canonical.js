@@ -15,6 +15,14 @@
  *   TRAJECTORY_SHA256=<hex64>
  *   MATCH=true|false
  * Exit 0 iff MATCH.
+ *
+ * Post-Phase-02 ADDITIVE capability (real visual feedback, FLYBODY_ARCHITECTURE
+ * §7): when EMBODIMENT_TRAJECTORY_SHA256 is set to a 64-hex hash, THIS hash is
+ * compared instead of the frozen Phase 01 constant — an opt-in gate for
+ * regression-anchoring NEW canonical trajectories after an additive,
+ * documented change to the sidecar's observation semantics (never a silent
+ * weakening: the default target stays the frozen Phase 01 hash, and RECORDS
+ * must equal 240 in either case).
  */
 const fs = require("fs");
 const path = require("path");
@@ -22,6 +30,10 @@ const crypto = require("crypto");
 
 const ROOT = path.resolve(__dirname, "..");
 const FROZEN_SHA = "05c47753fe56af3de12d5fa3b209e6c3ef20f88a74952154977b1c568bac204b";
+
+// Opt-in target override (fail closed on malformed values).
+const ENV_SHA = (process.env.EMBODIMENT_TRAJECTORY_SHA256 || "").trim().toLowerCase();
+const EXPECTED_SHA = /^[0-9a-f]{64}$/.test(ENV_SHA) ? ENV_SHA : FROZEN_SHA;
 
 const { EmbodimentClient } = require("../embodiment/embodiment_client");
 const contract = require("../embodiment/state_contract");
@@ -52,10 +64,11 @@ async function main() {
 
   console.log(`RECORDS=${traj.records.length}`);
   console.log(`TRAJECTORY_SHA256=${sha}`);
-  const match = sha === FROZEN_SHA;
+  const match = sha === EXPECTED_SHA;
+  console.log(`EXPECTED=${EXPECTED_SHA}`);
   console.log(`MATCH=${match}`);
   if (!match) {
-    console.error(`REPLAY MISMATCH: expected ${FROZEN_SHA} observed ${sha}`);
+    console.error(`REPLAY MISMATCH: expected ${EXPECTED_SHA} observed ${sha}`);
     process.exit(1);
   }
   process.exit(0);

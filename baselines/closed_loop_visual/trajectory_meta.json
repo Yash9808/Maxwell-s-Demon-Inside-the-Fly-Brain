@@ -1,0 +1,11 @@
+{
+  "captured": "2026-09-25T08:38:59.811Z",
+  "seed": 11,
+  "steps": 240,
+  "mode": "flybody",
+  "sha256": "477eb89d8c2ce1f12b2d3f30dc930c9dfdc7c60882b5d6eef170d30c7a4076e3",
+  "parent_frozen_phase01": "05c47753fe56af3de12d5fa3b209e6c3ef20f88a74952154977b1c568bac204b",
+  "reason": "post-Phase-02 additive change: real visual feedback in flybody observations (FLYBODY_ARCHITECTURE.md \u00c2\u00a77); determinism verified by two identical replay runs",
+  "contract": "state_contract v1 UNCHANGED (OBS_DIM 15)",
+  "note_default_gate": "On trees carrying the visual change, the default (Phase 01) replay target mismatches BY DESIGN - anchor via EMBODIMENT_TRAJECTORY_SHA256; the frozen hash remains valid at the frozen tag only."
+}

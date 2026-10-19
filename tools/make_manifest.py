@@ -134,6 +134,9 @@ SOURCE_FILES = [
     "embodiment/motor_decoder.py", "embodiment/smoke_test.py",
     "embodiment/embodiment_client.js", "tools/make_manifest.py",
     "tools/import_cell_types.js",
+    # W1/W2 research-pathway pipeline (real synapse-coordinate wiring + arbors)
+    "tools/build_edge_waypoints.py",
+    "tools/build_neuron_skeletons.py",
 ]
 
 HYBRID_APP_FILES = [
@@ -159,6 +162,10 @@ CIRCUIT_PAYLOADS = [
     "fly_brain_hulls_raw_frame.bin", "fly_brain_meta.json",
     "fly_brain_celltypes.json", "fly_brain_retinotopy.json",
     "devil_b64.txt",
+    # W1: per-edge real pathway cables (synapse-coordinate waypoints)
+    "fly_brain_edge_paths.bin", "fly_brain_edge_paths.json",
+    # W2: published FlyWire skeleton arbors (curated subset)
+    "data/skeletons/skeletons.bin", "data/skeletons/skeletons_index.json",
 ]
 
 FLYWIRE_V783_DATA = [
@@ -263,6 +270,14 @@ def main() -> int:
                 "pruned MCNS export (generator script not retained; see SCRIPT_ARCHIVE_INDEX.md)",
             "fly_brain_hulls*":
                 "_rebuild_anatomy.py (anatomy pipeline; see SCRIPT_ARCHIVE_INDEX.md)",
+            "fly_brain_edge_paths*":
+                "python tools/build_edge_waypoints.py (W1: per-edge polyline "
+                "waypoints from the v783 synapse-level table; canonical frame, "
+                "deterministic stride sampling; Dorkenwald et al. 2024 data)",
+            "data/skeletons/*":
+                "python tools/build_neuron_skeletons.py (W2: published FlyWire "
+                "skeletons, Zenodo 10877326 / Schlegel et al. 2024, curated "
+                "top-degree subset; canonical frame, SWC parent topology)",
             "neuron_nt_classification.csv": "python classify_neurons.py",
             "neuropil_matrix.csv": "python neuropil_matrix.py",
             "report_v783.md": "python analyze_v783.py",

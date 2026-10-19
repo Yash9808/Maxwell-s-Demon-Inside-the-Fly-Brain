@@ -1,0 +1,56 @@
+{
+ "id": "E10",
+ "provenance": {
+  "experiment": "E10",
+  "seeds": 10,
+  "seedRule": "core seed = 1 + (seedTag-1)*101",
+  "trainTrials": 10,
+  "testTrials": 10,
+  "episodeSeconds": 16,
+  "nParticles": 220,
+  "engine": "experiment_core.smoluchowskiCore",
+  "circuit": "fly_brain_circuit.json (FAFB v783, sha256 0eb64ba4...)",
+  "node": "v26.8.2",
+  "startedISO": "2026-09-23T11:58:34.290Z",
+  "elapsedSeconds": 107.166,
+  "rows": 800
+ },
+ "conditions": {
+  "trapdoor_light": {
+   "episodes": 200,
+   "testWorkJEp": null,
+   "testReward": 0,
+   "testDecisionAccuracy": 0,
+   "testDemonAgree": 0,
+   "testNetPerEpisode": null,
+   "testWeightDrift": 0
+  },
+  "trapdoor_heavy": {
+   "episodes": 200,
+   "testWorkJEp": null,
+   "testReward": 0,
+   "testDecisionAccuracy": 0,
+   "testDemonAgree": 0,
+   "testNetPerEpisode": null,
+   "testWeightDrift": 0
+  },
+  "trapdoor_neural": {
+   "episodes": 200,
+   "testWorkJEp": null,
+   "testReward": -1.6315000000000004,
+   "testDecisionAccuracy": 0.7126865561974262,
+   "testDemonAgree": 0.5490115511300298,
+   "testNetPerEpisode": null,
+   "testWeightDrift": 2.2662171696126463
+  },
+  "trapdoor_frozen": {
+   "episodes": 200,
+   "testWorkJEp": null,
+   "testReward": -1.5394999999999999,
+   "testDecisionAccuracy": 0.7021779144768281,
+   "testDemonAgree": 0.49766149864628106,
+   "testNetPerEpisode": null,
+   "testWeightDrift": 0
+  }
+ }
+}

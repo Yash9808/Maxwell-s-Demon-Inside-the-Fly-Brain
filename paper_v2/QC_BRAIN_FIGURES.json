@@ -1,0 +1,131 @@
+{
+ "figure8_brain_activity": {
+  "png_exists": true,
+  "pdf_exists": true,
+  "png_bytes": 270104,
+  "pdf_bytes": 880071,
+  "size": [
+   2160,
+   1800
+  ],
+  "bg_rgb": [
+   14,
+   20,
+   32
+  ],
+  "bg_is_dark": true,
+  "content_frac": 0.16727854938271605,
+  "n_color_cells": 49,
+  "has_#0d1321": true,
+  "has_#2f8fca": true,
+  "has_#c9cdd4": true,
+  "pass": true
+ },
+ "figure9_which_neurons": {
+  "png_exists": true,
+  "pdf_exists": true,
+  "png_bytes": 251661,
+  "pdf_bytes": 430071,
+  "size": [
+   2160,
+   1620
+  ],
+  "bg_rgb": [
+   14,
+   20,
+   32
+  ],
+  "bg_is_dark": true,
+  "content_frac": 0.1269438728852309,
+  "n_color_cells": 49,
+  "has_#8fd3ff": true,
+  "has_#d9930d": true,
+  "pass": true
+ },
+ "figure10_learning_delta": {
+  "png_exists": true,
+  "pdf_exists": true,
+  "png_bytes": 145421,
+  "pdf_bytes": 34455,
+  "size": [
+   2160,
+   1860
+  ],
+  "bg_rgb": [
+   14,
+   20,
+   32
+  ],
+  "bg_is_dark": true,
+  "content_frac": 0.13961818000796494,
+  "n_color_cells": 63,
+  "has_#2166ac": false,
+  "has_#b2182b": true,
+  "pass": true
+ },
+ "figure11_neural_mi": {
+  "png_exists": true,
+  "pdf_exists": true,
+  "png_bytes": 108521,
+  "pdf_bytes": 1320615,
+  "size": [
+   2160,
+   1380
+  ],
+  "bg_rgb": [
+   14,
+   20,
+   32
+  ],
+  "bg_is_dark": true,
+  "content_frac": 0.29054012345679014,
+  "n_color_cells": 42,
+  "has_#d9930d": true,
+  "has_#2f8fca": false,
+  "pass": true
+ },
+ "figure12_learning_curves": {
+  "png_exists": true,
+  "pdf_exists": true,
+  "png_bytes": 319943,
+  "pdf_bytes": 24970,
+  "size": [
+   2160,
+   1500
+  ],
+  "bg_rgb": [
+   255,
+   255,
+   255
+  ],
+  "bg_is_dark": false,
+  "content_frac": 0.06068888888888889,
+  "n_color_cells": 51,
+  "has_#c0392b": true,
+  "has_#2b6cb0": true,
+  "has_#d9930d": true,
+  "pass": true
+ },
+ "figure13_predictions_budget_ledger": {
+  "png_exists": true,
+  "pdf_exists": true,
+  "png_bytes": 218973,
+  "pdf_bytes": 30118,
+  "size": [
+   2160,
+   1680
+  ],
+  "bg_rgb": [
+   255,
+   255,
+   255
+  ],
+  "bg_is_dark": false,
+  "content_frac": 0.08484402557319223,
+  "n_color_cells": 22,
+  "has_#2b6cb0": false,
+  "has_#c0392b": true,
+  "has_#2e8b57": true,
+  "pass": false
+ }
+}

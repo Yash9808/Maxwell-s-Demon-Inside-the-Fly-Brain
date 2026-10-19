@@ -44,3 +44,14 @@ research_data/ab_optic_input_20*.json
 # Phase 02: runner scratch runs (regenerable; final acceptance evidence is
 # deliberately archived under baselines/ at freeze time)
 deployment/runs/
+
+# W2: published FlyWire skeleton parquet (5.4 GB, Zenodo 10877326) — machine-
+# local provision like the v783 feather tables; the derived curated bin/index
+# ARE tracked. Download via tools/build_neuron_skeletons.py --download.
+data/skeletons/sk_lod1_783_healed_ds2.parquet
+
+# W2b: full-circuit skeleton stream (1.41 GB bin + 6.4 MB index) — machine-
+# local, regenerable via tools/build_neuron_skeletons.py --build-all from the
+# ignored parquet; too large for git. The /api/arbor_family endpoints read it.
+data/skeletons/skeletons_all.bin
+data/skeletons/skeletons_all_index.json

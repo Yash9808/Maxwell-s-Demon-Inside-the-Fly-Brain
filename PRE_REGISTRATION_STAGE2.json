@@ -1,0 +1,235 @@
+{
+  "registration_version": 1,
+  "registered_utc": "2026-10-09T19:05:06.884Z",
+  "stage": 2,
+  "declared_status": "CONFIRMATORY — randomized, pre-registered before any Stage-2 row exists (protocol §6d/§9/§13)",
+  "protocol": {
+    "document": "Confirmatory_experiment_protocol_v1.md",
+    "version": "v1.1",
+    "sha256": "fe6b2619957b759903aff408bbf9f4b5894c14acdca795fe54732ade464100b9"
+  },
+  "config": {
+    "file": "stage2_config.json",
+    "sha256": "4114bc7cbb1b8b8138fb3b4ede07404ceadc6b84ce104173fd2d0d4bdccfc619",
+    "generator": "tools/stage2_config_gen.js",
+    "generator_rerunnable_to_the_byte": "node tools/stage2_config_gen.js --check → exit 0, identical sha256",
+    "stage": 2,
+    "smoke_flag": "absent (required for a confirmatory config)",
+    "nPairs": 800,
+    "consumedPairs": 800,
+    "nEnvironmentSeeds": 16,
+    "nNetworkSeeds": 50,
+    "environment_basis": 4101,
+    "network_basis": 9201,
+    "topology_stream_basis": 7008,
+    "seedStride": 101,
+    "floor_arm_rule": "arm E on pairIndex % 5 === 0 (160 pairs)",
+    "seedTable": {
+      "declared_sha256": "c4eba12766e1a2103cfe8bb988729dd7b06b748ba2b519c7d243be8f0dc73f3e",
+      "rederived_sha256": "c4eba12766e1a2103cfe8bb988729dd7b06b748ba2b519c7d243be8f0dc73f3e",
+      "match": true,
+      "file": "stage2_seedtable.json",
+      "file_sha256": "3762f1090efd29c0a1ce76fcd822aae7babf67d98d1ae9d0acb876dba9249b55"
+    },
+    "arm_runs": {
+      "connectome_ABCD": 3200,
+      "floor_E": 160,
+      "noop_diagnostic": 16,
+      "total": 3376
+    },
+    "jobs_total": 1776
+  },
+  "randomization": {
+    "master_stream": {
+      "prng": "mulberry32 (experiment_core.js makeRng)",
+      "seed": 20250921,
+      "drawnOnce": true,
+      "drawsConsumed": 2,
+      "draws": [
+        0.03089735098183155,
+        0.19580164062790573
+      ],
+      "purpose": [
+        "stream instantiation + determinism check (recorded, reproducible from the seed alone)",
+        "entropy reserved for the staged-analysis reference seed; no design quantity is drawn at generation time — the seed table and the parity assignment are fully determined by the protocol formulas"
+      ]
+    },
+    "permutation_reference_drawn_here": {
+      "seed": 20250921,
+      "resamples": 100000,
+      "strata": 16,
+      "pairs_per_stratum": 50,
+      "contrasts_in_order": [
+        "A-D",
+        "A-B",
+        "A-C"
+      ],
+      "algorithm": [
+        "For each PERMUTATION REPLICA r = 1..100000, in this fixed draw order:",
+        "  for stratum s = 1..16 (environment index, pairs (s-1)*50+1 .. s*50):",
+        "    for j = 1..50 (network index within the stratum), in ascending order:",
+        "      draw u = rng(); if u < 0.5 flip the sign of that pair's paired difference",
+        "      (equivalently: an independent random sign per pair, which is exact for a",
+        "      paired design under the sharp null of no arm effect within the pair),",
+        "  then recompute the stratum-balanced mean paired difference for the contrast.",
+        "Statistic: |mean over pairs of the (possibly flipped) paired difference|,",
+        "two-sided; p = (1 + #{replicas with |stat| >= |observed|}) / (1 + resamples).",
+        "One rng stream per contrast run, seeded makeRng(seed) with seed below, each",
+        "contrast (A-D, then A-B, then A-C) consuming a fresh stream in that order."
+      ],
+      "per_contrast_sha256": {
+        "A-D": {
+          "sha256": "8db6b6bc6cb6d16532892db66b504690e6418d6b92c31b2107b990bdf92b31eb",
+          "draws": 80000000
+        },
+        "A-B": {
+          "sha256": "ad7b4209166a52f9fca81a6bc6e92e8979c64c0d2bb0f309061cda11d82d5a8b",
+          "draws": 80000000
+        },
+        "A-C": {
+          "sha256": "1ed60f2c1b9ed012fcfb90fe97fb81defc463dc53c92ece7c20cf4e67f335a66",
+          "draws": 80000000
+        }
+      },
+      "combined_sha256": "bd206ae8a6afb9d868232c129d65ee0072dc35ccfbd7a074b65254443d505b7a",
+      "note": "The streams were DRAWN AND HASHED at registration time, before any Stage-2 row exists (protocol §9). The Stage-2 analysis must consume exactly this draw order; reproducing it must yield these hashes."
+    },
+    "topology_seeds": "continue the 7000+ stream after the §6c reserve: topologySeed = 7008 + k, k = 1..800 → 7009..7808",
+    "pilot_overlap_disclosure": {
+      "note": "The §6d basis/stride is protocol-fixed and the pilot (§6c, exploratory) was drawn on nearby anchors; the overlap is disclosed here rather than silently re-based.",
+      "identicalEnvironmentSeeds": "pilot environmentSeeds are 4101+100*(k-1) (4101..4801); Stage-2 uses 4101+101*(i-1) (4101..5616). The value 4101 is shared by pilot pair k=1 and Stage-2 envIndex 1.",
+      "identicalNetworkSeeds": "pilot networkSeeds 9201,9302,9403 (pairs 1-3) are exactly Stage-2 networkIndex 1,2,3 of every stratum.",
+      "consumedPilotCells": "3 exploratory cells (pilot pairs 1-3). Stage-1 is declared EXPLORATORY with no inferential claims and no p-values (protocol §7); no pilot value enters the Stage-2 estimand, and the confirmatory analysis consumes only Stage-2 rows. If strict pilot/Stage-2 cell disjointness is required, that is a protocol amendment (re-base), not a silent edit here.",
+      "pilotSeedsReserved": "§6c rows 4-8 (topology 7004-7008 included) remain reserved; Stage-2 topology seeds start at 7009 and consume none of them."
+    }
+  },
+  "runtime": {
+    "files": {
+      "experiment_core": "da3666baa581cc64067f81ee632e1e6d5f58a051bfe11b5950a06846d58a539e",
+      "controllers": "af0460ad0b97f992b75de594f7bcbeee1d2b096ade84fd541bdc21c94ef4120e",
+      "benchmark": "52f5e51351ee67092fb934fffa6df04118086e67626688e0513e81139a280607"
+    },
+    "match_test": {
+      "file": "tests/stage1_arm_d_match.test.js",
+      "sha256": "fd475c744729c88a77cc4f8f18d78c2fcf25a5910112a834a978d0f36f7d1ca5",
+      "result_at_registration": "green (node --test → 5/5 pass, exit 0; log: research_data/stage2_launch/gate0_match_test.log)"
+    },
+    "toolchain": {
+      "tools/stage2_parallel.js": "a7ffc7982f945e9f9cb2f0179128a239ad46f8898e263896780cf82270bd922c",
+      "tools/stage2_config_gen.js": "ae81ef46c5c6c3671bb28ac36ae851ed82affc17943ceffd6818cda397b7a560",
+      "tools/stage2_noop_check.js": "90ab28a9bc6f8bb689a547c46aebd37591603f8326c1549015188f0defee5e22",
+      "tools/stage2_dryrun_verify.js": "35c32c76035eacfa2f51ff43d9fdbb05fa7a77f84d794fafd24aa9260474cf55",
+      "tools/stage2_gate0_check.js": "d757b2613ac1fe45185cdb3b0b1e166684832fe59b900c6d2de8ad1c72fe49ec"
+    },
+    "runtime_coercion_trap": "benchmark.js (57 pinned) builds the arm-D edge list with `arm.swapFactor || 10`, so any FALSY swapFactor silently becomes 10. Measured in the 2026-10-09 dry run: with swapFactor 0 the no-op diagnostic arm produced rows byte-identical to arm D's on the same pair. The config therefore uses a negative swapFactor for the no-op arm and keeps this disclosure next to it."
+  },
+  "circuit": {
+    "file": "fly_brain_circuit.json",
+    "sha256": "0eb64ba45135656360567fd1d73385c7b7a0be3c7d053ddbba1eda797de98671",
+    "n_neurons": 106765,
+    "n_edges": 553807,
+    "wiring_fingerprint_sha16": "3507f2d32c688986"
+  },
+  "estimand": {
+    "endpoint": "deltaSortEntropy_post_minus_pre",
+    "primary_contrast": "A - D",
+    "secondary_contrasts": [
+      "A - B",
+      "A - C"
+    ],
+    "alpha": 0.05,
+    "two_sided": true,
+    "multiplicity": {
+      "family": [
+        "A - D",
+        "A - B",
+        "A - C"
+      ],
+      "method": "Holm",
+      "within": "Stage 2 only"
+    },
+    "mde": {
+      "sdUnitsAtN800": 0.1,
+      "designEffectTargetDeltaOverSd": 0.2,
+      "note": "protocol §9"
+    },
+    "dispersion": "sample SD, ddof = 1, over per-pair paired differences (pilot report §2 recommendation)",
+    "floor_reference": {
+      "arm": "armE_random_action_floor",
+      "pairs": 160,
+      "role": "instrumentation floor, not a confirmatory contrast"
+    }
+  },
+  "walk_way_entanglement_check": {
+    "arm": "armD_noop_topology_diagnostic",
+    "swapFactor": -1,
+    "wiring_level": "tools/stage2_noop_check.js phase 1: the no-op arm-D list is the REAL 553,807-edge list element-wise (ordered (s,t) sequence, in/out degree sequences, weight/sign multiset, 16-hex wiring fingerprint all identical; invariant across topology seeds)",
+    "runtime_level": "phase 2 against the dry-run rows: the no-op arm's rows are identical field-by-field to arm A's for the same pair, though the two arms run as separate benchmark.js invocations",
+    "rule": "any difference at either level voids the A − D interpretation until explained"
+  },
+  "preflight": {
+    "dry_run_config": {
+      "file": "tests/stage2_smoke_config.json",
+      "sha256": "bf0a06bc418170907bf0f29f5f4f4438f23a14ff02b2fb70fadb43fe1228b204",
+      "evidential_weight": "NONE — SMOKE-flagged, tiny phases (pre 1x2s / train 2x2s / post 1x2s); seeds disjoint from the §6c pilot table, the Gate-3 table and this pre-registered table",
+      "note": "Recorded here so the launch chain is auditable; it is not part of the confirmatory evidence."
+    },
+    "selftest": "node tools/stage2_parallel.js --selftest → SELFTEST PASS (serial-vs-parallel byte identity on smoke jobs; log: research_data/stage2_launch/selftest_final.log)",
+    "dry_run_verifier": "tools/stage2_dryrun_verify.js → DRY RUN VERIFIED (13/13 jobs, rows byte-identical serial vs parallel, all seed pairs covered, attribution correct under same-second stamp reuse, no real seed consumed)",
+    "evidence_files": {
+      "research_data/stage2_launch/dryrun_verify.txt": "118c187365f9ef359e90726f1a19ab2ef8f3a9962adda273776911810a5f5881",
+      "research_data/stage2_launch/noop_check.txt": "6e7aacf8bd7a91d026725b997a870ea6fa86bf4a79f17fd73a66890939d54779",
+      "research_data/stage2_launch/gate0_check.txt": "ba4b6cdfbd621ef34643453f3d7bb7138adeb1c96ee38ab6328590253717d882"
+    }
+  },
+  "gate0": {
+    "tool": "tools/stage2_gate0_check.js",
+    "exit_code": 0,
+    "stage1_manifest": {
+      "file": "research_data/stage1_manifest_2026-10-08T06-57-01.json",
+      "sha256": "25c761ed3c441439631b6f482a44bce5170e706b2fb2db197adc25b8d742484c"
+    },
+    "stage1_trials": {
+      "file": "research_data/stage1_trials_2026-10-08T06-57-01.jsonl",
+      "sha256": "6e4f741d4014e617084c891a91bff33c0db4a75db575111282f4fa6b37f23afc",
+      "matches_manifest_trialsSha256": true
+    },
+    "rows_streamed": "5415",
+    "checks": [
+      "PASS rows equal the manifest n_rows",
+      "PASS every line is strict JSON (no bare NaN/Infinity token)",
+      "PASS all endpoint numeric fields finite on all rows",
+      "PASS frozen-pre stamp on every pre row",
+      "PASS weightDrift === 0 on every pre row",
+      "PASS per (arm, pair) phase counts match the manifest",
+      "PASS §8 clause (ii): D does not systematically beat A beyond its 95% band",
+      "PASS §8 clause (iii): floor arm E does not dominate max(A–D)"
+    ],
+    "clause_ii": "PASS §8 clause (ii): D does not systematically beat A beyond its 95% band",
+    "clause_iii": "PASS §8 clause (iii): floor arm E does not dominate max(A–D)",
+    "contrasts": [
+      "A − D_matched_random_sparse 0.0177 ± 0.0232 (n=3, per-pair: -0.0057, 0.0328, 0.0258)",
+      "A − B_restricted_connectome -0.0029 ± 0.0024 (n=3, per-pair: -0.0008, -0.0028, -0.0050)",
+      "A − C_degree_preserved_shuffle 0.0354 ± 0.0557 (n=3, per-pair: 0.0289, 0.0875, -0.0103)",
+      "A − E_random_action_floor 0.0349 ± 0.0193 (n=3, per-pair: 0.0161, 0.0492, 0.0395)"
+    ],
+    "verdict": "gate 0: ALL PRECONDITIONS HOLD",
+    "per_pair_delta_Y_A_and_Y_D": {
+      "note": "per-pair point estimates; A and D columns of the checker's table",
+      "table": [
+        "pair_1 0.0082 0.0090 -0.0208 0.0138 -0.0079",
+        "pair_2 0.0128 0.0156 -0.0747 -0.0201 -0.0365",
+        "pair_3 0.0135 0.0185 0.0239 -0.0123 -0.0259"
+      ]
+    }
+  },
+  "git": {
+    "commit": "e29803b5cc90a5350fbd9063b86dab45d6a185ed",
+    "branch": "deployment/phase-02",
+    "dirty": true
+  },
+  "governance": {
+    "runner_gate": "tools/stage2_parallel.js refuses to run a non-SMOKE config unless this file pins that config's sha256 (exit 2 otherwise). Registration therefore precedes execution by construction as well as by timestamp.",
+    "amendment_note": "Any change to a pinned file after registration invalidates the pin and requires the §13 amendment path: re-run the §5d match test and the gate-0 checker, regenerate this record, and note the amendment in protocol §0. A new config sha256 is a new registration."
+  }
+}

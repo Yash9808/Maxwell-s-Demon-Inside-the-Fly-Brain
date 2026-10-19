@@ -1,0 +1,84 @@
+{
+  "registration_version": 1,
+  "registered_utc": "2026-10-08T07:20:26.142Z",
+  "stage": 1,
+  "declared_status": "EXPLORATORY (protocol §7); pilot-prohibition holds until this record exists",
+  "protocol": {
+    "document": "Confirmatory_experiment_protocol_v1.md",
+    "sha256": "fe6b2619957b759903aff408bbf9f4b5894c14acdca795fe54732ade464100b9"
+  },
+  "analysis_expectations": {
+    "endpoint": "deltaSortEntropy_post_minus_pre",
+    "contrasts": "seed-paired A−D (primary candidate), A−B, A−C (secondary); descriptive-only in Stage 1 (§7/§14)",
+    "selftest_fixture_count": 5
+  },
+  "match_test": {
+    "file": "tests/stage1_arm_d_match.test.js",
+    "sha256": "fd475c744729c88a77cc4f8f18d78c2fcf25a5910112a834a978d0f36f7d1ca5",
+    "real_circuit_fingerprint_note": "validated on the full real circuit in-test"
+  },
+  "config": {
+    "file": "stage1_config.json",
+    "sha256": "b1702d13f2279fdf717cdc0f388344623ac788f007b17778566a55df284a5e4b",
+    "arms": [
+      "armA_real_connectome",
+      "armB_restricted_connectome",
+      "armC_degree_preserved_shuffle",
+      "armD_matched_random_sparse",
+      "armE_random_action_floor"
+    ],
+    "consumedSeedPairs": 3,
+    "seedPairReserve": 8,
+    "frozenPreSeconds": 120,
+    "phases": {
+      "pre": {
+        "trials": 1,
+        "episodeSeconds": 120,
+        "learning": false,
+        "frozen": true
+      },
+      "train": {
+        "trials": 300,
+        "episodeSeconds": 12,
+        "learning": true
+      },
+      "post": {
+        "trials": 60,
+        "episodeSeconds": 12,
+        "learning": false
+      }
+    }
+  },
+  "runtime": {
+    "files": {
+      "experiment_core": "da3666baa581cc64067f81ee632e1e6d5f58a051bfe11b5950a06846d58a539e",
+      "controllers": "af0460ad0b97f992b75de594f7bcbeee1d2b096ade84fd541bdc21c94ef4120e",
+      "benchmark": "52f5e51351ee67092fb934fffa6df04118086e67626688e0513e81139a280607"
+    }
+  },
+  "analysis": {
+    "file": "stage1_analyze.js",
+    "sha256": "e18a4c56d77372ea3804ee234a766784c019d4d38f13702844b2000be6b9ddea",
+    "selftest": "--selftest green at registration time"
+  },
+  "pinned_files": {
+    "Confirmatory_experiment_protocol_v1.md": "fe6b2619957b759903aff408bbf9f4b5894c14acdca795fe54732ade464100b9",
+    "stage1_config.json": "b1702d13f2279fdf717cdc0f388344623ac788f007b17778566a55df284a5e4b",
+    "stage1_analyze.js": "e18a4c56d77372ea3804ee234a766784c019d4d38f13702844b2000be6b9ddea",
+    "tests/stage1_arm_d_match.test.js": "fd475c744729c88a77cc4f8f18d78c2fcf25a5910112a834a978d0f36f7d1ca5",
+    "experiment_core.js": "da3666baa581cc64067f81ee632e1e6d5f58a051bfe11b5950a06846d58a539e",
+    "controllers.js": "af0460ad0b97f992b75de594f7bcbeee1d2b096ade84fd541bdc21c94ef4120e",
+    "benchmark.js": "52f5e51351ee67092fb934fffa6df04118086e67626688e0513e81139a280607"
+  },
+  "circuit": {
+    "file": "fly_brain_circuit.json",
+    "n_neurons": 106765,
+    "n_edges": 553807
+  },
+  "git": {
+    "commit": "6e63e02c79406f9eccece3db03b5c9d3227d0341",
+    "branch": "deployment/phase-02",
+    "dirty": true
+  },
+  "amendment_note": "Any change to a pinned file after registration invalidates the pin and requires the §13 amendment path (re-run selftest + match test, regenerate, note in protocol §0)."
+}
