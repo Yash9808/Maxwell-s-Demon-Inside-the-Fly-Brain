@@ -1,6 +1,7 @@
 # Maxwell's Demon: Inside the Fly Brain
 
-![Maxwell's Demon Inside the Fly Brain](research_figures/icon_image_project.png)
+<img width="512" height="512" alt="brand_animation_poster" src="https://github.com/user-attachments/assets/12da5ddf-2546-462b-b307-0d79c7c134ee" />
+
 
 Data files for the FlyWire Full Adult Fly Brain (FAFB) connectome, materialization
 version **783** (proofread-scope). All root IDs refer to v783 and are stable only
