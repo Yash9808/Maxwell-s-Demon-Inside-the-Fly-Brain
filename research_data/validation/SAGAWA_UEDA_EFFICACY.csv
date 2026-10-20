@@ -1,2 +1,0 @@
-experiment,comparison,metric,eta,se,ciLo,ciHi,n,nDegenerate,note
-E3,"drosophila (feedback) vs drosophila_frozen (no-plasticity), seed-matched",workInJ (signed jet work),0.9997266474348212,0.002095120809791651,0.9953415091830364,1.004111785686606,20,0,"EXPLORATORY: eta<1 means the plastic arm extracts less jet work than its frozen twin under identical physics; door task is sorting-, not work-extraction-oriented, so interpret with caution"
