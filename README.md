@@ -1,5 +1,6 @@
 <p align="center">
-  <img src="brand_animation/brand_animation_hero.webp" alt="Maxwell's Demon: Inside the Fly Brain" width="560">
+  <img width="512" height="512" alt="b2ed05a1-08f5-4ba0-8392-7fa88dc67ff4" src="https://github.com/user-attachments/assets/a8a64efb-97e7-4af6-b652-817a92b6b033" />
+
 </p>
 
 <h1 align="center">Maxwell's Demon: Inside the Fly Brain</h1>
